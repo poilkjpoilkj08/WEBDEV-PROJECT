@@ -45,6 +45,12 @@ class ProductCategorySeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now()
             ],
+            [
+                'name' => 'Beauty & Personal Care',
+                'description' => 'Skincare, makeup, and personal care products.',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
         ]);
     }
 }

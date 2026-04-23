@@ -41,7 +41,7 @@ class ProductSeeder extends Seeder
                 'details' => 'Comfortable oversized cotton t-shirt for everyday wear',
                 'price' => 199000,
                 'category_id' => 2,
-                'stock' => 120,
+                'stock' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
