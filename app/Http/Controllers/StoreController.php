@@ -249,15 +249,100 @@ class StoreController extends Controller
                     'subtotal' => $item['price'] * $item['quantity'],
                 ]);
             }
+
+            //Midtrans payment integration
+            \Midtrans\Config::$serverKey = config('midtrans.server_key');
+            \Midtrans\Config::$isProduction = config('midtrans.is_production');
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
+
+            // Prepare item details for Midtrans
+            $item_details = [];
+            foreach ($cart as $product_id => $item) {
+                $item_details[] = [
+                    'id'       => $product_id,
+                    'price'    => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'name'     => substr($item['name'], 0, 50)
+                ];
+            }
+
+            // Create Midtrans Transaction
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $order->invoice_number,
+                    'gross_amount' => $totalPrice,
+                ],
+                'item_details' => $item_details,
+                'customer_details' => [
+                    'first_name' => Auth::user()->name,
+                    'email' => Auth::user()->email,
+                ],
+				'callbacks' => [
+                    'finish' => route('payment_return', $order->id), // Auto-check status after return
+                ]
+            ];
+
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+            $order->payment_url = $snapToken; // Store token to use in the modal later
+            $order->save();
             
             DB::commit();
  
             session()->forget('cart'); // Clear cart
- 
-            return redirect()->route('store')->with('success', 'Checkout successful! Thank you for your purchase.');
+            
+            // Return to a checkout payment view that triggers the Snap popup
+            return view('store.payment', compact('snapToken', 'order'));
+
+            //return redirect()->route('store')->with('success', 'Checkout successful! Thank you for your purchase.');
 		} catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Checkout failed: ' . $e->getMessage());
         }
+    }
+
+    public function payment_status($order_id){
+        $order = Order::findOrFail($order_id);
+
+        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = config('midtrans.is_production');
+        
+        try {
+            /** @var object $statusResponse */
+            $statusResponse = \Midtrans\Transaction::status($order->invoice_number);
+            $transactionStatus = $statusResponse->transaction_status;
+
+            if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
+                $order->status = 'paid';
+                if (!$order->paid_at) {
+                    $order->paid_at = now();
+                }
+            } elseif ($transactionStatus == 'pending') {
+                $order->status = 'pending';
+            } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
+                $order->status = 'failed';
+            }
+            $order->save();
+
+        } catch (\Exception $e) {
+            // Transaction not found or other Midtrans API error
+ 			// Transaction not found usually means user closed the popup before selecting a payment method
+            $order->status = 'failed';
+            $order->payment_url = null; // Invalidate the token so they cannot use it anymore
+            $order->save();
+			return redirect()->route('orders')->with('error', 'Unable to retrieve payment status: ' . $e->getMessage());
+        }
+
+        if ($order->status == 'paid') {
+            return redirect()->route('orders')->with('success', 'Payment successful!');
+        } elseif ($order->status == 'pending') {
+            return redirect()->route('orders')->with('error', 'Payment is pending. Please complete it.');
+        } else {
+            return redirect()->route('orders')->with('error', 'Payment failed or expired.');
+        }
+    }
+
+    public function payment_return($order_id){
+        return request()->has('order_id') ? $this->payment_status($order_id) : redirect()->route('payment_status', $order_id);
     }
 }

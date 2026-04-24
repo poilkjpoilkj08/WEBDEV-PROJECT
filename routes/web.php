@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FirstController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,4 +54,13 @@ Route::middleware('auth')->group(function(){
     Route::patch('/update-cart/{product_id}', [StoreController::class, 'update_cart'])->name('update_cart');
     Route::delete('/remove-from-cart/{product_id}', [StoreController::class, 'remove_from_cart'])->name('remove_from_cart');
     Route::post('/checkout', [StoreController::class, 'checkout'])->name('checkout');
+
+    //Midtrans auto checkout status after return
+    Route::get('/payment/return/{order_id}', [StoreController::class, 'payment_return'])->name('payment_return');
+    //Midtrans manual check status
+    Route::get('/payment/status/{order_id}', [StoreController::class, 'payment_status'])->name('payment_status');
+
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders');
+
+    Route::get('/orders/{order_id}', [OrderController::class, 'order_details'])->name('order_details');
 });
