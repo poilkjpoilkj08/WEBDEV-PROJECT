@@ -1,35 +1,61 @@
-<nav class="navbar navbar-expand-lg navbar-dark py-3 px-md-4" style="background: linear-gradient(135deg,#00398e,#3578db);">
+<nav class="navbar navbar-expand-lg navbar-dark py-3 px-md-4 shadow-sm" style="background: linear-gradient(135deg,#2c3e50,#34495e);">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold fs-4 tracking-tight" href="#">ISB Commerce</a>
+        <a class="navbar-brand fw-bold fs-4 tracking-tight text-white" href="{{ route('home') }}">
+            <i class="fas fa-book me-2"></i>BookHive
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Home</a>
+                    <a class="nav-link {{ Route::is('home') ? 'active' : '' }}" href="{{ route('home') }}">{{ __('messages.home') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('store') ? 'active' : '' }}" href="{{ route('store') }}">Shop Here</a>
+                    <a class="nav-link {{ Route::is('books.listing') ? 'active' : '' }}" href="{{ route('books.listing') }}">{{ __('messages.books') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">About Us</a>
+                    <a class="nav-link {{ Route::is('authors.index') ? 'active' : '' }}" href="{{ route('authors.index') }}">{{ __('messages.authors') }}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ Route::is('about') ? 'active' : '' }}" href="{{ route('about') }}">{{ __('messages.about') }}</a>
                 </li>
                 @auth
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('orders') ? 'active' : '' }}" href="{{ route('orders') }}">My Orders</a>
-                </li>
+                    @if(auth()->user()->hasRole(['admin', 'owner']))
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ __('messages.admin_panel') }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="{{ route('books.create-form') }}">{{ __('messages.add_new_book') }}</a></li>
+                            <li><a class="dropdown-item" href="{{ route('authors.create-form') }}">{{ __('messages.add_new_author') }}</a></li>
+                        </ul>
+                    </li>
+                    @endif
                 @endauth
             </ul>
             <div class="d-flex text-white align-items-center">
-                <a href="#" class="text-white me-3 fs-5"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="text-white me-3 fs-5"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="text-white me-3 fs-5"><i class="fab fa-instagram"></i></a>
-                @auth
-                <a href="{{ route('view_cart') }}" class="text-white me-3 fs-5"><i class="fas fa-shopping-cart"></i></a>
-                @endauth
+                <!-- Language Selector -->
+                <div class="dropdown me-3">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-globe me-1"></i>
+                        <span class="d-none d-sm-inline">{{ strtoupper(app()->getLocale()) }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                        <li><a class="dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}" href="{{ route('language.switch', 'en') }}">
+                            <i class="fas fa-check me-2 {{ app()->getLocale() === 'en' ? 'text-success' : 'text-muted' }}"></i>English
+                        </a></li>
+                        <li><a class="dropdown-item {{ app()->getLocale() === 'id' ? 'active' : '' }}" href="{{ route('language.switch', 'id') }}">
+                            <i class="fas fa-check me-2 {{ app()->getLocale() === 'id' ? 'text-success' : 'text-muted' }}"></i>Bahasa Indonesia
+                        </a></li>
+                    </ul>
+                </div>
+
+                <a href="#" class="text-white me-3 fs-5" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="text-white me-3 fs-5" title="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-white me-3 fs-5" title="Instagram"><i class="fab fa-instagram"></i></a>
                 @guest
-                    <a href="{{ route('login.show') }}" class="btn btn-light btn-sm ms-2 px-4 fw-bold rounded-pill text-primary shadow-sm hover-shadow">Login</a>
+                    <a href="{{ route('login.show') }}" class="btn btn-light btn-sm ms-2 px-4 fw-bold rounded-pill text-primary shadow-sm hover-shadow">{{ __('messages.login') }}</a>
                 @else
                     <div class="position-relative ms-2">
                         <button class="btn btn-light btn-sm px-4 fw-bold rounded-pill text-primary d-flex align-items-center shadow-sm" type="button" id="customUserDropdown">
@@ -39,7 +65,7 @@
                         </button>
                         <div class="dropdown-menu shadow-lg border-0 mt-2 position-absolute rounded-3" id="customUserMenu" style="right: 0; left: auto; min-width: 160px; display: none; z-index: 1050;">
                             <button class="w-100 text-start border-0 bg-transparent text-danger py-2 px-3 fw-medium d-flex align-items-center" type="button" id="logoutBtnDropdown" style="cursor: pointer; font-size: 0.95rem;">
-                                <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                <i class="fas fa-sign-out-alt me-2"></i> {{ __('messages.logout') }}
                             </button>
                         </div>
                     </div>

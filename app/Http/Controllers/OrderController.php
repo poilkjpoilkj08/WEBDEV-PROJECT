@@ -16,7 +16,7 @@ class OrderController extends Controller
             $orders = Order::with('user')->orderBy('created_at', 'desc')->get();
         }
         else{
-            $orders = Order::with('user')->where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+            $orders = Order::with('user')->where('user_id', '=', Auth::id())->orderBy('created_at', 'desc')->get();
         }
 
         return view('store.orders', compact('orders', 'userRoles'));

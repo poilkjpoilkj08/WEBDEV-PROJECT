@@ -1,30 +1,22 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\FirstController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\StoreController;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    // dd('hello world');
-    return view('welcome');
-});
+// Language switching routes
+Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
+Route::get('/api/current-locale', [LanguageController::class, 'getCurrentLocale'])->name('language.current');
 
-Route::get('/hi', function(){
-    return 'hi';
-})->name('hi');
+Route::get('/', [BookController::class, 'index'])->name('home');
+Route::get('/books', [BookController::class, 'listing'])->name('books.listing');
+Route::get('/books/search', [BookController::class, 'search'])->name('books.search');
+Route::get('/books/{id}', [BookController::class, 'show'])->whereNumber('id')->name('books.show');
 
-Route::get('/helo', function(){
-    return 'helooo isb';
-})->name('helo');
-
-Route::get('/home', [HomeController::class, 'show'])->name('home');
-
-Route::get('/home/sum', [FirstController::class, 'sum'])->name('home.sum');
-
-Route::get('/home/multiply/{param1}/{param2?}', [FirstController::class, 'multiply'])->name('home.multiply');
+Route::get('/authors', [AuthorController::class, 'index'])->name('authors.index');
+Route::get('/authors/{id}', [AuthorController::class, 'show'])->whereNumber('id')->name('authors.show');
 
 Route::get('/about', function(){
     return view('about');
@@ -38,29 +30,16 @@ Route::middleware('auth')->group(function(){
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::middleware(['role:admin,owner'])->group (function() {
-        Route::get('/product/insert-form', [StoreController::class, 'product_insert_form'])->name('product.insert-form');
-        Route::post('/product/insert', [StoreController::class, 'insert_product'])->name('insert_product');
-        Route::get('/product/edit/{product_id}', [StoreController::class, 'product_edit_form'])->name('product_edit_form');
-        Route::put('/product/update/{product_id}', [StoreController::class, 'update_product'])->name('update_product');
-        Route::delete('/product/delete/{product_id}', [StoreController::class, 'delete_product'])->name('delete_product');
+        Route::get('/books/create-form', [BookController::class, 'create_form'])->name('books.create-form');
+        Route::post('/books', [BookController::class, 'store'])->name('books.store');
+        Route::get('/books/{id}/edit-form', [BookController::class, 'edit_form'])->name('books.edit-form');
+        Route::put('/books/{id}', [BookController::class, 'update'])->name('books.update');
+        Route::delete('/books/{id}', [BookController::class, 'destroy'])->name('books.destroy');
+
+        Route::get('/authors/create-form', [AuthorController::class, 'create_form'])->name('authors.create-form');
+        Route::post('/authors', [AuthorController::class, 'store'])->name('authors.store');
+        Route::get('/authors/{id}/edit-form', [AuthorController::class, 'edit_form'])->name('authors.edit-form');
+        Route::put('/authors/{id}', [AuthorController::class, 'update'])->name('authors.update');
+        Route::delete('/authors/{id}', [AuthorController::class, 'destroy'])->name('authors.destroy');
     });
-
-    Route::middleware(['role:customer,admin,owner'])->group (function() {
-        Route::get('/store', [StoreController::class, 'show'])->name('store');
-    });
-
-    Route::post('/add-to-cart/{product_id}', [StoreController::class, 'add_to_cart'])->name('add_to_cart');
-    Route::get('/view-cart', [StoreController::class, 'view_cart'])->name('view_cart');
-    Route::patch('/update-cart/{product_id}', [StoreController::class, 'update_cart'])->name('update_cart');
-    Route::delete('/remove-from-cart/{product_id}', [StoreController::class, 'remove_from_cart'])->name('remove_from_cart');
-    Route::post('/checkout', [StoreController::class, 'checkout'])->name('checkout');
-
-    //Midtrans auto checkout status after return
-    Route::get('/payment/return/{order_id}', [StoreController::class, 'payment_return'])->name('payment_return');
-    //Midtrans manual check status
-    Route::get('/payment/status/{order_id}', [StoreController::class, 'payment_status'])->name('payment_status');
-
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders');
-
-    Route::get('/orders/{order_id}', [OrderController::class, 'order_details'])->name('order_details');
 });

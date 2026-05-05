@@ -1,0 +1,159 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\Book;
+
+class BookSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $books = [
+            [
+                'title' => 'Harry Potter and the Philosopher\'s Stone',
+                'description' => 'The first book in the Harry Potter series. Follow young Harry as he discovers his magical heritage and attends Hogwarts School of Witchcraft and Wizardry.',
+                'price' => 24.99,
+                'isbn' => '978-0747532699',
+                'pages' => 223,
+                'language' => 'English',
+                'publication_year' => 1997,
+                'publisher' => 'Bloomsbury Publishing',
+                'status' => 'available',
+                'author_id' => 1,
+                'category_id' => 3,
+                'cover_image_url' => 'https://via.placeholder.com/300x400?text=Harry+Potter+1',
+                'genres' => json_encode(['Fantasy', 'Magic', 'Adventure']),
+                'weight_grams' => 350,
+                'is_featured' => true,
+            ],
+            [
+                'title' => 'The Shining',
+                'description' => 'A family heads to an isolated hotel for the winter where a sinister presence influences the father into violence, while his psychic son sees horrific forebodings from both past and future.',
+                'price' => 19.99,
+                'isbn' => '978-0307743657',
+                'pages' => 447,
+                'language' => 'English',
+                'publication_year' => 1977,
+                'publisher' => 'Doubleday',
+                'status' => 'available',
+                'author_id' => 2,
+                'category_id' => 4,
+                'cover_image_url' => 'https://via.placeholder.com/300x400?text=The+Shining',
+                'genres' => json_encode(['Horror', 'Psychological', 'Supernatural']),
+                'weight_grams' => 420,
+                'is_featured' => true,
+            ],
+            [
+                'title' => 'Murder on the Orient Express',
+                'description' => 'Hercule Poirot investigates a murder aboard the luxurious Orient Express train when a wealthy American passenger is found dead in his compartment.',
+                'price' => 16.99,
+                'isbn' => '978-0062693662',
+                'pages' => 256,
+                'language' => 'English',
+                'publication_year' => 1934,
+                'publisher' => 'Collins Crime Club',
+                'status' => 'available',
+                'author_id' => 3,
+                'category_id' => 4,
+                'cover_image_url' => 'https://via.placeholder.com/300x400?text=Murder+on+Orient+Express',
+                'genres' => json_encode(['Mystery', 'Crime', 'Detective']),
+                'weight_grams' => 280,
+                'is_featured' => true,
+            ],
+            [
+                'title' => 'A Game of Thrones',
+                'description' => 'The first book in the epic A Song of Ice and Fire series. Political intrigue, war, and dragons in the Seven Kingdoms of Westeros.',
+                'price' => 29.99,
+                'isbn' => '978-0553103540',
+                'pages' => 694,
+                'language' => 'English',
+                'publication_year' => 1996,
+                'publisher' => 'Bantam Books',
+                'status' => 'available',
+                'author_id' => 4,
+                'category_id' => 3,
+                'cover_image_url' => 'https://via.placeholder.com/300x400?text=A+Game+of+Thrones',
+                'genres' => json_encode(['Fantasy', 'Epic', 'Political Intrigue']),
+                'weight_grams' => 650,
+                'is_featured' => true,
+            ],
+            [
+                'title' => 'The Great Gatsby',
+                'description' => 'A classic American novel set in the Jazz Age, exploring themes of decadence, idealism, and the American Dream through the eyes of narrator Nick Carraway.',
+                'price' => 14.99,
+                'isbn' => '978-0743273565',
+                'pages' => 180,
+                'language' => 'English',
+                'publication_year' => 1925,
+                'publisher' => 'Charles Scribner\'s Sons',
+                'status' => 'available',
+                'author_id' => null,
+                'category_id' => 1,
+                'cover_image_url' => 'https://via.placeholder.com/300x400?text=The+Great+Gatsby',
+                'genres' => json_encode(['Classic', 'Literary Fiction', 'Drama']),
+                'weight_grams' => 220,
+                'is_featured' => false,
+            ],
+            [
+                'title' => 'Sapiens: A Brief History of Humankind',
+                'description' => 'An exploration of the history of humankind, from the Stone Age to the modern age, examining how Homo sapiens came to dominate Earth.',
+                'price' => 22.99,
+                'isbn' => '978-0062316097',
+                'pages' => 443,
+                'language' => 'English',
+                'publication_year' => 2011,
+                'publisher' => 'Harper',
+                'status' => 'available',
+                'author_id' => null,
+                'category_id' => 2,
+                'cover_image_url' => 'https://via.placeholder.com/300x400?text=Sapiens',
+                'genres' => json_encode(['History', 'Anthropology', 'Science']),
+                'weight_grams' => 480,
+                'is_featured' => false,
+            ],
+            [
+                'title' => 'Atomic Habits',
+                'description' => 'A comprehensive guide to breaking bad habits and adopting good ones through small, incremental changes that lead to remarkable results.',
+                'price' => 18.99,
+                'isbn' => '978-0735211292',
+                'pages' => 320,
+                'language' => 'English',
+                'publication_year' => 2018,
+                'publisher' => 'Avery',
+                'status' => 'available',
+                'author_id' => null,
+                'category_id' => 8,
+                'cover_image_url' => 'https://via.placeholder.com/300x400?text=Atomic+Habits',
+                'genres' => json_encode(['Self-Help', 'Psychology', 'Productivity']),
+                'weight_grams' => 380,
+                'is_featured' => false,
+            ],
+            [
+                'title' => 'The Psychology of Money',
+                'description' => 'Timeless lessons on wealth, greed, and happiness from the author of The Intelligent Investor.',
+                'price' => 17.99,
+                'isbn' => '978-0857197689',
+                'pages' => 256,
+                'language' => 'English',
+                'publication_year' => 2020,
+                'publisher' => 'Harriman House',
+                'status' => 'out_of_stock',
+                'author_id' => null,
+                'category_id' => 2,
+                'cover_image_url' => 'https://via.placeholder.com/300x400?text=Psychology+of+Money',
+                'genres' => json_encode(['Finance', 'Psychology', 'Business']),
+                'weight_grams' => 290,
+                'is_featured' => false,
+            ],
+        ];
+
+        foreach ($books as $book) {
+            Book::create($book);
+        }
+    }
+}
