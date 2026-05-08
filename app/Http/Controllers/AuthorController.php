@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Author;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -10,7 +9,7 @@ use Illuminate\Support\Facades\Gate;
 class AuthorController extends Controller
 {
     // Display all authors
-    public function index()
+    public function index(): \Illuminate\View\View
     {
         $authors = Author::where('is_active', '=', 1)
             ->with('books')
@@ -22,7 +21,7 @@ class AuthorController extends Controller
     }
 
     // Display single author details
-    public function show($id)
+    public function show($id): \Illuminate\View\View
     {
         $author = Author::with('books')->findOrFail($id);
 
@@ -33,13 +32,13 @@ class AuthorController extends Controller
     }
 
     // Show create form
-    public function create_form()
+    public function create_form(): \Illuminate\View\View
     {
         return view('authors.create-form');
     }
 
     // Store author
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         if(!Gate::allows('insert-author')) {
             abort(403, 'Unauthorized action.');
@@ -61,7 +60,7 @@ class AuthorController extends Controller
     }
 
     // Show edit form
-    public function edit_form($id)
+    public function edit_form($id): \Illuminate\View\View
     {
         $author = Author::findOrFail($id);
         return view('authors.edit-form', [
@@ -70,7 +69,7 @@ class AuthorController extends Controller
     }
 
     // Update author
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): \Illuminate\Http\RedirectResponse
     {
         if(!Gate::allows('update-author')) {
             abort(403, 'Unauthorized action.');
@@ -95,7 +94,7 @@ class AuthorController extends Controller
     }
 
     // Delete author
-    public function destroy($id)
+    public function destroy($id): \Illuminate\Http\RedirectResponse
     {
         if(!Gate::allows('delete-author')) {
             abort(403, 'Unauthorized action.');

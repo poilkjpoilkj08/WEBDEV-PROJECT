@@ -6,13 +6,12 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\BookCategory;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Gate;
 
 class BookController extends Controller
 {
     // Display home page with featured books
-    public function index()
+    public function index(): \Illuminate\View\View
     {
         return view('home', [
             'featured_books' => Book::where('is_featured', '=', 1)
@@ -23,11 +22,13 @@ class BookController extends Controller
             'book_categories' => BookCategory::with('books')
                 ->get(),
             'total_books' => Book::where('status', '=', 'available')->count(),
+            'authors_count' => Author::where('is_active', '=', 1)->count(),
+            'categories_count' => BookCategory::count(),
         ]);
     }
 
     // Display all books listing
-    public function listing(Request $request)
+    public function listing(Request $request): \Illuminate\View\View
     {
         $query = Book::where('status', '=', 'available')->with(['author', 'category']);
 
@@ -69,7 +70,7 @@ class BookController extends Controller
     }
 
     // Display single book details
-    public function show($id)
+    public function show($id): \Illuminate\View\View
     {
         $book = Book::with(['author', 'category'])->findOrFail($id);
         $similar_books = Book::where('status', '=', 'available')
@@ -85,13 +86,13 @@ class BookController extends Controller
     }
 
     // Search properties
-    public function search(Request $request)
+    public function search(Request $request): \Illuminate\View\View
     {
         return $this->listing($request);
     }
 
     // Show create form
-    public function create_form()
+    public function create_form(): \Illuminate\View\View
     {
         return view('books.create-form', [
             'book_categories' => BookCategory::all(),
@@ -100,7 +101,7 @@ class BookController extends Controller
     }
 
     // Store book
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         if(!Gate::allows('insert-book')) {
             abort(403, 'Unauthorized action.');
@@ -129,7 +130,7 @@ class BookController extends Controller
     }
 
     // Show edit form
-    public function edit_form($id)
+    public function edit_form($id): \Illuminate\View\View
     {
         $book = Book::findOrFail($id);
         return view('books.edit-form', [
@@ -140,7 +141,7 @@ class BookController extends Controller
     }
 
     // Update book
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): \Illuminate\Http\RedirectResponse
     {
         if(!Gate::allows('update-book')) {
             abort(403, 'Unauthorized action.');
@@ -172,7 +173,7 @@ class BookController extends Controller
     }
 
     // Delete book
-    public function destroy($id)
+    public function destroy($id): \Illuminate\Http\RedirectResponse
     {
         if(!Gate::allows('delete-book')) {
             abort(403, 'Unauthorized action.');

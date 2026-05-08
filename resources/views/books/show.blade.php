@@ -173,6 +173,20 @@
 
     <div class="text-center">
         <a href="{{ route('books.listing') }}" class="btn btn-outline-secondary">← Back to Books</a>
+        @auth
+            @if(auth()->user()->hasRole(['admin', 'owner']))
+                <a href="{{ route('books.edit-form', $book->id) }}" class="btn btn-warning ms-2">
+                    <i class="fas fa-edit me-1"></i>Edit Book
+                </a>
+                <form action="{{ route('books.destroy', $book->id) }}" method="POST" class="d-inline ms-2" onsubmit="return confirm('Are you sure you want to delete this book?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Delete Book
+                    </button>
+                </form>
+            @endif
+        @endauth
     </div>
 </div>
 @endsection

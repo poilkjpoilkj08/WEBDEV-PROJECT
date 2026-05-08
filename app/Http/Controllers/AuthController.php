@@ -7,11 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function show_login(){
+    public function show_login(): \Illuminate\View\View
+    {
         return view('auth.login');
     }
 
-    public function login_auth(Request $request){
+    public function login_auth(Request $request): \Illuminate\Http\RedirectResponse
+    {
         $credentials = $request->validate([
             'email' => 'required|email:dns',
             'password' => 'required'
@@ -27,7 +29,8 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function logout(Request $request){
+    public function logout(Request $request): \Illuminate\Http\RedirectResponse
+    {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

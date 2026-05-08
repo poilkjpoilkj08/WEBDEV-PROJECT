@@ -11,7 +11,7 @@ class LanguageController extends Controller
     /**
      * Switch the application language
      */
-    public function switch(Request $request, $locale)
+    public function switch(Request $request, $locale): \Illuminate\Http\RedirectResponse
     {
         // Validate the locale
         if (!in_array($locale, ['en', 'id'])) {
@@ -29,7 +29,7 @@ class LanguageController extends Controller
     /**
      * Get the current locale
      */
-    public function getCurrentLocale()
+    public function getCurrentLocale(): \Illuminate\Http\JsonResponse
     {
         return response()->json([
             'locale' => App::getLocale(),

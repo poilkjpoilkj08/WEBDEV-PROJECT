@@ -70,6 +70,11 @@
                         </div>
                     </div>
                 @endguest
+
+                <!-- Hidden logout form -->
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
             </div>
         </div>
     </div>
@@ -92,6 +97,14 @@
                     menu.classList.remove('show');
                 }
             });
+            
+            // Handle logout button click
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.getElementById('logout-form').submit();
+                });
+            }
             
             document.addEventListener('click', function(e) {
                 // Only close menu if clicking outside the dropdown and logout button

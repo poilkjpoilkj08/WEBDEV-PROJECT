@@ -94,7 +94,7 @@
             </div>
 
             <div class="mt-4">
-                {{ $properties->links() }}
+                {{ $books->links() }}
             </div>
         </div>
     </div>
