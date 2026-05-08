@@ -4,8 +4,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\LanguageController;
+<<<<<<< HEAD
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\StoreLocationController;
+=======
+>>>>>>> 0baef88919b77deb93dd0969a66df6291b15cee3
 use Illuminate\Support\Facades\Route;
 
 // Language switching routes
@@ -20,6 +23,7 @@ Route::get('/books/{id}', [BookController::class, 'show'])->whereNumber('id')->n
 Route::get('/authors', [AuthorController::class, 'index'])->name('authors.index');
 Route::get('/authors/{id}', [AuthorController::class, 'show'])->whereNumber('id')->name('authors.show');
 
+<<<<<<< HEAD
 Route::get('/about', function () {
     return view('about');
 })->name('about');
@@ -41,6 +45,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::middleware(['role:admin,owner'])->group(function () {
+=======
+Route::get('/about', function(){
+    return view('about');
+})->name('about');
+
+Route::get('/login', [AuthController::class, 'show_login'])->name('login.show')->middleware('guest');
+
+Route::post('/login_auth', [AuthController::class, 'login_auth'])->name('login.auth')->middleware('guest');
+
+Route::middleware('auth')->group(function(){
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::middleware(['role:admin,owner'])->group (function() {
+>>>>>>> 0baef88919b77deb93dd0969a66df6291b15cee3
         Route::get('/books/create-form', [BookController::class, 'create_form'])->name('books.create-form');
         Route::post('/books', [BookController::class, 'store'])->name('books.store');
         Route::get('/books/{id}/edit-form', [BookController::class, 'edit_form'])->name('books.edit-form');
@@ -53,4 +71,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/authors/{id}', [AuthorController::class, 'update'])->name('authors.update');
         Route::delete('/authors/{id}', [AuthorController::class, 'destroy'])->name('authors.destroy');
     });
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 0baef88919b77deb93dd0969a66df6291b15cee3

@@ -20,9 +20,12 @@
                 <li class="nav-item">
                     <a class="nav-link {{ Route::is('about') ? 'active' : '' }}" href="{{ route('about') }}">{{ __('messages.about') }}</a>
                 </li>
+<<<<<<< HEAD
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('subscribe.plans') }}"><i class="fas fa-bookmark me-1"></i>Subscribe</a>
                 </li>
+=======
+>>>>>>> 0baef88919b77deb93dd0969a66df6291b15cee3
                 @auth
                     @if(auth()->user()->hasRole(['admin', 'owner']))
                     <li class="nav-item dropdown">
