@@ -143,11 +143,8 @@
         </div>
     </div>
 
-<<<<<<< HEAD
     @include('books.partials.store-map', ['book' => $book])
 
-=======
->>>>>>> 0baef88919b77deb93dd0969a66df6291b15cee3
     @if($similar_books->count() > 0)
     <div class="mb-5">
         <div class="d-flex justify-content-between align-items-center mb-3">
