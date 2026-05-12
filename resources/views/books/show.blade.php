@@ -5,21 +5,13 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 @if($book->cover_image_url)
-                <img src="{{ $book->cover_image_url }}" class="card-img-top" alt="{{ $book->title }}" style="height: 420px; object-fit: cover;" />
+                <img src="{{ $book->cover_image_src }}" class="card-img-top" alt="{{ $book->title }}" style="height: 420px; object-fit: contain; background:#f8f9fa;" />
                 @else
                 <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 420px;">No Cover Available</div>
                 @endif
             </div>
 
-            @if($book->images)
-            <div class="row g-2 mt-3">
-                @foreach($book->images as $image)
-                <div class="col-3">
-                    <img src="{{ $image }}" class="img-fluid rounded" alt="Gallery" style="height: 100px; object-fit: cover; width: 100%;" />
-                </div>
-                @endforeach
-            </div>
-            @endif
+
         </div>
 
         <div class="col-lg-4">
@@ -28,7 +20,7 @@
                     <span class="badge bg-success mb-3">{{ ucfirst($book->status) }}</span>
                     <h1 class="h4">{{ $book->title }}</h1>
                     <p class="text-muted mb-3">by {{ $book->author ? $book->author->name : 'Unknown Author' }}</p>
-                    <h2 class="h3 text-primary mb-3">${{ number_format($book->price, 2) }}</h2>
+                    <h2 class="h3 text-primary mb-3">Rp {{ number_format($book->price, 0, ',', '.') }}</h2>
 
                     <div class="row g-2 mb-3">
                         <div class="col-6">
@@ -63,6 +55,9 @@
                         <li class="list-group-item"><strong>ISBN:</strong> {{ $book->isbn ?: 'Not available' }}</li>
                         <li class="list-group-item"><strong>Category:</strong> {{ $book->category->name }}</li>
                         <li class="list-group-item"><strong>Publisher:</strong> {{ $book->publisher ?: 'Unknown' }}</li>
+                        @if($book->cover_type)
+                        <li class="list-group-item"><strong>Cover Type:</strong> {{ ucfirst($book->cover_type) }}</li>
+                        @endif
                     </ul>
 
                     @if($book->author)
@@ -73,21 +68,27 @@
                             @if($book->author->bio)
                             <p class="text-muted mb-2">{{ Str::limit($book->author->bio, 100) }}</p>
                             @endif
-                            <p class="text-muted mb-1">📧 <a href="mailto:{{ $book->author->email }}" class="text-decoration-none">{{ $book->author->email }}</a></p>
-                            @if($book->author->phone)
-                            <p class="text-muted mb-2">📱 <a href="tel:{{ $book->author->phone }}" class="text-decoration-none">{{ $book->author->phone }}</a></p>
-                            @endif
-                            <a href="{{ route('authors.show', $book->author->id) }}" class="btn btn-primary btn-sm">View Author</a>
                         </div>
                     </div>
                     @endif
 
-                    <a href="mailto:{{ $book->author?->email ?? 'info@premiumbookstore.com' }}?subject=Inquiry%20about%20{{ urlencode($book->title) }}&body=I%20am%20interested%20in%20{{ urlencode($book->title) }}.%20Please%20provide%20more%20information." class="btn btn-primary w-100 mb-2">Contact Author</a>
-                    @if($book->author && $book->author->phone)
-                    <a href="tel:{{ $book->author->phone }}" class="btn btn-outline-primary w-100">Call Author</a>
+                    @auth
+                        <form action="{{ route('cart.add') }}" method="POST" class="mb-2">
+                            @csrf
+                            <input type="hidden" name="book_id" value="{{ $book->id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-success w-100 mb-2" style="font-weight: 600; padding: 0.6rem;">
+                                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                            </button>
+                        </form>
                     @else
-                    <a href="mailto:{{ $book->author?->email ?? 'info@premiumbookstore.com' }}" class="btn btn-outline-primary w-100">Contact Author</a>
-                    @endif
+                        <a href="{{ route('login.show') }}" class="btn btn-success w-100 mb-2" style="font-weight: 600; padding: 0.6rem;">
+                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                        </a>
+                    @endauth
+                    <a href="mailto:{{ $book->author?->email ?? 'info@premiumbookstore.com' }}?subject=Inquiry%20about%20{{ urlencode($book->title) }}&body=I%20am%20interested%20in%20{{ urlencode($book->title) }}.%20Please%20provide%20more%20information." class="btn btn-outline-primary w-100">
+                        <i class="fas fa-envelope me-2"></i>Contact Author
+                    </a>
                 </div>
             </div>
         </div>
@@ -99,7 +100,7 @@
                 <div class="card-body">
                     <h2 class="h5">Book Description</h2>
                     <p class="text-muted">{{ $book->description ?: 'No description available.' }}</p>
-                    @if($book->genres)
+                    @if($book->genres && is_array($book->genres) && count($book->genres) > 0)
                     <h3 class="h6 mt-4">Genres</h3>
                     <div class="row g-2">
                         @foreach($book->genres as $genre)
@@ -172,6 +173,30 @@
         </div>
     </div>
     @endif
+
+    <div class="text-center mb-4">
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            @if($previous_book)
+                <a href="{{ route('books.show', $previous_book->id) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-chevron-left me-2"></i>Previous Book
+                </a>
+            @else
+                <button class="btn btn-outline-secondary" disabled>
+                    <i class="fas fa-chevron-left me-2"></i>Previous Book
+                </button>
+            @endif
+
+            @if($next_book)
+                <a href="{{ route('books.show', $next_book->id) }}" class="btn btn-outline-primary">
+                    Next Book<i class="fas fa-chevron-right ms-2"></i>
+                </a>
+            @else
+                <button class="btn btn-outline-secondary" disabled>
+                    Next Book<i class="fas fa-chevron-right ms-2"></i>
+                </button>
+            @endif
+        </div>
+    </div>
 
     <div class="text-center">
         <a href="{{ route('books.listing') }}" class="btn btn-outline-secondary">← Back to Books</a>

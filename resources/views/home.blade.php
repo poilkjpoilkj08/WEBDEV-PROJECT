@@ -61,7 +61,7 @@
         <div class="col-md-4 mb-3">
             <div class="card bg-gradient text-white border-0 shadow-sm" style="background: linear-gradient(135deg, #007bff, #6610f2);">
                 <div class="card-body text-center py-4">
-                    <i class="fas fa-user-tie fa-3x mb-3 opacity-75"></i>
+                    <i class="fas fa-feather-alt fa-3x mb-3 opacity-75"></i>
                     <h3 class="h2 mb-1">{{ $authors_count ?? 4 }}</h3>
                     <p class="mb-0">Expert Authors</p>
                 </div>
@@ -70,7 +70,7 @@
         <div class="col-md-4 mb-3">
             <div class="card bg-gradient text-white border-0 shadow-sm" style="background: linear-gradient(135deg, #fd7e14, #dc3545);">
                 <div class="card-body text-center py-4">
-                    <i class="fas fa-tags fa-3x mb-3 opacity-75"></i>
+                    <i class="fas fa-layer-group fa-3x mb-3 opacity-75"></i>
                     <h3 class="h2 mb-1">{{ $categories_count ?? 8 }}</h3>
                     <p class="mb-0">Book Categories</p>
                 </div>
@@ -80,7 +80,6 @@
 
     <section class="mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="h3 mb-0 fw-bold text-dark">🏆 Featured Books</h2>
             <a href="{{ route('books.listing') }}" class="btn btn-warning fw-bold">
                 <i class="fas fa-arrow-right me-2"></i>View All Books
             </a>
@@ -108,23 +107,9 @@
                         <p class="text-muted mb-3">
                             <i class="fas fa-user me-1"></i>{{ $book->author ? $book->author->name : 'Unknown Author' }}
                         </p>
-                        <div class="row g-2 mb-3 small">
-                            <div class="col-4 text-center">
-                                <i class="fas fa-file-alt text-primary"></i><br>
-                                {{ $book->pages }} pages
-                            </div>
-                            <div class="col-4 text-center">
-                                <i class="fas fa-language text-info"></i><br>
-                                {{ $book->language }}
-                            </div>
-                            <div class="col-4 text-center">
-                                <i class="fas fa-calendar text-success"></i><br>
-                                {{ $book->publication_year }}
-                            </div>
-                        </div>
                         <div class="mt-auto">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="h4 text-success fw-bold mb-0">${{ number_format($book->price, 2) }}</span>
+                                <span class="h4 text-success fw-bold mb-0">Rp {{ number_format($book->price, 0, ',', '.') }}</span>
                                 <small class="text-muted">{{ $book->category->name }}</small>
                             </div>
                             <a href="{{ route('books.show', $book->id) }}" class="btn btn-primary w-100 fw-bold">
@@ -166,13 +151,6 @@
             </div>
             @endforelse
         </div>
-    </section>
-
-    <section class="bg-primary text-white rounded-4 p-5 text-center">
-        <h2 class="h3 mb-3">Looking for Your Next Great Read?</h2>
-        <p class="mb-4">Browse our extensive book collection or discover new authors today.</p>
-        <a href="{{ route('books.listing') }}" class="btn btn-light btn-lg me-2">View Books</a>
-        <a href="{{ route('authors.index') }}" class="btn btn-outline-light btn-lg">Meet Authors</a>
     </section>
 </div>
 @endsection

@@ -22,6 +22,7 @@ class Book extends Model
         'language',
         'publication_year',
         'publisher',
+        'cover_type',
         'status',
         'author_id',
         'category_id',
@@ -29,7 +30,8 @@ class Book extends Model
         'genres',
         'images',
         'weight_grams',
-        'is_featured'
+        'is_featured',
+        'stock'
     ];
 
     protected $casts = [
@@ -71,5 +73,38 @@ class Book extends Model
     public function getCoverImageUrlAttribute($value)
     {
         return $value ?: 'https://via.placeholder.com/300x400?text=No+Cover';
+    }
+
+    // Accessor for cover image with asset() helper for local paths
+    public function getCoverImageSrcAttribute()
+    {
+        $url = $this->cover_image_url;
+        
+        if (!$url) {
+            return 'https://via.placeholder.com/300x400?text=No+Cover';
+        }
+        
+        // If it's already a full URL (http/https), return as-is
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            return $url;
+        }
+        
+        // Otherwise treat as local path and use asset() helper
+        return asset($url);
+    }
+
+    // Accessor for images array with asset() helper for local paths
+    public function getImageUrlsAttribute()
+    {
+        $images = $this->images ?? [];
+        
+        return collect($images)
+            ->map(function ($url) {
+                if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+                    return $url;
+                }
+                return asset($url);
+            })
+            ->toArray();
     }
 }

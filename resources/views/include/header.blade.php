@@ -20,9 +20,6 @@
                 <li class="nav-item">
                     <a class="nav-link {{ Route::is('about') ? 'active' : '' }}" href="{{ route('about') }}">{{ __('messages.about') }}</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('subscribe.plans') }}"><i class="fas fa-bookmark me-1"></i>Subscribe</a>
-                </li>
                 @auth
                     @if(auth()->user()->hasRole(['admin', 'owner']))
                     <li class="nav-item dropdown">
@@ -37,117 +34,113 @@
                     @endif
                 @endauth
             </ul>
-            <div class="d-flex text-white align-items-center">
-                <!-- Language Selector -->
-                <div class="dropdown me-3">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-globe me-1"></i>
-                        <span class="d-none d-sm-inline">{{ strtoupper(app()->getLocale()) }}</span>
+        </div>
+
+        <!-- User Controls (Outside collapsible nav) -->
+        <div class="d-flex text-white align-items-center gap-2">
+            <!-- Language Selector -->
+            <div class="dropdown">
+                <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-globe me-1"></i>
+                    <span class="d-none d-sm-inline">{{ strtoupper(app()->getLocale()) }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                    <li><a class="dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}" href="{{ route('language.switch', 'en') }}">
+                        <i class="fas fa-check me-2 {{ app()->getLocale() === 'en' ? 'text-success' : 'text-muted' }}"></i>English
+                    </a></li>
+                    <li><a class="dropdown-item {{ app()->getLocale() === 'id' ? 'active' : '' }}" href="{{ route('language.switch', 'id') }}">
+                        <i class="fas fa-check me-2 {{ app()->getLocale() === 'id' ? 'text-success' : 'text-muted' }}"></i>Bahasa Indonesia
+                    </a></li>
+                </ul>
+            </div>
+
+            <a href="#" class="text-white fs-5" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="text-white fs-5" title="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-white fs-5" title="Instagram"><i class="fab fa-instagram"></i></a>
+            
+            @guest
+                <a href="{{ route('login.show') }}" class="btn btn-light btn-sm px-4 fw-bold rounded-pill text-primary shadow-sm">{{ __('messages.login') }}</a>
+            @else
+                @php $cartCount = count(session('cart', [])); @endphp
+                <a href="{{ route('cart.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    <span class="d-none d-lg-inline">Cart</span>
+                    @if($cartCount > 0)
+                        <span class="badge bg-danger ms-2">{{ $cartCount }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('orders.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm">
+                    <i class="fas fa-receipt me-2"></i>
+                    <span class="d-none d-lg-inline">Orders</span>
+                </a>
+                
+                <!-- User Profile Dropdown using Bootstrap's native dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-light btn-sm px-3 fw-bold rounded-pill text-primary d-flex align-items-center shadow-sm" type="button" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-2 fs-5"></i>
+                        <span class="d-none d-lg-inline">{{ auth()->user()->name }}</span>
+                        <i class="fas fa-chevron-down ms-1" style="font-size: 0.65em;"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
-                        <li><a class="dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}" href="{{ route('language.switch', 'en') }}">
-                            <i class="fas fa-check me-2 {{ app()->getLocale() === 'en' ? 'text-success' : 'text-muted' }}"></i>English
-                        </a></li>
-                        <li><a class="dropdown-item {{ app()->getLocale() === 'id' ? 'active' : '' }}" href="{{ route('language.switch', 'id') }}">
-                            <i class="fas fa-check me-2 {{ app()->getLocale() === 'id' ? 'text-success' : 'text-muted' }}"></i>Bahasa Indonesia
-                        </a></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3" aria-labelledby="userProfileDropdown">
+                        <li>
+                            <form action="{{ route('logout') }}" method="POST" id="logout-form">
+                                @csrf
+                                <button type="submit" class="dropdown-item text-danger d-flex align-items-center">
+                                    <i class="fas fa-sign-out-alt me-2"></i> {{ __('messages.logout') }}
+                                </button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
-
-                <a href="#" class="text-white me-3 fs-5" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="text-white me-3 fs-5" title="Twitter"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="text-white me-3 fs-5" title="Instagram"><i class="fab fa-instagram"></i></a>
-                @guest
-                    <a href="{{ route('login.show') }}" class="btn btn-light btn-sm ms-2 px-4 fw-bold rounded-pill text-primary shadow-sm hover-shadow">{{ __('messages.login') }}</a>
-                @else
-                    <div class="position-relative ms-2">
-                        <button class="btn btn-light btn-sm px-4 fw-bold rounded-pill text-primary d-flex align-items-center shadow-sm" type="button" id="customUserDropdown">
-                            <i class="fas fa-user-circle me-2 fs-5"></i>
-                            {{ auth()->user()->name }}
-                            <i class="fas fa-chevron-down ms-2 mt-1" style="font-size: 0.65em;"></i>
-                        </button>
-                        <div class="dropdown-menu shadow-lg border-0 mt-2 position-absolute rounded-3" id="customUserMenu" style="right: 0; left: auto; min-width: 160px; display: none; z-index: 1050;">
-                            <button class="w-100 text-start border-0 bg-transparent text-danger py-2 px-3 fw-medium d-flex align-items-center" type="button" id="logoutBtnDropdown" style="cursor: pointer; font-size: 0.95rem;">
-                                <i class="fas fa-sign-out-alt me-2"></i> {{ __('messages.logout') }}
-                            </button>
-                        </div>
-                    </div>
-                @endguest
-
-                <!-- Hidden logout form -->
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
-            </div>
+            @endguest
         </div>
     </div>
 </nav>
 
 <script>
+    // Wait for DOM to be fully loaded
     document.addEventListener('DOMContentLoaded', function() {
-        var btn = document.getElementById('customUserDropdown');
-        var menu = document.getElementById('customUserMenu');
-        var logoutBtn = document.getElementById('logoutBtnDropdown');
+        const btn = document.getElementById('customUserDropdown');
+        const menu = document.getElementById('customUserMenu');
+        const logoutBtn = document.getElementById('logoutBtnDropdown');
         
-        if (btn && menu) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (menu.style.display === 'none' || menu.style.display === '') {
-                    menu.style.display = 'block';
-                    menu.classList.add('show');
-                } else {
-                    menu.style.display = 'none';
-                    menu.classList.remove('show');
-                }
-            });
-            
-            // Handle logout button click
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.getElementById('logout-form').submit();
-                });
-            }
-            
-            document.addEventListener('click', function(e) {
-                // Only close menu if clicking outside the dropdown and logout button
-                if (e.target !== btn && !btn.contains(e.target) && 
-                    e.target !== menu && !menu.contains(e.target) &&
-                    e.target !== logoutBtn && (logoutBtn && !logoutBtn.contains(e.target))) {
-                    menu.style.display = 'none';
-                    menu.classList.remove('show');
-                }
-            });
-            
-            menu.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
+        console.log('Button found:', btn ? 'Yes' : 'No');
+        console.log('Menu found:', menu ? 'Yes' : 'No');
+        
+        if (!btn || !menu) {
+            console.error('Could not find button or menu elements');
+            return;
         }
-
-        // Logout button handler
+        
+        // Toggle dropdown on button click
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Button clicked, menu display was:', menu.style.display);
+            
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
+            }
+        });
+        
+        // Handle logout button
         if (logoutBtn) {
             logoutBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                menu.style.display = 'none';
-                
-                // Show modal using simple DOM manipulation
-                const logoutModal = document.getElementById('logoutModal');
-                if (logoutModal) {
-                    // Add show class and set display
-                    logoutModal.style.display = 'block';
-                    logoutModal.classList.add('show');
-                    // Add backdrop
-                    let backdrop = document.querySelector('.modal-backdrop');
-                    if (!backdrop) {
-                        backdrop = document.createElement('div');
-                        backdrop.className = 'modal-backdrop fade show';
-                        document.body.appendChild(backdrop);
-                    }
-                    document.body.classList.add('modal-open');
-                }
+                console.log('Logout clicked');
+                document.getElementById('logout-form').submit();
             });
         }
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (btn && menu && e.target !== btn && !btn.contains(e.target) && e.target !== menu && !menu.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
     });
 </script>
 

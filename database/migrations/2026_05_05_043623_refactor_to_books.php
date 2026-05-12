@@ -57,6 +57,7 @@ return new class extends Migration
             $table->json('genres')->nullable(); // replaces amenities
             $table->json('images')->nullable();
             $table->decimal('weight_grams', 8, 2)->nullable(); // replaces lot_size_sqft
+            $table->integer('stock')->default(0); // Add stock column
             $table->boolean('is_featured')->default(false);
             $table->softDeletes();
             $table->timestamps();

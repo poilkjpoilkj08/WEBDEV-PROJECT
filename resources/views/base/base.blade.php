@@ -104,7 +104,7 @@
 
     <script>
         // Language switching functionality
-        function changeLanguage(lang) {
+        function changeLanguage(lang, showNotification = false) {
             // Store language preference in localStorage
             localStorage.setItem('preferred_language', lang);
 
@@ -125,7 +125,7 @@
             });
 
             // Mark selected language
-            const selectedItem = [...items].find(item => item.onclick.toString().includes(`'${lang}'`));
+            const selectedItem = [...items].find(item => item.onclick && item.onclick.toString().includes(`'${lang}'`));
             if (selectedItem) {
                 const dotSpan = selectedItem.querySelector('.text-muted');
                 if (dotSpan) {
@@ -137,13 +137,16 @@
             // or make an AJAX call to change the language server-side
             console.log('Language changed to:', lang);
 
-            // For now, just show a notification
-            showLanguageNotification(lang);
+            // Only show notification if this is a manual change (not page load)
+            if (showNotification) {
+                showLanguageNotification(lang);
+            }
         }
 
         function showLanguageNotification(lang) {
             const languages = {
                 'en': 'English',
+                'id': 'Indonesian',
                 'es': 'Español',
                 'fr': 'Français',
                 'de': 'Deutsch',
@@ -170,10 +173,10 @@
             }, 3000);
         }
 
-        // Initialize language on page load
+        // Initialize language on page load (without showing notification)
         document.addEventListener('DOMContentLoaded', function() {
             const savedLang = localStorage.getItem('preferred_language') || 'en';
-            changeLanguage(savedLang);
+            changeLanguage(savedLang, false);
         });
 
         // Enhanced dropdown functionality

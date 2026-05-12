@@ -79,9 +79,23 @@ class BookController extends Controller
             ->limit(4)
             ->get();
 
+        // Get previous book (id < current, last one)
+        $previous_book = Book::where('status', '=', 'available')
+            ->where('id', '<', $id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        // Get next book (id > current, first one)
+        $next_book = Book::where('status', '=', 'available')
+            ->where('id', '>', $id)
+            ->orderBy('id', 'asc')
+            ->first();
+
         return view('books.show', [
             'book' => $book,
             'similar_books' => $similar_books,
+            'previous_book' => $previous_book,
+            'next_book' => $next_book,
         ]);
     }
 

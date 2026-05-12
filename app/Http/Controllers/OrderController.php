@@ -19,7 +19,7 @@ class OrderController extends Controller
             $orders = Order::with('user')->where('user_id', '=', Auth::id())->orderBy('created_at', 'desc')->get();
         }
 
-        return view('store.orders', compact('orders', 'userRoles'));
+        return view('orders.index', compact('orders', 'userRoles'));
     }
 
     public function order_details($order_id){
@@ -30,6 +30,6 @@ class OrderController extends Controller
             abort(403);
         }
 
-        return view('store.order_details', compact('order', 'userRoles'));
+        return view('orders.show', compact('order', 'userRoles'));
     }
 }

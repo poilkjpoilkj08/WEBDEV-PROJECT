@@ -6,6 +6,9 @@ use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\StoreLocationController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\Route;
 
 // Language switching routes
@@ -33,12 +36,30 @@ Route::get('/unsubscribe/{token}', [SubscriptionController::class, 'unsubscribe'
 Route::get('/api/stores', [StoreLocationController::class, 'all'])->name('stores.all');
 Route::get('/api/stores/book/{bookId}', [StoreLocationController::class, 'forBook'])->name('stores.for-book');
 
+// ── Checkout Callback (for Midtrans) ───────────────────────────────────────
+Route::post('/checkout/callback', [CheckoutController::class, 'callback'])->name('checkout.callback');
+
 // ── Auth ───────────────────────────────────────────────────────────────────
 Route::get('/login', [AuthController::class, 'show_login'])->name('login.show')->middleware('guest');
 Route::post('/login_auth', [AuthController::class, 'login_auth'])->name('login.auth')->middleware('guest');
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Cart routes
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+    // Orders routes
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order_id}', [OrderController::class, 'order_details'])->name('orders.details');
+
+    // Checkout routes
+    Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
 
     Route::middleware(['role:admin,owner'])->group(function () {
         Route::get('/books/create-form', [BookController::class, 'create_form'])->name('books.create-form');
