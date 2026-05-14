@@ -27,8 +27,17 @@
                             {{ __('messages.admin_panel') }}
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                            <li><a class="dropdown-item" href="{{ route('books.create-form') }}">{{ __('messages.add_new_book') }}</a></li>
-                            <li><a class="dropdown-item" href="{{ route('authors.create-form') }}">{{ __('messages.add_new_author') }}</a></li>
+                            <li><h6 class="dropdown-header">Books</h6></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.books.index') }}"><i class="fas fa-list fa-fw me-2 text-muted"></i>Manage Books</a></li>
+                            <li><a class="dropdown-item" href="{{ route('books.create-form') }}"><i class="fas fa-plus fa-fw me-2 text-muted"></i>{{ __('messages.add_new_book') }}</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Authors</h6></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.authors.index') }}"><i class="fas fa-list fa-fw me-2 text-muted"></i>Manage Authors</a></li>
+                            <li><a class="dropdown-item" href="{{ route('authors.create-form') }}"><i class="fas fa-plus fa-fw me-2 text-muted"></i>{{ __('messages.add_new_author') }}</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Stores</h6></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.stores.index') }}"><i class="fas fa-store fa-fw me-2 text-muted"></i>Manage Store Locations</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.stores.create') }}"><i class="fas fa-plus fa-fw me-2 text-muted"></i>Add Store Location</a></li>
                         </ul>
                     </li>
                     @endif
