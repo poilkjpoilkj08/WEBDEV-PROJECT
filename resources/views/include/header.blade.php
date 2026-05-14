@@ -29,15 +29,12 @@
                         <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                             <li><h6 class="dropdown-header">Books</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.books.index') }}"><i class="fas fa-list fa-fw me-2 text-muted"></i>Manage Books</a></li>
-                            <li><a class="dropdown-item" href="{{ route('books.create-form') }}"><i class="fas fa-plus fa-fw me-2 text-muted"></i>{{ __('messages.add_new_book') }}</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">Authors</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.authors.index') }}"><i class="fas fa-list fa-fw me-2 text-muted"></i>Manage Authors</a></li>
-                            <li><a class="dropdown-item" href="{{ route('authors.create-form') }}"><i class="fas fa-plus fa-fw me-2 text-muted"></i>{{ __('messages.add_new_author') }}</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">Stores</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.stores.index') }}"><i class="fas fa-store fa-fw me-2 text-muted"></i>Manage Store Locations</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.stores.create') }}"><i class="fas fa-plus fa-fw me-2 text-muted"></i>Add Store Location</a></li>
                         </ul>
                     </li>
                     @endif
@@ -109,146 +106,8 @@
 <script>
     // Wait for DOM to be fully loaded
     document.addEventListener('DOMContentLoaded', function() {
-        const btn = document.getElementById('customUserDropdown');
-        const menu = document.getElementById('customUserMenu');
-        const logoutBtn = document.getElementById('logoutBtnDropdown');
-        
-        console.log('Button found:', btn ? 'Yes' : 'No');
-        console.log('Menu found:', menu ? 'Yes' : 'No');
-        
-        if (!btn || !menu) {
-            console.error('Could not find button or menu elements');
-            return;
-        }
-        
-        // Toggle dropdown on button click
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Button clicked, menu display was:', menu.style.display);
-            
-            if (menu.style.display === 'none' || menu.style.display === '') {
-                menu.style.display = 'block';
-            } else {
-                menu.style.display = 'none';
-            }
-        });
-        
-        // Handle logout button
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Logout clicked');
-                document.getElementById('logout-form').submit();
-            });
-        }
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', function(e) {
-            if (btn && menu && e.target !== btn && !btn.contains(e.target) && e.target !== menu && !menu.contains(e.target)) {
-                menu.style.display = 'none';
-            }
-        });
+        // Language functionality handled by base.blade.php
     });
 </script>
 
-<!-- Logout Modal -->
-<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
-                <h5 class="modal-title fw-bold text-dark d-flex align-items-center" id="logoutModalLabel">
-                    <i class="fas fa-sign-out-alt text-danger me-2"></i> Confirm Logout
-                </h5>
-                <button type="button" class="btn-close closeLogoutModal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-dark px-4 py-3">
-                <p class="mb-0 text-muted fs-6">Are you sure you want to log out from your account? You will need to log in again to access your session.</p>
-            </div>
-            <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
-                <button type="button" class="btn btn-light fw-medium rounded-pill px-4 closeLogoutModal">Cancel</button>
-                <button type="button" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm" id="confirmLogoutBtn">Logout</button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Hidden Logout Form -->
-<form id="logoutForm" action="{{ route('logout') }}" method="POST">
-    @csrf
-</form>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
-        const logoutForm = document.getElementById('logoutForm');
-        const logoutModal = document.getElementById('logoutModal');
-        const closeButtons = document.querySelectorAll('.closeLogoutModal');
-        
-        // Function to close modal
-        function closeModal() {
-            if (logoutModal) {
-                logoutModal.style.display = 'none';
-                logoutModal.classList.remove('show');
-                document.body.classList.remove('modal-open');
-                
-                // Remove backdrop
-                let backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
-            }
-        }
-        
-        // Attach close functionality to all close buttons
-        closeButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                closeModal();
-            });
-        });
-        
-        if (confirmLogoutBtn && logoutForm) {
-            confirmLogoutBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Disable the button
-                confirmLogoutBtn.disabled = true;
-                confirmLogoutBtn.textContent = 'Logging out...';
-                
-                // Get csrf token
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                
-                // Send logout via fetch
-                fetch('{{ route('logout') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin',
-                    body: '_token=' + encodeURIComponent(csrfToken)
-                })
-                .then(response => {
-                    console.log('Logout response status:', response.status);
-                    // Redirect regardless of response
-                    setTimeout(() => {
-                        window.location.href = '{{ route('login.show') }}';
-                    }, 300);
-                })
-                .catch(err => {
-                    console.error('Logout error:', err);
-                    // Still redirect on error
-                    setTimeout(() => {
-                        window.location.href = '{{ route('login.show') }}';
-                    }, 300);
-                });
-            });
-        }
-    });
-</script>

@@ -13,10 +13,10 @@ class OrderController extends Controller
         $userRoles = Auth::user()->roles->pluck('role')->toArray();
         if(in_array('admin', $userRoles)){
             //Admin can see all orders
-            $orders = Order::with('user')->orderBy('created_at', 'desc')->get();
+            $orders = Order::with('user')->orderByRaw('created_at DESC')->get();
         }
         else{
-            $orders = Order::with('user')->where('user_id', '=', Auth::id())->orderBy('created_at', 'desc')->get();
+            $orders = Order::with('user')->where('user_id', '=', Auth::id())->orderByRaw('created_at DESC')->get();
         }
 
         return view('orders.index', compact('orders', 'userRoles'));

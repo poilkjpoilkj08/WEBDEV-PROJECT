@@ -47,7 +47,7 @@ class StoreLocationController extends Controller
 
     public function index()
     {
-        $stores = StoreLocation::orderBy('city')->orderBy('name')->paginate(15);
+        $stores = StoreLocation::orderByRaw('city ASC, name ASC')->paginate(15);
         return view('admin.store-locations.index', compact('stores'));
     }
 

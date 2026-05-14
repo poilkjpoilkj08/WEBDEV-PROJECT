@@ -5,9 +5,9 @@
         <div class="col-lg-4">
             <div class="card shadow-sm border-0">
                 @if($author->photo_url)
-                <img src="{{ $author->photo_url }}" class="card-img-top" alt="{{ $author->name }}" style="height: 320px; object-fit: cover;" />
+                <img src="{{ $author->photo_url }}" class="card-img-top" alt="{{ $author->name }}" style="height: 280px; object-fit: cover;" />
                 @else
-                <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 320px; font-size: 4rem;">👤</div>
+                <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 280px; font-size: 4rem;">👤</div>
                 @endif
                 <div class="card-body">
                     <h1 class="h4 mb-2">{{ $author->name }}</h1>
@@ -56,11 +56,10 @@
             @forelse($books as $book)
             <div class="col-12 col-md-6">
                 <div class="card shadow-sm border-0 h-100">
-                    @if($book->cover_image_url)
-                    <img src="{{ $book->cover_image_url }}" class="card-img-top" alt="{{ $book->title }}" style="height: 220px; object-fit: cover;" />
-                    @else
-                    <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 220px;">No Cover</div>
-                    @endif
+                    @php
+                        $coverImage = $book->cover_image_src;
+                    @endphp
+                    <img src="{{ $coverImage }}" class="card-img-top" alt="{{ $book->title }}" style="height: 220px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/300x220?text=No+Cover'; this.onerror=null;" />
                     <div class="card-body d-flex flex-column">
                         <span class="badge bg-success mb-2">{{ ucfirst($book->status) }}</span>
                         <h3 class="h5 mb-2">{{ $book->title }}</h3>
@@ -100,3 +99,4 @@
             @endif
         @endauth
     </div>
+@endsection

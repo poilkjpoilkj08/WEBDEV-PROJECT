@@ -12,13 +12,42 @@
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+        }
         body {
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        nav.navbar {
+            position: relative;
+            width: 100%;
+            height: auto;
+            min-height: 70px;
         }
         .main-content {
-            flex: 1;
+            margin-top: 0;
+            flex: 1 0 auto;
+            width: 100%;
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 20px;
+            }
+        }
+        footer {
+            flex-shrink: 0;
+            width: 100%;
+            min-height: 220px;
+            padding-top: 3rem;
+            padding-bottom: 3rem;
         }
         #logoutBtnDropdown {
             transition: all 0.2s ease;
@@ -96,7 +125,7 @@
 <body>
     @include('include.header')
     
-    <div class="container-fluid main-content px-4 px-md-5 py-5" style="margin:0 auto; max-width: 1400px;">
+    <div class="container-fluid main-content px-4 px-md-5 py-5" style="margin-left: auto; margin-right: auto; max-width: 1400px;">
         @yield('content')
     </div>
     

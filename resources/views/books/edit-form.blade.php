@@ -7,7 +7,7 @@
                 <div class="card-body">
                     <h1 class="h3 mb-4">Edit Book</h1>
 
-                    <form action="{{ route('books.update', $book->id) }}" method="POST">
+                    <form action="{{ route('books.update', $book->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -119,6 +119,14 @@
                                 <input type="url" name="cover_image_url" value="{{ old('cover_image_url', $book->cover_image_url) }}" class="form-control @error('cover_image_url') is-invalid @enderror">
                                 @error('cover_image_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cover Image File</label>
+                                <input type="file" name="cover_image_file" accept="image/*" class="form-control @error('cover_image_file') is-invalid @enderror">
+                                @error('cover_image_file') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <div class="form-text">Upload a new image to replace the current cover, or leave blank to keep the existing cover.</div>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-3">
                             <div class="col-md-6 d-flex align-items-end">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured" value="1" {{ old('is_featured', $book->is_featured) ? 'checked' : '' }}>
