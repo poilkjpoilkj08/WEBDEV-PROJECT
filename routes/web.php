@@ -9,6 +9,7 @@ use App\Http\Controllers\StoreLocationController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
@@ -76,5 +77,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/stores/{id}/edit', [StoreLocationController::class, 'edit_form'])->name('admin.stores.edit');
         Route::put('/admin/stores/{id}', [StoreLocationController::class, 'update'])->name('admin.stores.update');
         Route::delete('/admin/stores/{id}', [StoreLocationController::class, 'destroy'])->name('admin.stores.destroy');
+
+        Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('books.reviews.store');
     });
 });

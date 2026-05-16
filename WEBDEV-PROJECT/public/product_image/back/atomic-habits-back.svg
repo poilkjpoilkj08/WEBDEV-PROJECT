@@ -1,0 +1,8 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='420' height='640' viewBox='0 0 420 640'>
+  <rect width='420' height='640' rx='20' fill='#eef4f6' stroke='#5a7785' stroke-width='8'/>
+  <rect x='30' y='30' width='360' height='120' rx='12' fill='#5a7785'/>
+  <text x='210' y='85' text-anchor='middle' font-family='Arial, sans-serif' font-size='24' fill='#ffffff'>BookHive</text>
+  <text x='210' y='240' text-anchor='middle' font-family='Arial, sans-serif' font-size='28' font-weight='bold' fill='#2c3e50'>Back Cover</text>
+  <text x='210' y='320' text-anchor='middle' font-family='Arial, sans-serif' font-size='20' fill='#2c3e50'>Atomic Habits</text>
+  <text x='210' y='580' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='#4a5c6d'>Discover more inside</text>
+</svg>

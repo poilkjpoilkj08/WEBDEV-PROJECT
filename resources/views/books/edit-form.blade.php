@@ -116,7 +116,7 @@
                         <div class="row g-3 mt-3">
                             <div class="col-md-6">
                                 <label class="form-label">Cover Image URL</label>
-                                <input type="url" name="cover_image_url" value="{{ old('cover_image_url', $book->cover_image_url) }}" class="form-control @error('cover_image_url') is-invalid @enderror">
+                                <input type="text" name="cover_image_url" value="{{ old('cover_image_url', $book->cover_image_url) }}" class="form-control @error('cover_image_url') is-invalid @enderror">
                                 @error('cover_image_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
@@ -134,7 +134,22 @@
                                 </div>
                             </div>
                         </div>
-
+                        <div class="mt-4">
+                            <h5 class="fw-semibold mb-3"><i class="fas fa-store me-2"></i>Store Stock</h5>
+                            <div class="row g-2">
+                                @foreach($store_locations as $store)
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-3 border rounded-3 p-2">
+                                        <span class="flex-grow-1 small fw-semibold">{{ $store->name }}<br><span class="text-muted fw-normal">{{ $store->city }}</span></span>
+                                        <input type="number" name="store_stock[{{ $store->id }}]" min="0"
+                                               value="{{ old('store_stock.' . $store->id, $book->storeLocations->find($store->id)?->pivot->stock ?? 0) }}"
+                                               class="form-control form-control-sm" style="width: 90px;" placeholder="0">
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            <div class="form-text">Set stock to 0 to remove a store from the map.</div>
+                        </div>
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">Update Book</button>
                             <a href="{{ route('books.show', $book->id) }}" class="btn btn-outline-secondary">Cancel</a>

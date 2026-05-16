@@ -99,4 +99,3 @@
             @endif
         @endauth
     </div>
-@endsection

@@ -13,7 +13,7 @@ class StoreLocationController extends Controller
     {
         $book = Book::findOrFail($bookId);
         $stores = StoreLocation::active()
-            ->whereHas('books', fn($q) => $q->where('book_id', $bookId))
+            ->whereHas('books', fn($q) => $q->where('books.id', $bookId))
             ->with(['books' => fn($q) => $q->where('book_id', $bookId)])
             ->get()
             ->map(fn($store) => [

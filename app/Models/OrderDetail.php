@@ -8,20 +8,15 @@ class OrderDetail extends Model
 {
     protected $fillable = [
     'order_id',
-    'product_id',
-    'product_name',
+    'book_id',     
+    'book_title',   
     'quantity',
     'price',
     'subtotal',
-    ];
-    
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
-    }
+];
 
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
-    }
+public function book()             
+{
+    return $this->belongsTo(Book::class);
+}
 }

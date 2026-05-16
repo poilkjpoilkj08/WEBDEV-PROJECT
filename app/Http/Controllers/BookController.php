@@ -108,9 +108,10 @@ class BookController extends Controller
     public function edit_form($id): \Illuminate\View\View
     {
         return view('books.edit-form', [
-            'book'            => Book::findOrFail($id),
-            'book_categories' => BookCategory::all(),
-            'authors'         => Author::where('is_active', 1)->get(),
+          'book'            => Book::with('storeLocations')->findOrFail($id),
+          'book_categories' => BookCategory::all(),
+          'authors'         => Author::where('is_active', 1)->get(),
+          'store_locations' => \App\Models\StoreLocation::orderBy('city')->get(),
         ]);
     }
 
@@ -148,7 +149,12 @@ class BookController extends Controller
         }
 
         unset($validated['cover_image_file']);
+        if (empty($validated['cover_image_url']) && !$request->hasFile('cover_image_file')) {
+           unset($validated['cover_image_url']);
+        }
         $book->update($validated);
+        $storeStock = collect($request->input('store_stock', []))->mapWithKeys(fn($qty, $id) => [$id => ['stock' => max(0, (int)$qty)]])->filter(fn($pivot) => $pivot['stock'] > 0)->toArray();
+        $book->storeLocations()->sync($storeStock);
         return redirect()->route('admin.books.index')->with('success', 'Book updated successfully!');
     }
 

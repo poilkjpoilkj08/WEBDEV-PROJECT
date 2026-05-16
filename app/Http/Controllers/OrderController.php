@@ -23,7 +23,7 @@ class OrderController extends Controller
     }
 
     public function order_details($order_id){
-        $order = Order::with('user', 'order_details.product')->findOrFail($order_id);
+        $order = Order::with('user', 'order_details.book')->findOrFail($order_id);
 
         $userRoles = Auth::user()->roles->pluck('role')->toArray();
         if(Auth::id() != $order->user_id && !in_array('admin', $userRoles) && !in_array('owner', $userRoles)){
