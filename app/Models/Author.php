@@ -37,6 +37,12 @@ class Author extends Model
 
     public function getPhotoUrlAttribute($value)
     {
-        return $value ?: 'https://via.placeholder.com/150x150?text=Author';
+        $url = $value ?: 'https://via.placeholder.com/150x150?text=Author';
+
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            return $url;
+        }
+
+        return asset($url);
     }
 }

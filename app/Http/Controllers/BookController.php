@@ -44,8 +44,8 @@ class BookController extends Controller
         return view('books.show', [
             'book'          => $book,
             'similar_books' => Book::where('status', 'available')->where('category_id', $book->category_id)->where('id', '!=', $id)->limit(4)->get(),
-            'previous_book' => Book::where('status', 'available')->where('id', '<', $id)->orderBy('id', 'desc')->first(),
-            'next_book'     => Book::where('status', 'available')->where('id', '>', $id)->orderBy('id')->first(),
+            'previous_book' => Book::where('status', 'available')->where('id', '<', $id)->orderByRaw('id DESC')->first(),
+            'next_book'     => Book::where('status', 'available')->where('id', '>', $id)->orderByRaw('id ASC')->first(),
         ]);
     }
 
@@ -57,7 +57,7 @@ class BookController extends Controller
     /** Admin: paginated list of ALL books with edit/delete */
     public function admin_index(): \Illuminate\View\View
     {
-        $books = Book::with(['author', 'category'])->orderByDesc('id')->paginate(20);
+        $books = Book::with(['author', 'category'])->orderByRaw('id DESC')->paginate(20);
         return view('admin.books.index', compact('books'));
     }
 
@@ -73,20 +73,34 @@ class BookController extends Controller
     {
         Gate::authorize('insert-book');
         $validated = $request->validate([
-            'title'            => 'required|string',
-            'description'      => 'nullable|string',
-            'price'            => 'required|numeric',
-            'isbn'             => 'nullable|string',
-            'pages'            => 'nullable|integer',
-            'language'         => 'required|string',
-            'publication_year' => 'nullable|integer',
-            'publisher'        => 'nullable|string',
-            'author_id'        => 'nullable|exists:authors,id',
-            'category_id'      => 'required|exists:book_categories,id',
-            'cover_image_url'  => 'nullable|string',
-            'weight_grams'     => 'nullable|numeric',
-            'is_featured'      => 'nullable|boolean',
+            'title'              => 'required|string',
+            'description'        => 'nullable|string',
+            'price'              => 'required|numeric',
+            'isbn'               => 'nullable|string',
+            'pages'              => 'nullable|integer',
+            'language'           => 'required|string',
+            'publication_year'   => 'nullable|integer',
+            'publisher'          => 'nullable|string',
+            'author_id'          => 'nullable|exists:authors,id',
+            'category_id'        => 'required|exists:book_categories,id',
+            'cover_image_url'    => 'nullable|string',
+            'cover_image_file'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'weight_grams'       => 'nullable|numeric',
+            'is_featured'        => 'nullable|boolean',
         ]);
+
+        if ($request->hasFile('cover_image_file')) {
+            $cover = $request->file('cover_image_file');
+            $destinationPath = public_path('book_covers');
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+            $fileName = time() . '_' . uniqid() . '.' . $cover->getClientOriginalExtension();
+            $cover->move($destinationPath, $fileName);
+            $validated['cover_image_url'] = '/book_covers/' . $fileName;
+        }
+
+        unset($validated['cover_image_file']);
         Book::create($validated);
         return redirect()->route('admin.books.index')->with('success', 'Book added successfully!');
     }
@@ -105,21 +119,35 @@ class BookController extends Controller
         Gate::authorize('update-book');
         $book = Book::findOrFail($id);
         $validated = $request->validate([
-            'title'            => 'required|string',
-            'description'      => 'nullable|string',
-            'price'            => 'required|numeric',
-            'isbn'             => 'nullable|string',
-            'pages'            => 'nullable|integer',
-            'language'         => 'required|string',
-            'publication_year' => 'nullable|integer',
-            'publisher'        => 'nullable|string',
-            'status'           => 'required|in:available,out_of_stock,discontinued',
-            'author_id'        => 'nullable|exists:authors,id',
-            'category_id'      => 'required|exists:book_categories,id',
-            'cover_image_url'  => 'nullable|string',
-            'weight_grams'     => 'nullable|numeric',
-            'is_featured'      => 'nullable|boolean',
+            'title'              => 'required|string',
+            'description'        => 'nullable|string',
+            'price'              => 'required|numeric',
+            'isbn'               => 'nullable|string',
+            'pages'              => 'nullable|integer',
+            'language'           => 'required|string',
+            'publication_year'   => 'nullable|integer',
+            'publisher'          => 'nullable|string',
+            'status'             => 'required|in:available,out_of_stock,discontinued',
+            'author_id'          => 'nullable|exists:authors,id',
+            'category_id'        => 'required|exists:book_categories,id',
+            'cover_image_url'    => 'nullable|string',
+            'cover_image_file'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'weight_grams'       => 'nullable|numeric',
+            'is_featured'        => 'nullable|boolean',
         ]);
+
+        if ($request->hasFile('cover_image_file')) {
+            $cover = $request->file('cover_image_file');
+            $destinationPath = public_path('book_covers');
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+            $fileName = time() . '_' . uniqid() . '.' . $cover->getClientOriginalExtension();
+            $cover->move($destinationPath, $fileName);
+            $validated['cover_image_url'] = '/book_covers/' . $fileName;
+        }
+
+        unset($validated['cover_image_file']);
         $book->update($validated);
         return redirect()->route('admin.books.index')->with('success', 'Book updated successfully!');
     }

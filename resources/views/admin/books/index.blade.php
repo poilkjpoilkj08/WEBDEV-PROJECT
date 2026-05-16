@@ -47,7 +47,7 @@
                         <tbody>
                             @foreach($books as $book)
                             <tr>
-                                <td class="text-muted">{{ $book->id }}</td>
+                                <td class="text-muted">{{ $loop->iteration }}</td>
                                 <td>
                                     <img src="{{ $book->cover_image_src }}" alt="{{ $book->title }}"
                                          style="width:40px;height:55px;object-fit:cover;border-radius:4px;">
