@@ -5,13 +5,13 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h1 class="h3 mb-4">Add New Agent</h1>
+                    <h1 class="h3 mb-4">Add New Author</h1>
 
                     <form action="{{ route('authors.store') }}" method="POST">
                         @csrf
 
                         <div class="mb-3">
-                            <label class="form-label">Agent Name *</label>
+                            <label class="form-label">Author Name *</label>
                             <input type="text" name="name" required class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}">
                             @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
@@ -29,9 +29,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">License Number</label>
-                            <input type="text" name="license_number" class="form-control @error('license_number') is-invalid @enderror" value="{{ old('license_number') }}">
-                            @error('license_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <label class="form-label">Publisher</label>
+                            <input type="text" name="publisher" class="form-control @error('publisher') is-invalid @enderror" value="{{ old('publisher') }}">
+                            @error('publisher') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="mb-3">
@@ -47,7 +47,7 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Add Agent</button>
+                            <button type="submit" class="btn btn-primary">Add Author</button>
                             <a href="{{ route('authors.index') }}" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
