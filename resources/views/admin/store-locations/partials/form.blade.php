@@ -1,6 +1,6 @@
 <div class="row g-3">
     <div class="col-md-6">
-        <label class="form-label fw-semibold">Store Name *</label>
+        <label class="form-label fw-semibold">Store Name <span class="text-danger">*</span></label>
         <input type="text" name="name" value="{{ old('name', $store?->name) }}" required
                class="form-control @error('name') is-invalid @enderror" placeholder="e.g. BookHive Surabaya">
         @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -12,20 +12,20 @@
         @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-12">
-        <label class="form-label fw-semibold">Address *</label>
+        <label class="form-label fw-semibold">Address <span class="text-danger">*</span></label>
         <textarea name="address" rows="2" required
                   class="form-control @error('address') is-invalid @enderror"
                   placeholder="Street address">{{ old('address', $store?->address) }}</textarea>
         @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-4">
-        <label class="form-label fw-semibold">City *</label>
+        <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
         <input type="text" name="city" value="{{ old('city', $store?->city) }}" required
                class="form-control @error('city') is-invalid @enderror" placeholder="Surabaya">
         @error('city')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-4">
-        <label class="form-label fw-semibold">Country *</label>
+        <label class="form-label fw-semibold">Country <span class="text-danger">*</span></label>
         <input type="text" name="country" value="{{ old('country', $store?->country ?? 'Indonesia') }}" required
                class="form-control @error('country') is-invalid @enderror">
         @error('country')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -37,14 +37,14 @@
         @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6">
-        <label class="form-label fw-semibold">Latitude *</label>
+        <label class="form-label fw-semibold">Latitude <span class="text-danger">*</span></label>
         <input type="number" name="latitude" step="0.0000001"
                value="{{ old('latitude', $store?->latitude) }}" required
                class="form-control @error('latitude') is-invalid @enderror" placeholder="-7.2575">
         @error('latitude')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6">
-        <label class="form-label fw-semibold">Longitude *</label>
+        <label class="form-label fw-semibold">Longitude <span class="text-danger">*</span></label>
         <input type="number" name="longitude" step="0.0000001"
                value="{{ old('longitude', $store?->longitude) }}" required
                class="form-control @error('longitude') is-invalid @enderror" placeholder="112.7521">

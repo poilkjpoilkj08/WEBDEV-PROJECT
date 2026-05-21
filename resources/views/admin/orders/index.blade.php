@@ -9,6 +9,8 @@
         </div>
     </div>
 
+    @include('admin.partials.nav', ['active' => 'orders'])
+
     @if($orders->isEmpty())
         <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>No orders found in the system.

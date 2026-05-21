@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\BookCategory;
+use App\Models\StoreLocation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -31,10 +32,10 @@ class BookController extends Controller
         if ($request->filled('language'))    $query->where('language', $request->language);
         if ($request->filled('category_id')) $query->where('category_id', $request->category_id);
         return view('books.listing', [
-            'books'          => $query->paginate(12),
-            'book_categories'=> BookCategory::all(),
-            'min_price'      => Book::where('status', 'available')->min('price'),
-            'max_price'      => Book::where('status', 'available')->max('price'),
+            'books'           => $query->paginate(12),
+            'book_categories' => BookCategory::all(),
+            'min_price'       => Book::where('status', 'available')->min('price'),
+            'max_price'       => Book::where('status', 'available')->max('price'),
         ]);
     }
 
@@ -54,7 +55,6 @@ class BookController extends Controller
         return $this->listing($request);
     }
 
-    /** Admin: paginated list of ALL books with edit/delete */
     public function admin_index(): \Illuminate\View\View
     {
         $books = Book::with(['author', 'category'])->orderByRaw('id DESC')->paginate(20);
@@ -66,6 +66,7 @@ class BookController extends Controller
         return view('books.create-form', [
             'book_categories' => BookCategory::all(),
             'authors'         => Author::where('is_active', 1)->get(),
+            'store_locations' => StoreLocation::orderBy('city')->get(),
         ]);
     }
 
@@ -73,19 +74,20 @@ class BookController extends Controller
     {
         Gate::authorize('insert-book');
         $validated = $request->validate([
-            'title'              => 'required|string',
-            'description'        => 'nullable|string',
-            'price'              => 'required|numeric',
-            'isbn'               => 'nullable|string',
-            'pages'              => 'nullable|integer',
-            'language'           => 'required|string',
-            'publication_year'   => 'nullable|integer',
-            'publisher'          => 'nullable|string',
-            'author_id'          => 'nullable|exists:authors,id',
-            'category_id'        => 'required|exists:book_categories,id',
-            'cover_image_file'   => 'required|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'weight_grams'       => 'nullable|numeric',
-            'is_featured'        => 'nullable|boolean',
+            'title'            => 'required|string',
+            'description'      => 'nullable|string',
+            'price'            => 'required|numeric',
+            'isbn'             => 'nullable|string',
+            'pages'            => 'nullable|integer',
+            'language'         => 'required|string',
+            'publication_year' => 'nullable|integer',
+            'publisher'        => 'nullable|string',
+            'author_id'        => 'nullable|exists:authors,id',
+            'category_id'      => 'required|exists:book_categories,id',
+            'cover_image_file' => 'required|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'weight_grams'     => 'nullable|numeric',
+            'is_featured'      => 'nullable|boolean',
+            'status'           => 'required|in:available,out_of_stock,discontinued',
         ]);
 
         if ($request->hasFile('cover_image_file')) {
@@ -100,17 +102,27 @@ class BookController extends Controller
         }
 
         unset($validated['cover_image_file']);
-        Book::create($validated);
+        $book = Book::create($validated);
+
+        // Sync store stock
+        $storeStock = collect($request->input('store_stock', []))
+            ->mapWithKeys(fn($qty, $id) => [$id => ['stock' => max(0, (int)$qty)]])
+            ->filter(fn($pivot) => $pivot['stock'] > 0)
+            ->toArray();
+        if (!empty($storeStock)) {
+            $book->storeLocations()->sync($storeStock);
+        }
+
         return redirect()->route('admin.books.index')->with('success', 'Book added successfully!');
     }
 
     public function edit_form($id): \Illuminate\View\View
     {
         return view('books.edit-form', [
-          'book'            => Book::with('storeLocations')->findOrFail($id),
-          'book_categories' => BookCategory::all(),
-          'authors'         => Author::where('is_active', 1)->get(),
-          'store_locations' => \App\Models\StoreLocation::orderBy('city')->get(),
+            'book'            => Book::with('storeLocations')->findOrFail($id),
+            'book_categories' => BookCategory::all(),
+            'authors'         => Author::where('is_active', 1)->get(),
+            'store_locations' => StoreLocation::orderBy('city')->get(),
         ]);
     }
 
@@ -119,19 +131,20 @@ class BookController extends Controller
         Gate::authorize('update-book');
         $book = Book::findOrFail($id);
         $validated = $request->validate([
-            'title'              => 'required|string',
-            'description'        => 'nullable|string',
-            'price'              => 'required|numeric',
-            'isbn'               => 'nullable|string',
-            'pages'              => 'nullable|integer',
-            'language'           => 'required|string',
-            'publication_year'   => 'nullable|integer',
-            'publisher'          => 'nullable|string',
-            'status'             => 'required|in:available,out_of_stock,discontinued',
-            'author_id'          => 'nullable|exists:authors,id',
-            'category_id'        => 'required|exists:book_categories,id',
-            'cover_image_file'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'title'            => 'required|string',
+            'description'      => 'nullable|string',
+            'price'            => 'required|numeric',
+            'isbn'             => 'nullable|string',
+            'pages'            => 'nullable|integer',
+            'language'         => 'required|string',
+            'publication_year' => 'nullable|integer',
+            'publisher'        => 'nullable|string',
+            'status'           => 'required|in:available,out_of_stock,discontinued',
+            'author_id'        => 'nullable|exists:authors,id',
+            'category_id'      => 'required|exists:book_categories,id',
+            'cover_image_file' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
+
         if ($request->hasFile('cover_image_file')) {
             $cover = $request->file('cover_image_file');
             $destinationPath = public_path('book_covers');
@@ -145,8 +158,20 @@ class BookController extends Controller
 
         unset($validated['cover_image_file']);
         $book->update($validated);
-        $storeStock = collect($request->input('store_stock', []))->mapWithKeys(fn($qty, $id) => [$id => ['stock' => max(0, (int)$qty)]])->filter(fn($pivot) => $pivot['stock'] > 0)->toArray();
+
+        // Sync store stock
+        $storeStock = collect($request->input('store_stock', []))
+            ->mapWithKeys(fn($qty, $id) => [$id => ['stock' => max(0, (int)$qty)]])
+            ->filter(fn($pivot) => $pivot['stock'] > 0)
+            ->toArray();
         $book->storeLocations()->sync($storeStock);
+
+        return redirect()->route('admin.books.index')->with('success', 'Book updated successfully!');
+    }
+
+    public function destroy($id): \Illuminate\Http\RedirectResponse
+    {
+        Gate::authorize('delete-book');
         Book::findOrFail($id)->delete();
         return redirect()->route('admin.books.index')->with('success', 'Book deleted successfully!');
     }

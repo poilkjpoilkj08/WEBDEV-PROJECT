@@ -129,9 +129,26 @@
                             </div>
                         </div>
 
-                        <div class="d-flex gap-2">
+                        <div class="mt-4">
+                            <h5 class="fw-semibold mb-3"><i class="fas fa-store me-2"></i>Store Stock</h5>
+                            <div class="row g-2">
+                                @foreach($store_locations as $store)
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-3 border rounded-3 p-2">
+                                        <span class="flex-grow-1 small fw-semibold">{{ $store->name }}<br><span class="text-muted fw-normal">{{ $store->city }}</span></span>
+                                        <input type="number" name="store_stock[{{ $store->id }}]" min="0"
+                                               value="{{ old('store_stock.' . $store->id, 0) }}"
+                                               class="form-control form-control-sm" style="width: 90px;" placeholder="0">
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            <div class="form-text">Set stock per store location. Leave 0 if not available at that store.</div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3">
                             <button type="submit" class="btn btn-primary">Add Book</button>
-                            <a href="{{ route('books.listing') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="{{ route('admin.books.index') }}" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
