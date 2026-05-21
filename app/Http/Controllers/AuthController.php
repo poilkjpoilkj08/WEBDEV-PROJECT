@@ -15,7 +15,7 @@ class AuthController extends Controller
     public function login_auth(Request $request): \Illuminate\Http\RedirectResponse
     {
         $credentials = $request->validate([
-            'email' => 'required|email:dns',
+            'email' => 'required|email',
             'password' => 'required'
         ]);
 

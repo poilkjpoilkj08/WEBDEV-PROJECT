@@ -70,11 +70,6 @@ class Book extends Model
         return '$' . number_format($this->price, 2);
     }
 
-    public function getCoverImageUrlAttribute($value)
-    {
-        return $value ?: 'https://via.placeholder.com/300x400?text=No+Cover';
-    }
-
     // Accessor for cover image with asset() helper for local paths
     public function getCoverImageSrcAttribute()
     {

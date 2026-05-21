@@ -54,6 +54,19 @@ class AuthorSeeder extends Seeder
                 'user_id' => null,
                 'is_active' => true,
             ],
+<<<<<<< HEAD
+=======
+            [
+                'name' => 'Matt Haig',
+                'email' => 'matt.haig@authors.com',
+                'phone' => '555-0205',
+                'bio' => 'English novelist and journalist. Author of both fiction and non-fiction, including the bestselling novel The Midnight Library.',
+                'photo_url' => 'https://via.placeholder.com/300x300?text=Matt+Haig',
+                'publisher' => 'Viking',
+                'user_id' => null,
+                'is_active' => true,
+            ],
+>>>>>>> origin/main
         ];
 
         foreach ($authors as $author) {

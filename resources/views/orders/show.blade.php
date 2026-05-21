@@ -109,10 +109,23 @@
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Payment Status</span>
+<<<<<<< HEAD
                         <span class="badge bg-{{ $order->status === 'paid' ? 'success' : ($order->status === 'pending' ? 'warning text-dark' : 'secondary') }}">
                             {{ ucfirst($order->status) }}
                         </span>
                     </div>
+=======
+                        <span class="badge bg-{{ $order->status === 'payment_paid' || $order->status === 'paid' ? 'success' : ($order->status === 'pending' ? 'warning text-dark' : 'secondary') }}">
+                            {{ $order->status === 'payment_paid' ? 'Paid' : ucfirst($order->status) }}
+                        </span>
+                    </div>
+                    @if($order->payment_method)
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Payment Method</span>
+                        <span class="badge bg-info">{{ formatPaymentMethod($order->payment_method) }}</span>
+                    </div>
+                    @endif
+>>>>>>> origin/main
                     @if($order->paid_at)
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Paid At</span>

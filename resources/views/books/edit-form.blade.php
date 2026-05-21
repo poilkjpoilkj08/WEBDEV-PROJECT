@@ -114,16 +114,11 @@
                         </div>
 
                         <div class="row g-3 mt-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Cover Image URL</label>
-                                <input type="text" name="cover_image_url" value="{{ old('cover_image_url', $book->cover_image_url) }}" class="form-control @error('cover_image_url') is-invalid @enderror">
-                                @error('cover_image_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Cover Image File</label>
+                            <div class="col-12">
+                                <label class="form-label">Cover Image</label>
                                 <input type="file" name="cover_image_file" accept="image/*" class="form-control @error('cover_image_file') is-invalid @enderror">
                                 @error('cover_image_file') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                <div class="form-text">Upload a new image to replace the current cover, or leave blank to keep the existing cover.</div>
+                                <div class="form-text">Upload a new cover image to replace the current one, or leave blank to keep the existing cover.</div>
                             </div>
                         </div>
                         <div class="row g-3 mt-3">

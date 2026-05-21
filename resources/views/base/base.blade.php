@@ -120,9 +120,117 @@
                 font-size: 1.25rem !important;
             }
         }
+<<<<<<< HEAD
     </style>
 </head>
 <body>
+=======
+
+        /* Toast Notification Styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            z-index: 9999;
+            display: none;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .toast-notification.show {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toast-notification.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .toast-notification.success .toast-icon {
+            color: #28a745;
+        }
+
+        .toast-notification.error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .toast-notification.error .toast-icon {
+            color: #dc3545;
+        }
+
+        .toast-notification.info {
+            border-left: 4px solid #17a2b8;
+        }
+
+        .toast-notification.info .toast-icon {
+            color: #17a2b8;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-message {
+            font-weight: 500;
+            color: #333;
+            margin: 0;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast-notification.hide {
+            animation: slideOutRight 0.3s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .toast-notification {
+                min-width: 280px;
+                right: 10px;
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {{-- Toast Notification --}}
+    <div id="toastNotification" class="toast-notification">
+        <i class="fas fa-check-circle toast-icon"></i>
+        <div class="toast-content">
+            <p class="toast-message" id="toastMessage">Added to cart!</p>
+        </div>
+    </div>
+
+>>>>>>> origin/main
     @include('include.header')
     
     <div class="container-fluid main-content px-4 px-md-5 py-5" style="margin-left: auto; margin-right: auto; max-width: 1400px;">
@@ -229,6 +337,49 @@
                 });
             }
         });
+<<<<<<< HEAD
+=======
+
+        // Toast Notification Function
+        let toastTimeout;
+        window.showToast = function(message = 'Added to cart!', type = 'success', duration = 5000) {
+            const toast = document.getElementById('toastNotification');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = toast.querySelector('.toast-icon');
+            
+            // Clear any existing timeout
+            if (toastTimeout) clearTimeout(toastTimeout);
+            
+            // Remove previous classes
+            toast.classList.remove('success', 'error', 'info', 'hide');
+            
+            // Set new content and type
+            toastMessage.textContent = message;
+            toast.classList.add(type, 'show');
+            
+            // Update icon based on type
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle toast-icon';
+            } else if (type === 'error') {
+                toastIcon.className = 'fas fa-exclamation-circle toast-icon';
+            } else if (type === 'info') {
+                toastIcon.className = 'fas fa-info-circle toast-icon';
+            }
+            
+            // Hide after duration
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => {
+                    toast.classList.remove('show', 'hide');
+                }, 300);
+            }, duration);
+        };
+
+        // Clear toast on page navigation
+        window.addEventListener('beforeunload', function() {
+            if (toastTimeout) clearTimeout(toastTimeout);
+        });
+>>>>>>> origin/main
     </script>
 </body>
 </html>

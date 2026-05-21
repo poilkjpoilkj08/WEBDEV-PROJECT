@@ -33,6 +33,11 @@ class StoreLocation extends Model
                     ->withTimestamps();
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'store_id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

@@ -8,6 +8,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\StoreLocationController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,10 @@ Route::get('/api/stores', [StoreLocationController::class, 'all'])->name('stores
 Route::get('/api/stores/book/{bookId}', [StoreLocationController::class, 'forBook'])->name('stores.for-book');
 
 Route::post('/checkout/callback', [CheckoutController::class, 'callback'])->name('checkout.callback');
+Route::post('/checkout/calculate-shipping', [CheckoutController::class, 'calculateShipping'])->name('checkout.calculate-shipping');
+Route::post('/checkout/get-cities', [CheckoutController::class, 'getCitiesByProvince'])->name('checkout.get-cities');
+Route::post('/checkout/get-streets', [CheckoutController::class, 'getStreetsByCity'])->name('checkout.get-streets');
+Route::post('/checkout/fetch-location-details', [CheckoutController::class, 'fetchLocationDetails'])->name('checkout.fetch-location-details');
 
 Route::get('/login', [AuthController::class, 'show_login'])->name('login.show')->middleware('guest');
 Route::post('/login_auth', [AuthController::class, 'login_auth'])->name('login.auth')->middleware('guest');
@@ -47,10 +52,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order_id}', [OrderController::class, 'order_details'])->name('orders.details');
+    Route::get('/orders/{order_id}', [OrderController::class, 'order_details'])->name('orders.show');
+
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('wishlist.add');
+    Route::post('/wishlist/remove', [WishlistController::class, 'remove'])->name('wishlist.remove');
+    Route::get('/wishlist/check/{bookId}', [WishlistController::class, 'isInWishlist'])->name('wishlist.check');
 
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::post('/checkout/mark-payment-complete', [CheckoutController::class, 'markPaymentComplete'])->name('checkout.mark-payment-complete');
+    Route::post('/checkout/save-address', [CheckoutController::class, 'saveAddress'])->name('checkout.save-address');
 
     Route::middleware(['role:admin,owner'])->group(function () {
 
@@ -77,6 +89,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/stores/{id}/edit', [StoreLocationController::class, 'edit_form'])->name('admin.stores.edit');
         Route::put('/admin/stores/{id}', [StoreLocationController::class, 'update'])->name('admin.stores.update');
         Route::delete('/admin/stores/{id}', [StoreLocationController::class, 'destroy'])->name('admin.stores.destroy');
+
+        // ── Orders Management ────────────────────────────
+        Route::get('/admin/orders', [OrderController::class, 'index'])->name('admin.orders.index');
 
         Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('books.reviews.store');
     });

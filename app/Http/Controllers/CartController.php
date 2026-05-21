@@ -26,7 +26,7 @@ class CartController extends Controller
         return view('cart.index', compact('items', 'total'));
     }
 
-    public function add(Request $request): \Illuminate\Http\RedirectResponse
+    public function add(Request $request): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
             'book_id' => 'required|exists:books,id',
@@ -37,11 +37,19 @@ class CartController extends Controller
         $quantity = max(1, $validated['quantity'] ?? 1);
 
         if ($book->status !== 'available') {
-            return back()->with('error', 'This book is not available for purchase.');
+            $message = 'This book is not available for purchase.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message], 400);
+            }
+            return back()->with('error', $message);
         }
 
         if ($quantity > $book->stock) {
-            return back()->with('error', 'Requested quantity exceeds current stock.');
+            $message = 'Requested quantity exceeds current stock.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message], 400);
+            }
+            return back()->with('error', $message);
         }
 
         $cart = session('cart', []);
@@ -49,6 +57,14 @@ class CartController extends Controller
         $newQuantity = min($book->stock, $existingQuantity + $quantity);
         $cart[$book->id] = $newQuantity;
         session(['cart' => $cart]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Book added to cart successfully.',
+                'cartCount' => count($cart)
+            ]);
+        }
 
         return back()->with('success', 'Book added to cart successfully.');
     }

@@ -83,8 +83,7 @@ class BookController extends Controller
             'publisher'          => 'nullable|string',
             'author_id'          => 'nullable|exists:authors,id',
             'category_id'        => 'required|exists:book_categories,id',
-            'cover_image_url'    => 'nullable|string',
-            'cover_image_file'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'cover_image_file'   => 'required|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'weight_grams'       => 'nullable|numeric',
             'is_featured'        => 'nullable|boolean',
         ]);
@@ -131,12 +130,8 @@ class BookController extends Controller
             'status'             => 'required|in:available,out_of_stock,discontinued',
             'author_id'          => 'nullable|exists:authors,id',
             'category_id'        => 'required|exists:book_categories,id',
-            'cover_image_url'    => 'nullable|string',
             'cover_image_file'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'weight_grams'       => 'nullable|numeric',
-            'is_featured'        => 'nullable|boolean',
         ]);
-
         if ($request->hasFile('cover_image_file')) {
             $cover = $request->file('cover_image_file');
             $destinationPath = public_path('book_covers');
@@ -149,18 +144,9 @@ class BookController extends Controller
         }
 
         unset($validated['cover_image_file']);
-        if (empty($validated['cover_image_url']) && !$request->hasFile('cover_image_file')) {
-           unset($validated['cover_image_url']);
-        }
         $book->update($validated);
         $storeStock = collect($request->input('store_stock', []))->mapWithKeys(fn($qty, $id) => [$id => ['stock' => max(0, (int)$qty)]])->filter(fn($pivot) => $pivot['stock'] > 0)->toArray();
         $book->storeLocations()->sync($storeStock);
-        return redirect()->route('admin.books.index')->with('success', 'Book updated successfully!');
-    }
-
-    public function destroy($id): \Illuminate\Http\RedirectResponse
-    {
-        Gate::authorize('delete-book');
         Book::findOrFail($id)->delete();
         return redirect()->route('admin.books.index')->with('success', 'Book deleted successfully!');
     }

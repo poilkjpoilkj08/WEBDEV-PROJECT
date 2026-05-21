@@ -13,6 +13,7 @@ class Order extends Model
         'total_price',
         'status',
         'payment_url',
+        'payment_method',
         'paid_at',
         // Shipping fields
         'shipping_name',
@@ -27,6 +28,9 @@ class Order extends Model
         'shipping_status',
         'tracking_number',
         'shipped_at',
+        // Store and distance fields
+        'store_id',
+        'shipping_distance_km',
     ];
 
     protected $casts = [
@@ -34,11 +38,17 @@ class Order extends Model
         'shipped_at'  => 'datetime',
         'shipping_cost' => 'decimal:2',
         'total_price'   => 'decimal:2',
+        'shipping_distance_km' => 'decimal:2',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function store()
+    {
+        return $this->belongsTo(StoreLocation::class, 'store_id');
     }
 
     public function order_details()

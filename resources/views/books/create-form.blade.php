@@ -113,16 +113,11 @@
                         </div>
 
                         <div class="row g-3 mt-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Cover Image URL</label>
-                                <input type="url" name="cover_image_url" value="{{ old('cover_image_url') }}" class="form-control @error('cover_image_url') is-invalid @enderror">
-                                @error('cover_image_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Cover Image File</label>
-                                <input type="file" name="cover_image_file" accept="image/*" class="form-control @error('cover_image_file') is-invalid @enderror">
+                            <div class="col-12">
+                                <label class="form-label">Cover Image *</label>
+                                <input type="file" name="cover_image_file" accept="image/*" required class="form-control @error('cover_image_file') is-invalid @enderror">
                                 @error('cover_image_file') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                <div class="form-text">Upload a cover image instead of using a URL, or leave blank to use the URL.</div>
+                                <div class="form-text">Upload a high-quality cover image (JPEG, PNG, GIF, or WebP). Maximum 2MB.</div>
                             </div>
                         </div>
                         <div class="row g-3 mt-3">
