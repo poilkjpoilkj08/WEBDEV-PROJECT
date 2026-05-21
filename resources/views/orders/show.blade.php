@@ -1,7 +1,7 @@
 @extends('base.base')
 @section('content')
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4 flex-wrap">
         <div>
             <h1 class="display-6 mb-1">Order Details</h1>
             <p class="text-muted">Invoice #{{ $order->invoice_number }}</p>

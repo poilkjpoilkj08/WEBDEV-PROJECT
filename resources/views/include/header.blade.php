@@ -19,7 +19,7 @@
         </button>
         
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 mt-2 mt-lg-0">
                 <li class="nav-item">
                     <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('home') ? 'active' : '' }}" href="{{ route('home') }}">{{ __('messages.home') }}</a>
                 </li>
@@ -52,7 +52,7 @@
         </div>
 
         <!-- REARRANGED ACTION HUB: Language -> Orders -> Cart -> Wishlist -> User Console -->
-        <div class="d-flex text-white align-items-center flex-wrap gap-2 gap-md-3">
+        <div class="d-flex text-white align-items-center gap-1 gap-md-2 ms-auto ms-lg-0">
             
             <!-- [1] Language Switcher Module -->
             <div class="dropdown">
@@ -154,6 +154,36 @@
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 991.98px) {
+        .navbar .d-flex.text-white {
+            gap: 0.25rem !important;
+        }
+        .navbar .btn-outline-light.btn-sm {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.8rem !important;
+        }
+        .navbar .btn-light.btn-sm {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.8rem !important;
+        }
+        .navbar-collapse .navbar-nav .nav-link {
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+        }
+        .navbar-collapse .navbar-nav .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .navbar-collapse {
+            background: rgba(166, 79, 30, 0.97);
+            border-radius: 0 0 12px 12px;
+            padding: 0.5rem 1rem 1rem;
+            margin: 0 -1.5rem;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
     }
 
     /* Active Scroll Blending class style */

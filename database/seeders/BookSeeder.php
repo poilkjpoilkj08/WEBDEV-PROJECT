@@ -22,11 +22,7 @@ class BookSeeder extends Seeder
                 'status' => 'available',
                 'author_id' => 1,
                 'category_id' => 3,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/harry-potter-and-the-philosopher-s-stone-front.jpg',
-=======
-                'cover_image_url' => 'product_image/harry-potter-and-the-philosopher-s-stone-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Fantasy', 'Magic', 'Adventure']),
                 'weight_grams' => 350,
@@ -46,11 +42,7 @@ class BookSeeder extends Seeder
                 'status' => 'available',
                 'author_id' => 2,
                 'category_id' => 4,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/the-shining-front.jpg',
-=======
-                'cover_image_url' => 'product_image/the-shining-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Horror', 'Psychological', 'Supernatural']),
                 'weight_grams' => 420,
@@ -68,13 +60,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 1925,
                 'publisher' => 'Charles Scribner\'s Sons',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 4,
                 'category_id' => 1,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/the-great-gatsby-front.jpg',
-=======
-                'cover_image_url' => 'product_image/the-great-gatsby-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Classic', 'Literary Fiction', 'Drama']),
                 'weight_grams' => 220,
@@ -92,13 +80,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 1813,
                 'publisher' => 'Penguin Classics',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 5,
                 'category_id' => 1,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/pride-and-prejudice-front.jpg',
-=======
-                'cover_image_url' => 'product_image/pride-and-prejudice-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Romance', 'Literary Fiction', 'Classic']),
                 'weight_grams' => 390,
@@ -118,11 +102,7 @@ class BookSeeder extends Seeder
                 'status' => 'available',
                 'author_id' => 3,
                 'category_id' => 4,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/murder-on-the-orient-express-front.jpg',
-=======
-                'cover_image_url' => '/book_covers/1779285096_6a0dbc6832643.jpeg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Mystery', 'Crime', 'Detective']),
                 'weight_grams' => 280,
@@ -140,13 +120,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 2002,
                 'publisher' => 'Knopf',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 6,
                 'category_id' => 1,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/kafka-on-the-shore-front.jpg',
-=======
-                'cover_image_url' => 'product_image/kafka-on-the-shore-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Magical Realism', 'Surrealism', 'Literary Fiction']),
                 'weight_grams' => 420,
@@ -164,13 +140,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 1965,
                 'publisher' => 'Ace Books',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 7,
                 'category_id' => 5,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/dune-front.jpg',
-=======
-                'cover_image_url' => 'product_image/dune-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Science Fiction', 'Epic', 'Adventure']),
                 'weight_grams' => 640,
@@ -188,13 +160,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 1951,
                 'publisher' => 'Bantam Spectra',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 8,
                 'category_id' => 5,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/foundation-front.jpg',
-=======
-                'cover_image_url' => 'product_image/foundation-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Science Fiction', 'Epic', 'Classic']),
                 'weight_grams' => 350,
@@ -212,13 +180,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 2018,
                 'publisher' => 'Random House',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 9,
                 'category_id' => 6,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/educated-front.jpg',
-=======
-                'cover_image_url' => '/book_covers/1779284689_6a0dbad1a6993.jpeg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Memoir', 'Biography', 'Education']),
                 'weight_grams' => 420,
@@ -236,13 +200,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 2018,
                 'publisher' => 'Crown Publishing Group',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 10,
                 'category_id' => 6,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/becoming-front.jpg',
-=======
-                'cover_image_url' => 'product_image/becoming-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Memoir', 'Biography', 'Politics']),
                 'weight_grams' => 480,
@@ -260,13 +220,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 1985,
                 'publisher' => 'Houghton Mifflin',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 11,
                 'category_id' => 3,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/the-handmaid-s-tale-front.jpg',
-=======
-                'cover_image_url' => '/book_covers/1779284345_6a0db97991d35.jpeg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Dystopian', 'Science Fiction', 'Political']),
                 'weight_grams' => 390,
@@ -286,11 +242,7 @@ class BookSeeder extends Seeder
                 'status' => 'available',
                 'author_id' => 4,
                 'category_id' => 3,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/a-game-of-thrones-front.jpg',
-=======
-                'cover_image_url' => 'product_image/a-game-of-thrones-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Fantasy', 'Epic', 'Political Intrigue']),
                 'weight_grams' => 650,
@@ -308,13 +260,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 2011,
                 'publisher' => 'Harper',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 12,
                 'category_id' => 2,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/sapiens-a-brief-history-of-humankind-front.jpg',
-=======
-                'cover_image_url' => 'product_image/sapiens-a-brief-history-of-humankind-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['History', 'Anthropology', 'Science']),
                 'weight_grams' => 480,
@@ -332,13 +280,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 2018,
                 'publisher' => 'Avery',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 13,
                 'category_id' => 8,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/atomic-habits-front.jpg',
-=======
-                'cover_image_url' => 'product_image/atomic-habits-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Self-Help', 'Psychology', 'Productivity']),
                 'weight_grams' => 380,
@@ -356,13 +300,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 2020,
                 'publisher' => 'Harriman House',
                 'status' => 'available',
-                'author_id' => null,
+                'author_id' => 14,
                 'category_id' => 2,
-<<<<<<< HEAD
                 'cover_image_url' => 'product_image/front/the-psychology-of-money-front.jpg',
-=======
-                'cover_image_url' => 'product_image/the-psychology-of-money-front.jpg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Finance', 'Psychology', 'Business']),
                 'weight_grams' => 290,
@@ -380,15 +320,9 @@ class BookSeeder extends Seeder
                 'publication_year' => 2020,
                 'publisher' => 'Viking',
                 'status' => 'available',
-<<<<<<< HEAD
-                'author_id' => null,
+                'author_id' => 15,
                 'category_id' => 1,
                 'cover_image_url' => 'product_image/front/the-midnight-library-front.jpg',
-=======
-                'author_id' => 5,
-                'category_id' => 1,
-                'cover_image_url' => '/book_covers/1779284285_6a0db93d492b7.jpeg',
->>>>>>> origin/main
                 'images' => json_encode([]),
                 'genres' => json_encode(['Fiction', 'Fantasy', 'Contemporary']),
                 'weight_grams' => 350,
@@ -399,14 +333,7 @@ class BookSeeder extends Seeder
         ];
 
         foreach ($books as $book) {
-<<<<<<< HEAD
             Book::create($book);
-=======
-            Book::firstOrCreate(
-                ['isbn' => $book['isbn']],
-                $book
-            );
->>>>>>> origin/main
         }
     }
 }

@@ -323,12 +323,19 @@ class CheckoutController extends Controller
                 ->first();
             
             if ($order) {
-                // Update status to payment_paid
-                $order->update([
-                    'status' => 'payment_paid',
+                $updateData = [
+                    'status'          => 'payment_paid',
                     'shipping_status' => 'processing',
-                    'paid_at' => now()
-                ]);
+                    'paid_at'         => now(),
+                ];
+
+                // Capture payment_method sent from the Midtrans onSuccess result object
+                $paymentType = $request->input('payment_type');
+                if ($paymentType && !$order->payment_method) {
+                    $updateData['payment_method'] = $paymentType;
+                }
+
+                $order->update($updateData);
                 
                 return response()->json(['success' => true, 'message' => 'Payment marked complete']);
             }

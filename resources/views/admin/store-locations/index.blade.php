@@ -14,7 +14,6 @@
     </div>
 
     {{-- Admin nav --}}
-    @include('admin.partials.nav', ['active' => 'stores'])
 
     {{-- Alerts --}}
     @if(session('success'))

@@ -12,11 +12,7 @@ class StoreLocationSeeder extends Seeder
     {
         $stores = [
             [
-<<<<<<< HEAD
-                'name'          => 'BookHive Jakarta Pusat',
-=======
                 'name'          => 'Jakarta Pusat',
->>>>>>> origin/main
                 'address'       => 'Jl. MH Thamrin No. 1',
                 'city'          => 'Jakarta',
                 'latitude'      => -6.1944,
@@ -25,11 +21,7 @@ class StoreLocationSeeder extends Seeder
                 'opening_hours' => 'Mon–Sat 09:00–21:00',
             ],
             [
-<<<<<<< HEAD
-                'name'          => 'BookHive Bandung',
-=======
                 'name'          => 'Bandung',
->>>>>>> origin/main
                 'address'       => 'Jl. Braga No. 10',
                 'city'          => 'Bandung',
                 'latitude'      => -6.9175,
@@ -38,11 +30,7 @@ class StoreLocationSeeder extends Seeder
                 'opening_hours' => 'Mon–Sun 10:00–20:00',
             ],
             [
-<<<<<<< HEAD
-                'name'          => 'BookHive Surabaya',
-=======
                 'name'          => 'Surabaya',
->>>>>>> origin/main
                 'address'       => 'Jl. Pemuda No. 27',
                 'city'          => 'Surabaya',
                 'latitude'      => -7.2575,
@@ -51,11 +39,7 @@ class StoreLocationSeeder extends Seeder
                 'opening_hours' => 'Mon–Sat 10:00–21:00',
             ],
             [
-<<<<<<< HEAD
-                'name'          => 'BookHive Yogyakarta',
-=======
                 'name'          => 'Yogyakarta',
->>>>>>> origin/main
                 'address'       => 'Jl. Malioboro No. 55',
                 'city'          => 'Yogyakarta',
                 'latitude'      => -7.7928,
@@ -64,11 +48,7 @@ class StoreLocationSeeder extends Seeder
                 'opening_hours' => 'Daily 09:00–22:00',
             ],
             [
-<<<<<<< HEAD
-                'name'          => 'BookHive Bali',
-=======
                 'name'          => 'Bali',
->>>>>>> origin/main
                 'address'       => 'Jl. Sunset Road No. 88',
                 'city'          => 'Denpasar',
                 'latitude'      => -8.6705,

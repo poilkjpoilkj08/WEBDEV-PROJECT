@@ -1389,14 +1389,16 @@ document.getElementById('payButton').addEventListener('click', function(e) {
     .then(data => {
         if (data.success && data.snapToken) {
             snap.pay(data.snapToken, {
-                onSuccess: function() {
-                    // Mark payment as complete on backend immediately
+                onSuccess: function(result) {
+                    // Mark payment as complete on backend, passing payment_type from Midtrans result
                     fetch('{{ route("checkout.mark-payment-complete") }}', {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json',
                             'Accept': 'application/json'
-                        }
+                        },
+                        body: JSON.stringify({ payment_type: result.payment_type || null })
                     }).then(() => {
                         // Save address to user record
                         const addressData = {

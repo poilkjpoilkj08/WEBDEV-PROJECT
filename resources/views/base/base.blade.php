@@ -43,6 +43,33 @@
                 padding-top: 20px;
             }
         }
+
+        /* ===== GLOBAL MOBILE RESPONSIVENESS ===== */
+        @media (max-width: 575.98px) {
+            /* Containers have proper padding */
+            .container, .container-fluid {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+            /* Cards don't overflow */
+            .card {
+                border-radius: 10px !important;
+            }
+            /* Tables scroll horizontally */
+            .table-responsive {
+                -webkit-overflow-scrolling: touch;
+            }
+            /* Display-6 headings smaller on phone */
+            .display-6 {
+                font-size: 1.4rem !important;
+            }
+            /* Buttons full-width friendly */
+            .btn-group-mobile-full .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            /* Order details sidebar stacks below on mobile — already col-lg-4/8 */
+        }
         footer {
             flex-shrink: 0;
             width: 100%;
