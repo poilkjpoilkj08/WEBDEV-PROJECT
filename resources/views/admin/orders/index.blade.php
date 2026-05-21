@@ -43,19 +43,30 @@
                         </td>
                         <td>{{ $order->created_at->format('M d, Y H:i') }}</td>
                         <td>
-                            <span class="fw-bold text-success">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                            <span class="fw-bold text-success">Rp {{ number_format($order->total_price + ($order->shipping_cost ?? 0), 0, ',', '.') }}</span>
                         </td>
                         <td>
                             @if($order->payment_method)
-                            <span class="badge bg-info">{{ formatPaymentMethod($order->payment_method) }}</span>
+                            <span class="badge bg-info text-dark">{{ formatPaymentMethod($order->payment_method) }}</span>
                             @else
                             <span class="badge bg-secondary">N/A</span>
                             @endif
                         </td>
                         <td>
-                            <span class="badge bg-{{ $order->status === 'paid' ? 'success' : ($order->status === 'pending' ? 'warning text-dark' : 'secondary') }}">
-                                {{ ucfirst($order->status) }}
-                            </span>
+                            @php
+                                $badgeColor = match($order->status) {
+                                    'payment_paid', 'paid' => 'success',
+                                    'pending'              => 'warning text-dark',
+                                    'cancelled'            => 'danger',
+                                    default                => 'secondary',
+                                };
+                                $badgeLabel = match($order->status) {
+                                    'payment_paid' => 'Paid',
+                                    'paid'         => 'Paid',
+                                    default        => ucfirst($order->status),
+                                };
+                            @endphp
+                            <span class="badge bg-{{ $badgeColor }}">{{ $badgeLabel }}</span>
                         </td>
                         <td>
                             @if($order->shipping_method)

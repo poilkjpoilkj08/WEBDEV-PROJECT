@@ -31,7 +31,7 @@
             min-height: 70px;
         }
         .main-content {
-            margin-top: 0;
+            margin-top: 70px;
             flex: 1 0 auto;
             width: 100%;
             padding-top: 20px;
@@ -39,6 +39,7 @@
         }
         @media (max-width: 768px) {
             .main-content {
+                margin-top: 65px;
                 padding-top: 20px;
             }
         }

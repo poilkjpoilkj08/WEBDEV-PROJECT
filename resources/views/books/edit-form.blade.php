@@ -13,31 +13,31 @@
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Book Title *</label>
+                                <label class="form-label fw-semibold">Book Title <span class="text-danger">*</span></label>
                                 <input type="text" name="title" value="{{ old('title', $book->title) }}" required class="form-control @error('title') is-invalid @enderror">
                                 @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">ISBN</label>
+                                <label class="form-label fw-semibold">ISBN</label>
                                 <input type="text" name="isbn" value="{{ old('isbn', $book->isbn) }}" class="form-control @error('isbn') is-invalid @enderror">
                                 @error('isbn') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
                         <div class="mb-3 mt-3">
-                            <label class="form-label">Description</label>
+                            <label class="form-label fw-semibold">Description</label>
                             <textarea name="description" rows="4" class="form-control @error('description') is-invalid @enderror">{{ old('description', $book->description) }}</textarea>
                             @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Price *</label>
+                                <label class="form-label fw-semibold">Price <span class="text-danger">*</span></label>
                                 <input type="number" name="price" step="0.01" value="{{ old('price', $book->price) }}" required class="form-control @error('price') is-invalid @enderror">
                                 @error('price') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Pages</label>
+                                <label class="form-label fw-semibold">Pages</label>
                                 <input type="number" name="pages" min="1" value="{{ old('pages', $book->pages) }}" class="form-control @error('pages') is-invalid @enderror">
                                 @error('pages') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
@@ -45,7 +45,7 @@
 
                         <div class="row g-3 mt-3">
                             <div class="col-md-4">
-                                <label class="form-label">Language *</label>
+                                <label class="form-label fw-semibold">Language <span class="text-danger">*</span></label>
                                 <select name="language" required class="form-select @error('language') is-invalid @enderror">
                                     <option value="">Select Language</option>
                                     <option value="English" {{ old('language', $book->language) == 'English' ? 'selected' : '' }}>English</option>
@@ -62,12 +62,12 @@
                                 @error('language') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Publication Year</label>
+                                <label class="form-label fw-semibold">Publication Year</label>
                                 <input type="number" name="publication_year" min="1000" max="{{ date('Y') + 1 }}" value="{{ old('publication_year', $book->publication_year) }}" class="form-control @error('publication_year') is-invalid @enderror">
                                 @error('publication_year') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Weight (grams)</label>
+                                <label class="form-label fw-semibold">Weight (grams)</label>
                                 <input type="number" name="weight_grams" min="1" value="{{ old('weight_grams', $book->weight_grams) }}" class="form-control @error('weight_grams') is-invalid @enderror">
                                 @error('weight_grams') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
@@ -75,12 +75,12 @@
 
                         <div class="row g-3 mt-3">
                             <div class="col-md-6">
-                                <label class="form-label">Publisher</label>
+                                <label class="form-label fw-semibold">Publisher</label>
                                 <input type="text" name="publisher" value="{{ old('publisher', $book->publisher) }}" class="form-control @error('publisher') is-invalid @enderror">
                                 @error('publisher') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Status *</label>
+                                <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
                                 <select name="status" required class="form-select @error('status') is-invalid @enderror">
                                     <option value="available" {{ old('status', $book->status) == 'available' ? 'selected' : '' }}>Available</option>
                                     <option value="out_of_stock" {{ old('status', $book->status) == 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
@@ -92,7 +92,7 @@
 
                         <div class="row g-3 mt-3">
                             <div class="col-md-6">
-                                <label class="form-label">Category *</label>
+                                <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
                                 <select name="category_id" required class="form-select @error('category_id') is-invalid @enderror">
                                     <option value="">Select Category</option>
                                     @foreach($book_categories as $category)
@@ -102,7 +102,7 @@
                                 @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Author</label>
+                                <label class="form-label fw-semibold">Author</label>
                                 <select name="author_id" class="form-select @error('author_id') is-invalid @enderror">
                                     <option value="">Select Author</option>
                                     @foreach($authors as $author)
@@ -115,7 +115,7 @@
 
                         <div class="row g-3 mt-3">
                             <div class="col-12">
-                                <label class="form-label">Cover Image</label>
+                                <label class="form-label fw-semibold">Cover Image</label>
                                 <input type="file" name="cover_image_file" accept="image/*" class="form-control @error('cover_image_file') is-invalid @enderror">
                                 @error('cover_image_file') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 <div class="form-text">Upload a new cover image to replace the current one, or leave blank to keep the existing cover.</div>

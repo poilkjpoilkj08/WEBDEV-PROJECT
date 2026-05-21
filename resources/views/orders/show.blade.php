@@ -7,9 +7,22 @@
             <p class="text-muted">Invoice #{{ $order->invoice_number }}</p>
         </div>
         <div class="text-end">
-            <span class="badge bg-{{ $order->status === 'paid' ? 'success' : ($order->status === 'pending' ? 'warning text-dark' : 'secondary') }} py-2 px-3">
-                {{ ucfirst($order->status) }}
-            </span>
+            @php
+                $statusColor = match($order->status) {
+                    'payment_paid', 'paid' => 'success',
+                    'pending'              => 'warning text-dark',
+                    'cancelled'            => 'danger',
+                    default                => 'secondary',
+                };
+                $statusLabel = match($order->status) {
+                    'payment_paid' => 'Paid',
+                    'paid'         => 'Paid',
+                    'pending'      => 'Pending Payment',
+                    'cancelled'    => 'Cancelled',
+                    default        => ucfirst($order->status),
+                };
+            @endphp
+            <span class="badge bg-{{ $statusColor }} py-2 px-3">{{ $statusLabel }}</span>
         </div>
     </div>
 
@@ -91,7 +104,7 @@
         <div class="col-lg-4">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white fw-bold py-3">
-                    <i class="fas fa-receipt me-2 text-primary"></i>Order Summary
+                    <i class="fas fa-receipt me-2 text-primary"></i>Transaction Summary
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
@@ -105,37 +118,31 @@
                     <hr>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="fw-bold">Grand Total</span>
-                        <span class="fw-bold text-success">Rp {{ number_format(($order->total_price + ($order->shipping_cost ?? 0)), 0, ',', '.') }}</span>
+                        <span class="fw-bold text-success">Rp {{ number_format($order->total_price + ($order->shipping_cost ?? 0), 0, ',', '.') }}</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-3">
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Payment Status</span>
-<<<<<<< HEAD
-                        <span class="badge bg-{{ $order->status === 'paid' ? 'success' : ($order->status === 'pending' ? 'warning text-dark' : 'secondary') }}">
-                            {{ ucfirst($order->status) }}
-                        </span>
+                        <span class="badge bg-{{ $statusColor }}">{{ $statusLabel }}</span>
                     </div>
-=======
-                        <span class="badge bg-{{ $order->status === 'payment_paid' || $order->status === 'paid' ? 'success' : ($order->status === 'pending' ? 'warning text-dark' : 'secondary') }}">
-                            {{ $order->status === 'payment_paid' ? 'Paid' : ucfirst($order->status) }}
-                        </span>
-                    </div>
-                    @if($order->payment_method)
-                    <div class="d-flex justify-content-between mb-3">
+                    <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Payment Method</span>
-                        <span class="badge bg-info">{{ formatPaymentMethod($order->payment_method) }}</span>
+                        @if($order->payment_method)
+                            <span class="badge bg-info text-dark">{{ formatPaymentMethod($order->payment_method) }}</span>
+                        @else
+                            <span class="text-muted fst-italic small">—</span>
+                        @endif
                     </div>
-                    @endif
->>>>>>> origin/main
                     @if($order->paid_at)
-                    <div class="d-flex justify-content-between mb-3">
+                    <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Paid At</span>
                         <span>{{ $order->paid_at->format('d M Y') }}</span>
                     </div>
                     @endif
                     @if($order->status === 'pending' && $order->payment_url)
-                        <a href="{{ $order->payment_url }}" target="_blank" class="btn btn-warning w-100 mb-2">Pay Now</a>
+                        <a href="{{ $order->payment_url }}" target="_blank" class="btn btn-warning w-100 mb-2 mt-2">Pay Now</a>
                     @endif
-                    <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary w-100">Back to Orders</a>
+                    <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary w-100 mt-2">Back to Orders</a>
                 </div>
             </div>
         </div>

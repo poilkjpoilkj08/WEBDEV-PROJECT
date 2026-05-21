@@ -91,7 +91,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/admin/stores/{id}', [StoreLocationController::class, 'destroy'])->name('admin.stores.destroy');
 
         // ── Orders Management ────────────────────────────
-        Route::get('/admin/orders', [OrderController::class, 'index'])->name('admin.orders.index');
+        Route::get('/admin/orders', [OrderController::class, 'adminIndex'])->name('admin.orders.index');
 
         Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('books.reviews.store');
     });

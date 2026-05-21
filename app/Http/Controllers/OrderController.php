@@ -32,4 +32,8 @@ class OrderController extends Controller
 
         return view('orders.show', compact('order', 'userRoles'));
     }
+    public function adminIndex() {
+      $orders = Order::with('user')->orderByDesc('created_at')->get();
+      return view('admin.orders.index', compact('orders'));
+    }
 }
