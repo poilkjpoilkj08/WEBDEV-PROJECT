@@ -23,14 +23,7 @@
                     <div class="card shadow-sm border-0 h-100 position-relative wishlist-card" style="overflow: hidden;">
                         <!-- Book Cover -->
                         <div style="height: 250px; overflow: hidden; background: #f5f5f5; display: flex; align-items: center; justify-content: center;">
-                            @if($wishlist->book->cover_image)
-                                <img src="{{ asset('storage/' . $wishlist->book->cover_image) }}" alt="{{ $wishlist->book->title }}" class="img-fluid" style="max-height: 100%; object-fit: cover;">
-                            @else
-                                <div class="text-center text-muted">
-                                    <i class="fas fa-book fa-3x mb-2"></i>
-                                    <p>No Cover</p>
-                                </div>
-                            @endif
+                            <img src="{{ $wishlist->book->cover_image_src }}" alt="{{ $wishlist->book->title }}" class="img-fluid" style="max-height: 100%; object-fit: cover;">
                         </div>
 
                         <div class="card-body d-flex flex-column">

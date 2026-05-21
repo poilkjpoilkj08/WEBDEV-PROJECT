@@ -64,6 +64,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/mark-payment-complete', [CheckoutController::class, 'markPaymentComplete'])->name('checkout.mark-payment-complete');
     Route::post('/checkout/save-address', [CheckoutController::class, 'saveAddress'])->name('checkout.save-address');
 
+    Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('books.reviews.store');
+
     Route::middleware(['role:admin,owner'])->group(function () {
 
         // ── Books CRUD ───────────────────────────────────────────────────────
@@ -92,7 +94,5 @@ Route::middleware('auth')->group(function () {
 
         // ── Orders Management ────────────────────────────
         Route::get('/admin/orders', [OrderController::class, 'adminIndex'])->name('admin.orders.index');
-
-        Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('books.reviews.store');
     });
 });

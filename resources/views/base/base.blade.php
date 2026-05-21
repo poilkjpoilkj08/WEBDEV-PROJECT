@@ -121,11 +121,6 @@
                 font-size: 1.25rem !important;
             }
         }
-<<<<<<< HEAD
-    </style>
-</head>
-<body>
-=======
 
         /* Toast Notification Styles */
         .toast-notification {
@@ -231,7 +226,6 @@
         </div>
     </div>
 
->>>>>>> origin/main
     @include('include.header')
     
     <div class="container-fluid main-content px-4 px-md-5 py-5" style="margin-left: auto; margin-right: auto; max-width: 1400px;">
@@ -338,8 +332,6 @@
                 });
             }
         });
-<<<<<<< HEAD
-=======
 
         // Toast Notification Function
         let toastTimeout;
@@ -380,7 +372,6 @@
         window.addEventListener('beforeunload', function() {
             if (toastTimeout) clearTimeout(toastTimeout);
         });
->>>>>>> origin/main
     </script>
 </body>
 </html>

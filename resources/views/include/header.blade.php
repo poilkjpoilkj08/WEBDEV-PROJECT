@@ -39,9 +39,6 @@
                             <li><h6 class="dropdown-header">Books</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.books.index') }}"><i class="fas fa-list fa-fw me-2 text-white-50"></i>Manage Books</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">Authors</h6></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.authors.index') }}"><i class="fas fa-list fa-fw me-2 text-white-50"></i>Manage Authors</a></li>
-                            <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">Stores</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.stores.index') }}"><i class="fas fa-store fa-fw me-2 text-white-50"></i>Manage Store Locations</a></li>
                             <li><hr class="dropdown-divider"></li>

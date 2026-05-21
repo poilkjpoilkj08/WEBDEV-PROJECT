@@ -23,7 +23,7 @@
                             <p class="mb-1 text-muted small">Customer: <strong>{{ $order->user->name }}</strong> ({{ $order->user->email }})</p>
                             @endif
                             <p class="mb-1 text-muted">Placed on {{ $order->created_at->format('F j, Y') }}</p>
-                            <p class="mb-0">Total: <strong>Rp {{ number_format($order->total_price, 0, ',', '.') }}</strong></p>
+                            <p class="mb-0">Total: <strong>Rp {{ number_format($order->total_price + ($order->shipping_cost ?? 0), 0, ',', '.') }}</strong></p>
                             @if($order->payment_method)
                             <p class="mb-0 small mt-2"><i class="fas fa-credit-card text-info me-1"></i>Payment: <span class="badge bg-info">{{ formatPaymentMethod($order->payment_method) }}</span></p>
                             @endif
