@@ -1177,12 +1177,19 @@ document.querySelectorAll('.store-radio').forEach(function(radio) {
             lng: parseFloat(this.dataset.lng)
         };
         
-        // IMPORTANT: When store changes, show ONLY base cost
-        // Do not auto-calculate distance with old address
-        // User must confirm address for new store to get accurate shipping cost
-        const methodRadio = document.querySelector('.shipping-radio:checked');
-        const baseCost = parseInt(methodRadio?.dataset.baseCost || 0);
-        showBaseCost(baseCost);
+        // IMPORTANT: Check if user already entered an address
+        const userLat = document.getElementById('shipping_latitude').value;
+        const userLng = document.getElementById('shipping_longitude').value;
+        
+        if (userLat && userLng) {
+            // User already entered address - recalculate with new store
+            calculateShippingCost();
+        } else {
+            // No address yet - show only base cost
+            const methodRadio = document.querySelector('.shipping-radio:checked');
+            const baseCost = parseInt(methodRadio?.dataset.baseCost || 0);
+            showBaseCost(baseCost);
+        }
         
         // Reinitialize map if it's open to show new store marker
         if (mapInstance) {
