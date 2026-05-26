@@ -1168,7 +1168,7 @@ if (mapConfirmButton) {
     });
 }
 
-// Store selection changes - preserve existing shipping fee
+// Store selection changes - preserve user's address
 document.querySelectorAll('.store-radio').forEach(function(radio) {
     radio.addEventListener('change', function() {
         // Update current store location
@@ -1177,16 +1177,9 @@ document.querySelectorAll('.store-radio').forEach(function(radio) {
             lng: parseFloat(this.dataset.lng)
         };
         
-        // Only update user location if not already set
-        const currentLat = document.getElementById('shipping_latitude').value;
-        const currentLng = document.getElementById('shipping_longitude').value;
-        
-        // IMPORTANT: When user changes store, clear previous address location
-        // This ensures shipping cost is hidden until user picks location for NEW store
-        document.getElementById('shipping_latitude').value = '';
-        document.getElementById('shipping_longitude').value = '';
-        document.getElementById('location_display').value = '';
-        document.getElementById('location_search').value = '';
+        // IMPORTANT: Preserve user's previously entered address
+        // DO NOT clear address fields when store changes
+        // User may want to switch stores after entering delivery address
         
         // Reinitialize map if it's open to show new store marker
         if (mapInstance) {
@@ -1197,7 +1190,7 @@ document.querySelectorAll('.store-radio').forEach(function(radio) {
             }
         }
         
-        // Recalculate shipping cost with new store (will show base cost if no address yet)
+        // Recalculate shipping cost with new store and preserved address
         calculateShippingCost();
     });
 });
@@ -1430,14 +1423,17 @@ document.getElementById('payButton').addEventListener('click', function(e) {
                     });
                 },
                 onPending: function() {
-                    alert('Payment processing is pending. Please complete the instructions provided inside the terminal overlay.');
+                    alert('Payment is being processed. Your order is pending until payment is confirmed. Please check your orders page for updates.');
                     resetBtn();
                 },
                 onError: function() {
-                    alert('Payment routing authentication failed. Please retry.');
+                    alert('Payment authentication failed. Your order remains pending. You can retry payment from your orders page.');
                     resetBtn();
                 },
-                onClose: function() { resetBtn(); }
+                onClose: function() { 
+                    alert('You closed the payment window. Your order remains pending. Complete payment from your orders page or retry checkout.');
+                    resetBtn(); 
+                }
             });
         } else {
             alert('Error: ' + (data.error || data.message || 'Failed to initiate payment.'));

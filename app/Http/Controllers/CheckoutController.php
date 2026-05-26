@@ -414,8 +414,11 @@ class CheckoutController extends Controller
                             $order->payment_method = $paymentType;
                             $order->save();
                         } elseif (in_array($txStatus, ['deny', 'cancel', 'expire'])) {
+                            // Payment was cancelled, denied, or expired - set status and restore stock
                             $order->status = 'cancelled';
+                            $order->payment_method = $paymentType;
                             $order->save();
+                            // Restore stock for all items in cancelled order
                             foreach ($order->order_details as $detail) {
                                 $detail->book->increment('stock', $detail->quantity);
                             }
