@@ -417,9 +417,13 @@ class CheckoutController extends Controller
 
                     $grossAmount = (int)($order->total_price + $order->shipping_cost);
 
+                    // Generate unique order_id for retry by appending timestamp
+                    // Midtrans doesn't allow duplicate order_ids, so we need unique ID for each retry attempt
+                    $retryOrderId = $order->invoice_number . '-' . substr(md5(microtime()), 0, 8);
+
                     $transaction = [
                         'transaction_details' => [
-                            'order_id'     => $order->invoice_number,
+                            'order_id'     => $retryOrderId,
                             'gross_amount' => $grossAmount,
                         ],
                         'item_details'     => $midtransItems,
@@ -513,7 +517,19 @@ class CheckoutController extends Controller
                 $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
 
                 if ($signature === $signatureKey) {
+                    // Try to find order by invoice_number
                     $order = Order::where('invoice_number', $orderId)->first();
+                    
+                    // If not found and this is a retry order_id (has -suffix), extract base invoice_number
+                    if (!$order && strpos($orderId, '-') !== false) {
+                        // Retry format: {invoice_number}-{8char_hash}
+                        // Extract the base invoice_number
+                        preg_match('/^(.+)-[a-f0-9]{8}$/', $orderId, $matches);
+                        if (!empty($matches[1])) {
+                            $order = Order::where('invoice_number', $matches[1])->first();
+                        }
+                    }
+                    
                     if ($order) {
                         $txStatus = $notifData['transaction_status'] ?? null;
                         $paymentType = $notifData['payment_type'] ?? null;
