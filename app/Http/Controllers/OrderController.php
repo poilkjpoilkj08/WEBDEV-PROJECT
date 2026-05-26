@@ -9,18 +9,13 @@ use Illuminate\Support\Facades\Auth;
 class OrderController extends Controller
 {
     public function index(Request $request){
-        $status = $request->query('status'); // 'all', 'paid', 'pending', or null for all
-        $userRoles = Auth::user()->roles->pluck('role')->toArray();
+        $status = $request->query('status'); // 'paid' or 'pending'
+        $user = Auth::user();
         
-        $query = Order::with('user');
-        
-        if(in_array('admin', $userRoles)){
-            //Admin can see all orders
-            $query = $query->orderByRaw('created_at DESC');
-        }
-        else{
-            $query = $query->where('user_id', '=', Auth::id())->orderByRaw('created_at DESC');
-        }
+        // User only sees their OWN orders (order history)
+        $query = Order::with('user')
+            ->where('user_id', '=', $user->id)
+            ->orderByRaw('created_at DESC');
         
         // Apply status filter
         if($status === 'paid'){
@@ -30,6 +25,7 @@ class OrderController extends Controller
         }
         
         $orders = $query->get();
+        $userRoles = $user->roles->pluck('role')->toArray();
 
         return view('orders.index', compact('orders', 'userRoles', 'status'));
     }
@@ -44,8 +40,19 @@ class OrderController extends Controller
 
         return view('orders.show', compact('order', 'userRoles'));
     }
-    public function adminIndex() {
-      $orders = Order::with('user')->orderByDesc('created_at')->get();
-      return view('admin.orders.index', compact('orders'));
-    }
+    public function adminIndex(Request $request) {
+        $status = $request->query('status'); // 'paid' or 'pending'
+        
+        // Admin sees ALL orders in management panel
+        $query = Order::with('user')->orderByDesc('created_at');
+        
+        // Apply status filter
+        if($status === 'paid'){
+            $query = $query->where('status', 'paid');
+        } elseif($status === 'pending'){
+            $query = $query->where('status', 'pending');
+        }
+        
+        $orders = $query->get();
+        return view('admin.orders.index', compact('orders', 'status'));
 }

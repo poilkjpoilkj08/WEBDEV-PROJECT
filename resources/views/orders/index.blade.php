@@ -3,8 +3,8 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
-            <h1 class="display-6 mb-1">{{ in_array('admin', $userRoles) ? 'All Orders' : 'My Orders' }}</h1>
-            <p class="text-muted mb-0">{{ in_array('admin', $userRoles) ? 'View all customer orders' : 'Track your purchases and payment status.' }}</p>
+            <h1 class="display-6 mb-1">My Orders</h1>
+            <p class="text-muted mb-0">Track your purchases and payment status.</p>
         </div>
         <a href="{{ route('books.listing') }}" class="btn btn-outline-secondary rounded-pill">
             <i class="fas fa-book me-2"></i>Browse Books
@@ -37,7 +37,7 @@
     @if($orders->isEmpty())
         <div class="text-center py-5">
             <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
-            <p class="text-muted fs-5">{{ in_array('admin', $userRoles) ? 'No orders found.' : 'You have no orders yet.' }}</p>
+            <p class="text-muted fs-5">You have no orders yet.</p>
             <a href="{{ route('books.listing') }}" class="btn btn-primary rounded-pill px-4">Start Shopping</a>
         </div>
     @else

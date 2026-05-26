@@ -10,6 +10,21 @@
         <span class="badge bg-primary rounded-pill fs-6">{{ $orders->count() }} orders</span>
     </div>
 
+    {{-- Status Filter Menu --}}
+    <div class="mb-4">
+        <div class="btn-group" role="group" aria-label="Filter by status">
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-primary {{ !request('status') ? 'active' : '' }} rounded-start-pill">
+                <i class="fas fa-list me-1"></i>All Orders
+            </a>
+            <a href="{{ route('admin.orders.index', ['status' => 'pending']) }}" class="btn btn-outline-warning {{ request('status') === 'pending' ? 'active bg-warning text-dark' : '' }}">
+                <i class="fas fa-clock me-1"></i>Pending
+            </a>
+            <a href="{{ route('admin.orders.index', ['status' => 'paid']) }}" class="btn btn-outline-success {{ request('status') === 'paid' ? 'active bg-success text-white' : '' }} rounded-end-pill">
+                <i class="fas fa-check-circle me-1"></i>Paid
+            </a>
+        </div>
+    </div>
+
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mt-3" role="alert">
             <i class="fas fa-check-circle"></i> {{ session('success') }}
