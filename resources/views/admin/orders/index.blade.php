@@ -25,10 +25,10 @@
     @else
         {{-- Stats summary row --}}
         @php
-            $countPaid      = $orders->whereIn('status', ['paid', 'payment_paid'])->count();
+            $countPaid      = $orders->where('status', 'paid')->count();
             $countPending   = $orders->where('status', 'pending')->count();
             $countCancelled = $orders->where('status', 'cancelled')->count();
-            $totalRevenue   = $orders->whereIn('status', ['paid', 'payment_paid'])->sum(fn($o) => $o->total_price + ($o->shipping_cost ?? 0));
+            $totalRevenue   = $orders->where('status', 'paid')->sum(fn($o) => $o->total_price + ($o->shipping_cost ?? 0));
         @endphp
         <div class="row g-3 mb-4 mt-1">
             <div class="col-6 col-md-3">
@@ -78,12 +78,13 @@
                     <tbody>
                         @foreach($orders as $order)
                         @php
-                            $isPaid = in_array($order->status, ['payment_paid', 'paid']);
+                            $isPaid = $order->status === 'paid';
                             $statusColor = $isPaid ? 'success' : ($order->status === 'cancelled' ? 'danger' : 'warning');
                             $statusLabel = match($order->status) {
-                                'payment_paid', 'paid' => 'Paid',
-                                'cancelled'            => 'Cancelled',
-                                default                => 'Pending',
+                                'paid'       => 'Paid',
+                                'pending'    => 'Pending',
+                                'cancelled'  => 'Cancelled',
+                                default      => ucfirst($order->status),
                             };
                             $shippingColors = [
                                 'pending'    => 'secondary',
@@ -187,7 +188,7 @@
                         <label class="form-label fw-semibold">Payment Status</label>
                         <select name="status" class="form-select" id="modalStatus">
                             <option value="pending">Pending Payment</option>
-                            <option value="payment_paid">Paid</option>
+                            <option value="paid">Paid</option>
                             <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
