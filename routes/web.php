@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
     Route::post('/checkout/mark-payment-complete', [CheckoutController::class, 'markPaymentComplete'])->name('checkout.mark-payment-complete');
+    Route::post('/checkout/generate-payment-token', [CheckoutController::class, 'generatePaymentToken'])->name('checkout.generate-payment-token');
     Route::post('/checkout/save-address', [CheckoutController::class, 'saveAddress'])->name('checkout.save-address');
 
     Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('books.reviews.store');

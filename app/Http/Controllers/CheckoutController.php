@@ -346,6 +346,123 @@ class CheckoutController extends Controller
             return response()->json(['error' => 'Failed to update order'], 500);
         }
     }
+
+    /**
+     * Generate new snap token for pending order (retry payment)
+     */
+    public function generatePaymentToken(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $request->validate([
+            'order_id' => 'required|integer|exists:orders,id',
+        ]);
+
+        try {
+            $order = Order::findOrFail($request->order_id);
+
+            // Verify order belongs to authenticated user
+            if ($order->user_id !== $user->id) {
+                return response()->json(['error' => 'Unauthorized - Order does not belong to user'], 403);
+            }
+
+            // Only allow payment retry for pending orders
+            if ($order->status !== 'pending') {
+                return response()->json([
+                    'error' => 'Cannot retry payment',
+                    'message' => 'Only pending orders can be paid. Order status: ' . ucfirst($order->status)
+                ], 422);
+            }
+
+            // Get order details with items
+            $orderDetails = $order->order_details;
+            if ($orderDetails->isEmpty()) {
+                return response()->json(['error' => 'Order has no items'], 400);
+            }
+
+            $serverKey = config('midtrans.server_key');
+            $clientKey = config('midtrans.client_key');
+
+            if (!empty($serverKey) && !empty($clientKey)) {
+                try {
+                    // Initialize Midtrans configuration
+                    Config::$serverKey    = $serverKey;
+                    Config::$clientKey    = $clientKey;
+                    Config::$isProduction = filter_var(config('midtrans.is_production', false), FILTER_VALIDATE_BOOLEAN);
+                    Config::$isSanitized  = true;
+                    Config::$is3ds        = false;
+
+                    $midtransItems = [];
+                    foreach ($orderDetails as $detail) {
+                        $midtransItems[] = [
+                            'id'       => (string)$detail->book_id,
+                            'price'    => (int)round($detail->price),
+                            'quantity' => (int)$detail->quantity,
+                            'name'     => substr(trim($detail->book_title), 0, 50),
+                        ];
+                    }
+
+                    // Add shipping as a line item
+                    if ($order->shipping_cost > 0) {
+                        $midtransItems[] = [
+                            'id'       => 'SHIPPING',
+                            'price'    => (int)round($order->shipping_cost),
+                            'quantity' => 1,
+                            'name'     => substr(trim($order->shipping_method), 0, 50),
+                        ];
+                    }
+
+                    $grossAmount = (int)($order->total_price + $order->shipping_cost);
+
+                    $transaction = [
+                        'transaction_details' => [
+                            'order_id'     => $order->invoice_number,
+                            'gross_amount' => $grossAmount,
+                        ],
+                        'item_details'     => $midtransItems,
+                        'customer_details' => [
+                            'first_name' => substr($user->name ?? 'Customer', 0, 50),
+                            'email'      => $user->email,
+                            'phone'      => $order->shipping_phone,
+                        ],
+                        'billing_address' => [
+                            'first_name'   => substr($order->shipping_name, 0, 50),
+                            'phone'        => $order->shipping_phone,
+                            'address'      => substr($order->shipping_address, 0, 100),
+                            'city'         => substr($order->shipping_city, 0, 100),
+                            'postal_code'  => $order->shipping_postal_code,
+                            'country_code' => 'IDN',
+                        ],
+                    ];
+
+                    $snapToken = Snap::getSnapToken($transaction);
+
+                    return response()->json([
+                        'success'   => true,
+                        'snapToken' => $snapToken,
+                        'orderId'   => $order->id,
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Midtrans Snap Token Error for payment retry', [
+                        'order_id' => $order->id,
+                        'message' => $e->getMessage(),
+                    ]);
+                    return response()->json([
+                        'error' => 'Failed to generate payment token',
+                        'message' => $e->getMessage()
+                    ], 500);
+                }
+            }
+
+            return response()->json(['error' => 'Midtrans not configured'], 500);
+        } catch (\Exception $e) {
+            \Log::error('Generate payment token error', ['message' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to generate payment token'], 500);
+        }
+    }
     
     /**
      * Save user's address after successful order

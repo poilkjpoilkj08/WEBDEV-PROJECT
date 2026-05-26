@@ -139,8 +139,10 @@
                         <span>{{ $order->paid_at->format('d M Y') }}</span>
                     </div>
                     @endif
-                    @if($order->status === 'pending' && $order->payment_url)
-                        <a href="{{ $order->payment_url }}" target="_blank" class="btn btn-warning w-100 mb-2 mt-2">Pay Now</a>
+                    @if($order->status === 'pending')
+                        <button type="button" id="payNowBtn" class="btn btn-warning w-100 mb-2 mt-2" data-order-id="{{ $order->id }}">
+                            <i class="fas fa-lock me-2"></i>Pay Now
+                        </button>
                     @endif
                     <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary w-100 mt-2">Back to Orders</a>
                 </div>
@@ -148,4 +150,79 @@
         </div>
     </div>
 </div>
+
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const payNowBtn = document.getElementById('payNowBtn');
+    
+    if (payNowBtn) {
+        payNowBtn.addEventListener('click', function() {
+            const orderId = this.dataset.orderId;
+            const originalText = this.innerHTML;
+            
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading payment...';
+            
+            // Request new payment token
+            axios.post('{{ route("checkout.generate-payment-token") }}', {
+                order_id: orderId,
+                _token: '{{ csrf_token() }}'
+            })
+            .then(response => {
+                if (response.data.success && response.data.snapToken) {
+                    // Open Midtrans payment modal
+                    snap.pay(response.data.snapToken, {
+                        onSuccess: function(result) {
+                            // Mark payment as complete
+                            fetch('{{ route("checkout.mark-payment-complete") }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({ payment_type: result.payment_type || null })
+                            }).then(() => {
+                                // Reload page to show updated status
+                                setTimeout(() => {
+                                    window.location.href = window.location.href + '?paid=true';
+                                }, 1500);
+                            });
+                        },
+                        onPending: function() {
+                            alert('Payment is being processed. Please check back soon.');
+                            resetPayBtn();
+                        },
+                        onError: function() {
+                            alert('Payment failed. Please try again.');
+                            resetPayBtn();
+                        },
+                        onClose: function() {
+                            alert('Payment cancelled. Order remains pending.');
+                            resetPayBtn();
+                        }
+                    });
+                } else {
+                    alert('Error: ' + (response.data.error || 'Failed to generate payment token'));
+                    resetPayBtn();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const errorMsg = error.response?.data?.message || error.message || 'Failed to process payment';
+                alert('Error: ' + errorMsg);
+                resetPayBtn();
+            });
+            
+            function resetPayBtn() {
+                payNowBtn.disabled = false;
+                payNowBtn.innerHTML = originalText;
+            }
+        });
+    }
+});
+</script>
 @endsection
