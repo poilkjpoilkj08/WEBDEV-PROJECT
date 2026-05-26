@@ -9,17 +9,16 @@
         <div class="text-end">
             @php
                 $statusColor = match($order->status) {
-                    'payment_paid', 'paid' => 'success',
-                    'pending'              => 'warning text-dark',
-                    'cancelled'            => 'danger',
-                    default                => 'secondary',
+                    'paid'       => 'success',
+                    'pending'    => 'warning text-dark',
+                    'cancelled'  => 'danger',
+                    default      => 'secondary',
                 };
                 $statusLabel = match($order->status) {
-                    'payment_paid' => 'Paid',
-                    'paid'         => 'Paid',
-                    'pending'      => 'Pending Payment',
-                    'cancelled'    => 'Cancelled',
-                    default        => ucfirst($order->status),
+                    'paid'       => 'Paid',
+                    'pending'    => 'Pending Payment',
+                    'cancelled'  => 'Cancelled',
+                    default      => ucfirst($order->status),
                 };
             @endphp
             <span class="badge bg-{{ $statusColor }} py-2 px-3">{{ $statusLabel }}</span>

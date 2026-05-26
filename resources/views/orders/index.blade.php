@@ -11,6 +11,21 @@
         </a>
     </div>
 
+    {{-- Status Filter Menu --}}
+    <div class="mb-4">
+        <div class="btn-group" role="group" aria-label="Filter by status">
+            <a href="{{ route('orders.index') }}" class="btn btn-outline-primary {{ !request('status') ? 'active' : '' }} rounded-start-pill">
+                <i class="fas fa-list me-1"></i>All Orders
+            </a>
+            <a href="{{ route('orders.index', ['status' => 'pending']) }}" class="btn btn-outline-warning {{ request('status') === 'pending' ? 'active bg-warning text-dark' : '' }}">
+                <i class="fas fa-clock me-1"></i>Pending
+            </a>
+            <a href="{{ route('orders.index', ['status' => 'paid']) }}" class="btn btn-outline-success {{ request('status') === 'paid' ? 'active bg-success text-white' : '' }} rounded-end-pill">
+                <i class="fas fa-check-circle me-1"></i>Paid
+            </a>
+        </div>
+    </div>
+
     @if(session('success') === 'true' || request('success') === 'true')
         <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
             <i class="fas fa-check-circle fs-5"></i>
@@ -29,13 +44,13 @@
         <div class="row g-3">
             @foreach($orders as $order)
             @php
-                $isPaid = in_array($order->status, ['payment_paid', 'paid']);
+                $isPaid = $order->status === 'paid';
                 $statusColor = $isPaid ? 'success' : ($order->status === 'cancelled' ? 'danger' : 'warning');
                 $statusLabel = match($order->status) {
-                    'payment_paid', 'paid' => 'Paid',
-                    'pending'              => 'Pending Payment',
-                    'cancelled'            => 'Cancelled',
-                    default                => ucfirst($order->status),
+                    'paid'     => 'Paid',
+                    'pending'  => 'Pending Payment',
+                    'cancelled' => 'Cancelled',
+                    default    => ucfirst($order->status),
                 };
                 $grandTotal = $order->total_price + ($order->shipping_cost ?? 0);
             @endphp
@@ -91,10 +106,10 @@
                                             <a href="{{ route('orders.show', $order->id) }}" class="btn btn-primary btn-sm rounded-pill px-3">
                                                 <i class="fas fa-eye me-1"></i>Details
                                             </a>
-                                            @if($order->status === 'pending' && $order->payment_url)
-                                            <a href="{{ $order->payment_url }}" target="_blank" class="btn btn-warning btn-sm rounded-pill px-3">
-                                                <i class="fas fa-credit-card me-1"></i>Pay
-                                            </a>
+                                            @if($order->status === 'pending')
+                                            <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 pay-now-btn" data-order-id="{{ $order->id }}">
+                                                <i class="fas fa-credit-card me-1"></i>Pay Now
+                                            </button>
                                             @endif
                                         </div>
                                     </div>
@@ -108,4 +123,79 @@
         </div>
     @endif
 </div>
+
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const payButtons = document.querySelectorAll('.pay-now-btn');
+    
+    payButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.dataset.orderId;
+            const originalText = this.innerHTML;
+            
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...';
+            
+            // Request new payment token
+            axios.post('{{ route("checkout.generate-payment-token") }}', {
+                order_id: orderId,
+                _token: '{{ csrf_token() }}'
+            })
+            .then(response => {
+                if (response.data.success && response.data.snapToken) {
+                    // Open Midtrans payment modal
+                    snap.pay(response.data.snapToken, {
+                        onSuccess: function(result) {
+                            // Mark payment as complete
+                            fetch('{{ route("checkout.mark-payment-complete") }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({ payment_type: result.payment_type || null })
+                            }).then(() => {
+                                // Reload with success message
+                                setTimeout(() => {
+                                    window.location.href = window.location.href + '?success=true';
+                                }, 1500);
+                            });
+                        },
+                        onPending: function() {
+                            alert('Payment is being processed. Please check back soon.');
+                            resetBtn();
+                        },
+                        onError: function() {
+                            alert('Payment failed. Please try again.');
+                            resetBtn();
+                        },
+                        onClose: function() {
+                            alert('Payment cancelled. Order remains pending.');
+                            resetBtn();
+                        }
+                    });
+                } else {
+                    alert('Error: ' + (response.data.error || 'Failed to generate payment token'));
+                    resetBtn();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const errorMsg = error.response?.data?.message || error.message || 'Failed to process payment';
+                alert('Error: ' + errorMsg);
+                resetBtn();
+            });
+            
+            function resetBtn() {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        });
+    });
+});
+</script>
 @endsection

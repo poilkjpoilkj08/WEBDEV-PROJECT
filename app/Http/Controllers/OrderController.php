@@ -8,18 +8,30 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
-    public function index(){
-
+    public function index(Request $request){
+        $status = $request->query('status'); // 'all', 'paid', 'pending', or null for all
         $userRoles = Auth::user()->roles->pluck('role')->toArray();
+        
+        $query = Order::with('user');
+        
         if(in_array('admin', $userRoles)){
             //Admin can see all orders
-            $orders = Order::with('user')->orderByRaw('created_at DESC')->get();
+            $query = $query->orderByRaw('created_at DESC');
         }
         else{
-            $orders = Order::with('user')->where('user_id', '=', Auth::id())->orderByRaw('created_at DESC')->get();
+            $query = $query->where('user_id', '=', Auth::id())->orderByRaw('created_at DESC');
         }
+        
+        // Apply status filter
+        if($status === 'paid'){
+            $query = $query->where('status', 'paid');
+        } elseif($status === 'pending'){
+            $query = $query->where('status', 'pending');
+        }
+        
+        $orders = $query->get();
 
-        return view('orders.index', compact('orders', 'userRoles'));
+        return view('orders.index', compact('orders', 'userRoles', 'status'));
     }
 
     public function order_details($order_id){

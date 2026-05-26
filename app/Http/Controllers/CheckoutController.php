@@ -324,7 +324,7 @@ class CheckoutController extends Controller
             
             if ($order) {
                 $updateData = [
-                    'status'          => 'payment_paid',
+                    'status'          => 'paid',
                     'shipping_status' => 'processing',
                     'paid_at'         => now(),
                 ];
@@ -520,7 +520,7 @@ class CheckoutController extends Controller
                         
                         if ($statusCode == 200 || $statusCode == 201) {
                             if ($txStatus === 'capture' || $txStatus === 'settlement') {
-                                $order->status          = 'payment_paid';
+                                $order->status          = 'paid';
                                 $order->payment_method = $paymentType;
                                 $order->paid_at         = now();
                                 $order->shipping_status = 'processing';
