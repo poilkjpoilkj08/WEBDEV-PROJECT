@@ -1177,9 +1177,12 @@ document.querySelectorAll('.store-radio').forEach(function(radio) {
             lng: parseFloat(this.dataset.lng)
         };
         
-        // IMPORTANT: Preserve user's previously entered address
-        // DO NOT clear address fields when store changes
-        // User may want to switch stores after entering delivery address
+        // IMPORTANT: When store changes, show ONLY base cost
+        // Do not auto-calculate distance with old address
+        // User must confirm address for new store to get accurate shipping cost
+        const methodRadio = document.querySelector('.shipping-radio:checked');
+        const baseCost = parseInt(methodRadio?.dataset.baseCost || 0);
+        showBaseCost(baseCost);
         
         // Reinitialize map if it's open to show new store marker
         if (mapInstance) {
@@ -1189,9 +1192,6 @@ document.querySelectorAll('.store-radio').forEach(function(radio) {
                 initMapPicker();
             }
         }
-        
-        // Recalculate shipping cost with new store and preserved address
-        calculateShippingCost();
     });
 });
 
@@ -1264,7 +1264,7 @@ function showBaseCost(baseCost) {
     const shippingDisplay = document.getElementById('shippingDisplay');
     if (shippingDisplay) {
         shippingDisplay.style.display = 'block';
-        shippingDisplay.title = '(base cost - will calculate with distance once address is entered)';
+        shippingDisplay.title = '(base cost only - address will be used to calculate final distance cost)';
         shippingDisplay.textContent = baseCost === 0 ? 'FREE' : 'Rp ' + baseCost.toLocaleString('id-ID');
     }
     // Update grand total with base cost
@@ -1458,9 +1458,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedStore = document.querySelector('.store-radio:checked');
     const selectedMethod = document.querySelector('.shipping-radio:checked');
     if (selectedStore && selectedMethod) {
-        document.getElementById('shipping_latitude').value = selectedStore.dataset.lat;
-        document.getElementById('shipping_longitude').value = selectedStore.dataset.lng;
-        calculateShippingCost();
+        // IMPORTANT: Do NOT fill shipping coordinates with store coordinates
+        // Only show base shipping cost until user enters their delivery address
+        const baseCost = parseInt(selectedMethod.dataset.baseCost || 0);
+        showBaseCost(baseCost);
     }
     
     // Handle saved address toggle
