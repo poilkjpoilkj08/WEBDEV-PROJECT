@@ -49,7 +49,7 @@
                         <tbody>
                             @foreach($stores as $store)
                             <tr>
-                                <td class="text-muted">{{ $store->id }}</td>
+                                <td class="text-muted">{{ $loop->iteration }}</td>
                                 <td class="fw-semibold">{{ $store->name }}</td>
                                 <td>{{ $store->city }}, {{ $store->country }}</td>
                                 <td class="text-muted small">{{ Str::limit($store->address, 40) }}</td>

@@ -57,7 +57,7 @@ class BookController extends Controller
 
     public function admin_index(): \Illuminate\View\View
     {
-        $books = Book::with(['author', 'category'])->orderByRaw('id DESC')->paginate(20);
+        $books = Book::with(['author', 'category', 'storeLocations'])->orderByRaw('id DESC')->paginate(20);
         return view('admin.books.index', compact('books'));
     }
 

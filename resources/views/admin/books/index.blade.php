@@ -55,10 +55,11 @@
                                 <td><span class="badge bg-light text-dark border">{{ $book->category?->name ?? '—' }}</span></td>
                                 <td>Rp {{ number_format($book->price, 0, ',', '.') }}</td>
                                 <td>
-                                    @if($book->stock > 10)
-                                        <span class="text-success fw-semibold">{{ $book->stock }}</span>
-                                    @elseif($book->stock > 0)
-                                        <span class="text-warning fw-semibold">{{ $book->stock }}</span>
+                                    @php $totalStock = $book->total_stock; @endphp
+                                    @if($totalStock > 10)
+                                        <span class="text-success fw-semibold">{{ $totalStock }}</span>
+                                    @elseif($totalStock > 0)
+                                        <span class="text-warning fw-semibold">{{ $totalStock }}</span>
                                     @else
                                         <span class="text-danger fw-semibold">0</span>
                                     @endif

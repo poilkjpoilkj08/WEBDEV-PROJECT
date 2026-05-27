@@ -196,7 +196,7 @@
             </div>
             <form id="updateOrderForm" method="POST">
                 @csrf
-                @method('PATCH')
+                @method('PUT')
                 <div class="modal-body px-4 pt-3 pb-2">
                     <p class="text-muted mb-3">Invoice: <strong id="modalInvoice"></strong></p>
                     <div class="mb-3">
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modalTracking').value = tracking;
 
             document.getElementById('updateOrderForm').action =
-                '/admin/orders/' + orderId + '/status';
+                '/admin/orders/' + orderId;
         });
     }
 });

@@ -57,6 +57,7 @@
             @guest
                 <a href="{{ route('login.show') }}" class="btn btn-light btn-sm px-4 fw-bold rounded-pill shadow-sm btn-smooth" style="color: #c25e25;">{{ __('messages.login') }}</a>
             @else
+                @if(!auth()->user()->hasRole(['admin', 'owner']))
                 <!-- Cart Button -->
                 <a href="{{ route('cart.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm btn-smooth px-3" title="Cart">
                     <i class="fas fa-shopping-cart fs-5"></i>
@@ -71,6 +72,7 @@
                 <a href="{{ route('orders.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm btn-smooth px-3" title="Orders">
                     <i class="fas fa-receipt fs-5"></i>
                 </a>
+                @endif
                 
                 <!-- [2] Custom Context Profile Console Dropdown -->
                 <div class="dropdown">

@@ -242,6 +242,7 @@
                             </div>
                         </div>
 
+                        @if(!auth()->check() || !auth()->user()->hasRole(['admin', 'owner']))
                         <div class="row g-2 pt-2">
                             <div class="col-sm-6">
                                 @auth
@@ -275,6 +276,7 @@
                                 @endauth
                             </div>
                         </div>
+                        @endif
 
                     </div>
                 </div>
