@@ -1,16 +1,16 @@
 <!-- Base Navigation Wrapper Structure -->
-<nav class="navbar navbar-expand-lg navbar-dark py-3 px-md-4 shadow-sm {{ Route::is('home') ? 'navbar-home-transparent' : '' }}" 
+<nav class="navbar navbar-expand-lg navbar-dark py-2 px-md-4 shadow-sm {{ Route::is('home') ? 'navbar-home-transparent' : '' }}" 
      style="{{ Route::is('home') ? 'background: rgba(43, 24, 12, 0.15) !important;' : 'background: linear-gradient(135deg, #c25e25, #a64f1e) !important;' }}">
     <div class="container-fluid">
-        <!-- Brand Identity with Smooth Animated Image Configuration -->
-        <a class="navbar-brand fw-bold fs-4 tracking-tight text-white d-flex align-items-center brand-transition" 
+        <!-- Brand Identity -->
+        <a class="navbar-brand fw-bold fs-5 text-white d-flex align-items-center" 
            href="{{ route('home') }}" 
            style="text-decoration: none !important; box-shadow: none !important; outline: none !important;">
             <img src="{{ asset('images/logo.png') }}" 
                  alt="BookHive Logo" 
-                 height="45"
-                 class="me-2 d-inline-block align-top logo-smooth"
-                 style="object-fit: contain; filter: none !important;">
+                 height="32"
+                 class="me-2 d-inline-block align-top"
+                 style="object-fit: contain;">
             BookHive
         </a>
         
@@ -51,50 +51,28 @@
             </ul>
         </div>
 
-        <!-- REARRANGED ACTION HUB: Language -> Orders -> Cart -> Wishlist -> User Console -->
+        <!-- REARRANGED ACTION HUB: Orders -> User Console (Cart & Wishlist removed, Language removed) -->
         <div class="d-flex text-white align-items-center gap-1 gap-md-2 ms-auto ms-lg-0">
-            
-            <!-- [1] Language Switcher Module -->
-            <div class="dropdown">
-                <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center btn-smooth rounded-pill px-3" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-globe me-2"></i>
-                    <span class="d-none d-sm-inline">{{ strtoupper(app()->getLocale()) }}</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="languageDropdown">
-                    <li><a class="dropdown-item d-flex align-items-center {{ app()->getLocale() === 'en' ? 'active' : '' }}" href="{{ route('language.switch', 'en') }}">
-                        <i class="fas fa-check me-2 {{ app()->getLocale() === 'en' ? 'text-success' : 'text-muted' }}"></i>English
-                    </a></li>
-                    <li><a class="dropdown-item d-flex align-items-center {{ app()->getLocale() === 'id' ? 'active' : '' }}" href="{{ route('language.switch', 'id') }}">
-                        <i class="fas fa-check me-2 {{ app()->getLocale() === 'id' ? 'text-success' : 'text-muted' }}"></i>Bahasa Indonesia
-                    </a></li>
-                </ul>
-            </div>
             
             @guest
                 <a href="{{ route('login.show') }}" class="btn btn-light btn-sm px-4 fw-bold rounded-pill shadow-sm btn-smooth" style="color: #c25e25;">{{ __('messages.login') }}</a>
             @else
-                @php $cartCount = count(session('cart', [])); @endphp
-                
-                <!-- [2] Dynamic Checkout History Receipts (Orders Button) -->
-                <a href="{{ route('orders.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm btn-smooth px-3 px-sm-4">
-                    <i class="fas fa-receipt me-2"></i>
-                    <span class="d-none d-lg-inline">Orders</span>
-                </a>
-                
-                <!-- [3] Active Cart Button Context (Borderless Style with Circular Hover Shadow effect) -->
-                <a href="{{ route('cart.index') }}" class="btn btn-link btn-minimal-circle position-relative text-white text-decoration-none">
-                    <i class="fas fa-shopping-cart"></i>
-                    @if($cartCount > 0)
-                        <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill" style="font-size: 0.6rem; padding: 0.25em 0.4em;">{{ $cartCount }}</span>
-                    @endif
+                <!-- Cart Button -->
+                <a href="{{ route('cart.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm btn-smooth px-3" title="Cart">
+                    <i class="fas fa-shopping-cart fs-5"></i>
                 </a>
 
-                <!-- [4] Standalone Wishlist Button (Borderless Style with Circular Hover Shadow effect) -->
-                <a href="{{ route('wishlist.index') }}" class="btn btn-link btn-minimal-circle text-white text-decoration-none" title="View Wishlist">
-                    <i class="fas fa-bookmark"></i>
+                <!-- Wishlist Button -->
+                <a href="{{ route('wishlist.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm btn-smooth px-3" title="Wishlist">
+                    <i class="fas fa-heart fs-5"></i>
                 </a>
                 
-                <!-- [5] Custom Context Profile Console Dropdown -->
+                <!-- Orders Button -->
+                <a href="{{ route('orders.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm btn-smooth px-3" title="Orders">
+                    <i class="fas fa-receipt fs-5"></i>
+                </a>
+                
+                <!-- [2] Custom Context Profile Console Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-light btn-sm px-3 px-sm-4 fw-bold rounded-pill d-flex align-items-center shadow-sm btn-smooth" type="button" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: #c25e25;">
                         <i class="fas fa-user-circle me-2 fs-5"></i>

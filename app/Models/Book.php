@@ -51,8 +51,32 @@ class Book extends Model
         return $this->belongsTo(Author::class, 'author_id');
     }
     public function storeLocations(): BelongsToMany
-   {
-    return $this->belongsToMany(StoreLocation::class, 'book_store_locations') ->withPivot('stock') ->withTimestamps();
+    {
+        return $this->belongsToMany(StoreLocation::class, 'book_store_locations')
+                    ->withPivot('stock')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get total stock from all stores
+     * Sums up stock from book_store_locations pivot table
+     */
+    public function getTotalStockAttribute()
+    {
+        return $this->storeLocations()
+            ->sum('book_store_locations.stock');
+    }
+
+    /**
+     * Get stock for a specific store
+     */
+    public function getStockForStore($storeId)
+    {
+        $pivot = $this->storeLocations()
+            ->where('store_location_id', $storeId)
+            ->first();
+        
+        return $pivot ? $pivot->pivot->stock : 0;
     }
 
     public function scopeFeatured($query)

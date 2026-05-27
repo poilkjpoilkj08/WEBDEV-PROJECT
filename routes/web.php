@@ -39,6 +39,55 @@ Route::post('/checkout/get-cities', [CheckoutController::class, 'getCitiesByProv
 Route::post('/checkout/get-streets', [CheckoutController::class, 'getStreetsByCity'])->name('checkout.get-streets');
 Route::post('/checkout/fetch-location-details', [CheckoutController::class, 'fetchLocationDetails'])->name('checkout.fetch-location-details');
 
+// Debug route for testing shipping calculation
+Route::get('/debug/shipping-test', function () {
+    $shippingService = new \App\Services\ShippingService();
+    
+    $testCases = [
+        [
+            'from' => 'Yogyakarta',
+            'to' => 'Jakarta',
+            'weight' => 1,
+            'method' => 'jne_reg',
+        ],
+        [
+            'from' => 'Surabaya',
+            'to' => 'Bandung',
+            'weight' => 1,
+            'method' => 'sicepat',
+        ],
+        [
+            'from' => 'Denpasar',
+            'to' => 'Jakarta',
+            'weight' => 1,
+            'method' => 'gosend',
+        ],
+    ];
+
+    $results = [];
+    foreach ($testCases as $test) {
+        $cost = $shippingService->calculateShippingCost(
+            $test['from'],
+            $test['to'],
+            $test['weight'],
+            $test['method']
+        );
+        $results[] = [
+            'from' => $test['from'],
+            'to' => $test['to'],
+            'method' => $test['method'],
+            'cost' => $cost,
+            'display' => 'Rp ' . number_format($cost, 0, ',', '.'),
+        ];
+    }
+
+    return response()->json([
+        'message' => 'Shipping calculation test results',
+        'results' => $results,
+        'log_file' => storage_path('logs/laravel.log'),
+    ]);
+})->name('debug.shipping-test');
+
 Route::get('/login', [AuthController::class, 'show_login'])->name('login.show')->middleware('guest');
 Route::post('/login_auth', [AuthController::class, 'login_auth'])->name('login.auth')->middleware('guest');
 
@@ -53,6 +102,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order_id}', [OrderController::class, 'order_details'])->name('orders.show');
+    
+    // User order actions - delivery confirmation and refund requests
+    Route::post('/orders/{order_id}/confirm-delivery', [OrderController::class, 'confirmDelivery'])->name('orders.confirm-delivery');
+    Route::post('/orders/{order_id}/request-refund', [OrderController::class, 'requestRefund'])->name('orders.request-refund');
 
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('wishlist.add');
@@ -95,5 +148,10 @@ Route::middleware('auth')->group(function () {
 
         // ── Orders Management ────────────────────────────
         Route::get('/admin/orders', [OrderController::class, 'adminIndex'])->name('admin.orders.index');
+        Route::put('/admin/orders/{order_id}', [OrderController::class, 'update'])->name('admin.orders.update');
+        
+        // Admin refund management        Route::get('/admin/refunds', [OrderController::class, 'adminRefundsIndex'])->name('admin.refunds.index');        Route::post('/admin/refunds/{refund_id}/approve', [OrderController::class, 'approveRefund'])->name('admin.refunds.approve');
+        Route::post('/admin/refunds/{refund_id}/reject', [OrderController::class, 'rejectRefund'])->name('admin.refunds.reject');
+        Route::post('/admin/refunds/{refund_id}/complete', [OrderController::class, 'completeRefund'])->name('admin.refunds.complete');
     });
 });

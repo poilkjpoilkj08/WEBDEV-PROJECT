@@ -6,8 +6,11 @@ use App\Models\Book;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\StoreLocation;
+use App\Services\ShippingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -66,10 +69,15 @@ class CheckoutController extends Controller
         $books = Book::whereIn('id', array_keys($cart))->get();
 
         $items = $books->map(function (Book $book) use ($cart) {
+            $cartItem = $cart[$book->id];
+            $quantity = is_array($cartItem) ? $cartItem['quantity'] : $cartItem;
+            $storeId = is_array($cartItem) ? $cartItem['store_id'] : null;
+            
             return [
                 'book'     => $book,
-                'quantity' => $cart[$book->id] ?? 0,
-                'subtotal' => $book->price * ($cart[$book->id] ?? 0),
+                'quantity' => $quantity,
+                'store_id' => $storeId,
+                'subtotal' => $book->price * $quantity,
             ];
         });
 
@@ -77,6 +85,12 @@ class CheckoutController extends Controller
 
         if ($total <= 0) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
+
+        // Check if all stores are selected
+        $unselectedStores = $items->filter(fn($item) => !$item['store_id'])->count();
+        if ($unselectedStores > 0) {
+            return redirect()->route('cart.index')->with('error', 'Please select a store location for all items before checkout.');
         }
 
         $clientKey = config('midtrans.client_key');
@@ -105,10 +119,8 @@ class CheckoutController extends Controller
     public function process(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            // Log incoming request for debugging
             \Log::info('Checkout process request', [
                 'all_input' => $request->except('_token'),
-                'headers' => $request->headers->all(),
             ]);
 
             $validated = $request->validate([
@@ -123,12 +135,15 @@ class CheckoutController extends Controller
                 'shipping_latitude'      => 'required|numeric|between:-90,90',
                 'shipping_longitude'     => 'required|numeric|between:-180,180',
                 'shipping_method'        => 'required|string|in:' . implode(',', array_keys(self::SHIPPING_METHODS)),
-                'store_id'               => 'required|integer|exists:store_locations,id',
+                'store_ids'              => 'required|array',
+                'store_ids.*'            => 'required|integer|exists:store_locations,id',
+                'shipping_cost'          => 'nullable|numeric|min:0',
+                'shipping_zone'          => 'nullable|string|in:A,B,C,D,E',
+                'shipping_breakdown'     => 'nullable|json',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Checkout validation failed', [
                 'errors' => $e->errors(),
-                'input' => $request->except('_token'),
             ]);
             
             return response()->json([
@@ -143,170 +158,241 @@ class CheckoutController extends Controller
             return response()->json(['error' => 'Your cart is empty.'], 400);
         }
 
-        $books = Book::whereIn('id', array_keys($cart))->get();
-        $items = [];
-        $subtotal = 0;
+        try {
+            // CRITICAL: Wrap entire order creation in transaction with pessimistic locks
+            return DB::transaction(function () use ($cart, $validated) {
+                $books = Book::whereIn('id', array_keys($cart))
+                    ->lockForUpdate()  // Pessimistic lock: prevents other transactions from reading
+                    ->get();
+                    
+                $items = [];
+                $subtotal = 0;
+                $primaryStoreId = null;
 
-        foreach ($books as $book) {
-            $quantity = $cart[$book->id] ?? 0;
-            if ($quantity < 1) continue;
-            if ($quantity > $book->stock) {
-                return response()->json(['error' => sprintf('Only %d copies of "%s" available.', $book->stock, $book->title)], 400);
-            }
-            $items[] = ['book' => $book, 'quantity' => $quantity, 'subtotal' => $book->price * $quantity];
-            $subtotal += $book->price * $quantity;
-        }
-
-        if (empty($items)) {
-            return response()->json(['error' => 'Your cart is empty.'], 400);
-        }
-
-        $shippingMethod = self::SHIPPING_METHODS[$validated['shipping_method']];
-        $store = StoreLocation::findOrFail($validated['store_id']);
-        
-        // Calculate distance between customer and store
-        $distance = $this->calculateDistance(
-            $validated['shipping_latitude'],
-            $validated['shipping_longitude'],
-            $store->latitude,
-            $store->longitude
-        );
-        
-        // Calculate shipping cost based on distance
-        $shippingCost = $this->calculateShippingCost(
-            $shippingMethod['base_cost'],
-            $distance,
-            $validated['shipping_method']
-        );
-        
-        $grandTotal = $subtotal + $shippingCost;
-
-        $invoiceNumber = 'BH-' . now()->format('YmdHis') . '-' . rand(100, 999);
-
-        $order = Order::create([
-            'invoice_number'      => $invoiceNumber,
-            'user_id'             => Auth::id(),
-            'store_id'            => $validated['store_id'],
-            'customer_name'       => $validated['customer_name'] ?? Auth::user()->name,
-            'total_price'         => $subtotal,
-            'status'              => 'pending',
-            'payment_url'         => null,
-            'shipping_name'       => $validated['shipping_name'],
-            'shipping_phone'      => $validated['shipping_phone'],
-            'shipping_address'    => $validated['shipping_address'],
-            'shipping_city'       => $validated['shipping_city'],
-            'shipping_province'   => $validated['shipping_province'],
-            'shipping_postal_code'=> $validated['shipping_postal_code'],
-            'shipping_country'    => $validated['shipping_country'],
-            'shipping_method'     => $shippingMethod['name'],
-            'shipping_cost'       => $shippingCost,
-            'shipping_distance_km'=> $distance,
-            'shipping_status'     => 'pending',
-        ]);
-
-        foreach ($items as $item) {
-            OrderDetail::create([
-                'order_id'   => $order->id,
-                'book_id'    => $item['book']->id,
-                'book_title' => $item['book']->title,
-                'quantity'   => $item['quantity'],
-                'price'      => $item['book']->price,
-                'subtotal'   => $item['subtotal'],
-            ]);
-            $item['book']->decrement('stock', $item['quantity']);
-        }
-
-        $snapToken = null;
-        $serverKey = config('midtrans.server_key');
-        $clientKey = config('midtrans.client_key');
-
-        if (!empty($serverKey) && !empty($clientKey)) {
-            try {
-                // Initialize Midtrans configuration
-                Config::$serverKey    = $serverKey;
-                Config::$clientKey    = $clientKey;
-                Config::$isProduction = filter_var(config('midtrans.is_production', false), FILTER_VALIDATE_BOOLEAN);
-                Config::$isSanitized  = true;
-                Config::$is3ds        = false;
-
-                $midtransItems = array_map(function ($item) {
-                    return [
-                        'id'       => (string)$item['book']->id,
-                        'price'    => (int)round($item['book']->price),
-                        'quantity' => (int)$item['quantity'],
-                        'name'     => substr(trim($item['book']->title), 0, 50),
+                foreach ($books as $book) {
+                    $cartItem = $cart[$book->id];
+                    $quantity = is_array($cartItem) ? $cartItem['quantity'] : $cartItem;
+                    $storeId = is_array($cartItem) ? $cartItem['store_id'] : null;
+                    
+                    if ($quantity < 1) continue;
+                    
+                    // Validate store is selected for this book
+                    if (!$storeId || !isset($validated['store_ids'][$book->id])) {
+                        return response()->json(['error' => sprintf('Store location not selected for "%s".', $book->title)], 400);
+                    }
+                    
+                    $storeId = $validated['store_ids'][$book->id];
+                    
+                    // Lock and validate store stock for this book
+                    $storeBook = $book->storeLocations()
+                        ->where('store_location_id', $storeId)
+                        ->lockForUpdate()
+                        ->first();
+                    
+                    $storeStock = $storeBook ? $storeBook->pivot->stock : 0;
+                    
+                    if ($storeStock <= 0) {
+                        return response()->json(['error' => sprintf('"%s" is not available at the selected store.', $book->title)], 400);
+                    }
+                    
+                    if ($quantity > $storeStock) {
+                        return response()->json(['error' => sprintf('Only %d copies of "%s" available at this store.', $storeStock, $book->title)], 400);
+                    }
+                    
+                    $items[] = [
+                        'book' => $book,
+                        'quantity' => $quantity,
+                        'store_id' => $storeId,
+                        'subtotal' => $book->price * $quantity
                     ];
-                }, $items);
-
-                // Add shipping as a line item
-                if ($shippingCost > 0) {
-                    $midtransItems[] = [
-                        'id'       => 'SHIPPING',
-                        'price'    => (int)round($shippingCost),
-                        'quantity' => 1,
-                        'name'     => substr(trim($shippingMethod['name']), 0, 50),
-                    ];
+                    $subtotal += $book->price * $quantity;
+                    
+                    // Set primary store for shipping calculation (use first store)
+                    if (!$primaryStoreId) {
+                        $primaryStoreId = $storeId;
+                    }
                 }
 
-                // Validate that item total equals gross amount
-                $itemTotal = array_reduce($midtransItems, function ($carry, $item) {
-                    return $carry + ($item['price'] * $item['quantity']);
-                }, 0);
-
-                if ($itemTotal !== (int)$grandTotal) {
-                    \Log::warning('Midtrans amount mismatch', [
-                        'itemTotal' => $itemTotal,
-                        'grandTotal' => $grandTotal,
-                        'difference' => $itemTotal - $grandTotal,
-                    ]);
+                if (empty($items)) {
+                    return response()->json(['error' => 'Your cart is empty.'], 400);
                 }
 
-                $transaction = [
-                    'transaction_details' => [
-                        'order_id'     => $invoiceNumber,
-                        'gross_amount' => (int)$grandTotal,
-                    ],
-                    'item_details'     => $midtransItems,
-                    'customer_details' => [
-                        'first_name' => substr(Auth::user()->name ?? 'Customer', 0, 50),
-                        'email'      => Auth::user()->email,
-                        'phone'      => $validated['shipping_phone'],
-                    ],
-                    'billing_address' => [
-                        'first_name'   => substr($validated['shipping_name'], 0, 50),
-                        'phone'        => $validated['shipping_phone'],
-                        'address'      => substr($validated['shipping_address'], 0, 100),
-                        'city'         => substr($validated['shipping_city'], 0, 100),
-                        'postal_code'  => $validated['shipping_postal_code'],
-                        'country_code' => 'IDN',
-                    ],
-                ];
+                $shippingMethod = self::SHIPPING_METHODS[$validated['shipping_method']];
+                
+                // CRITICAL: Use frontend-calculated shipping cost if provided
+                // This ensures zone-based calculation from frontend is stored
+                $shippingCost = $validated['shipping_cost'] ?? 0;
+                $shippingZone = $validated['shipping_zone'] ?? 'C';
+                $shippingBreakdown = null;
+                
+                if ($validated['shipping_breakdown']) {
+                    try {
+                        $shippingBreakdown = json_decode($validated['shipping_breakdown'], true);
+                    } catch (\Exception $e) {
+                        \Log::warning('Failed to decode shipping breakdown', ['error' => $e->getMessage()]);
+                    }
+                }
+                
+                $grandTotal = $subtotal + $shippingCost;
 
-                $snapToken = Snap::getSnapToken($transaction);
-            } catch (\Exception $e) {
-                \Log::error('Midtrans Snap Token Error', [
-                    'message' => $e->getMessage(),
-                    'code' => $e->getCode(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
+                $invoiceNumber = 'BH-' . now()->format('YmdHis') . '-' . rand(100, 999);
+
+                $order = Order::create([
+                    'invoice_number'      => $invoiceNumber,
+                    'user_id'             => Auth::id(),
+                    'store_id'            => $primaryStoreId,
+                    'customer_name'       => $validated['customer_name'] ?? Auth::user()->name,
+                    'total_price'         => $subtotal,
+                    'status'              => 'pending',
+                    'payment_url'         => null,
+                    'payment_processed'   => false,
+                    'shipping_name'       => $validated['shipping_name'],
+                    'shipping_phone'      => $validated['shipping_phone'],
+                    'shipping_address'    => $validated['shipping_address'],
+                    'shipping_city'       => $validated['shipping_city'],
+                    'shipping_province'   => $validated['shipping_province'],
+                    'shipping_postal_code'=> $validated['shipping_postal_code'],
+                    'shipping_country'    => $validated['shipping_country'],
+                    'shipping_method'     => $shippingMethod['name'],
+                    'shipping_cost'       => $shippingCost,
+                    'shipping_zone'       => $shippingZone,
+                    'shipping_breakdown'  => $shippingBreakdown,
+                    'shipping_status'     => 'pending',
                 ]);
-                return response()->json([
-                    'error' => 'Failed to create payment token',
-                    'details' => $e->getMessage()
-                ], 500);
-            }
-        }
 
-        return response()->json([
-            'success'       => true,
-            'snapToken'     => $snapToken,
-            'orderId'       => $order->id,
-            'invoiceNumber' => $invoiceNumber,
-        ]);
+                foreach ($items as $item) {
+                    OrderDetail::create([
+                        'order_id'   => $order->id,
+                        'book_id'    => $item['book']->id,
+                        'store_id'   => $item['store_id'],
+                        'book_title' => $item['book']->title,
+                        'quantity'   => $item['quantity'],
+                        'price'      => $item['book']->price,
+                        'subtotal'   => $item['subtotal'],
+                    ]);
+                    
+                    // IMPORTANT: Stock will be decremented ONLY after successful payment in markPaymentComplete()
+                    // This prevents stock reduction if user cancels payment
+                }
+
+                $snapToken = null;
+                $serverKey = config('midtrans.server_key');
+                $clientKey = config('midtrans.client_key');
+
+                if (empty($serverKey) || empty($clientKey)) {
+                    \Log::warning('Midtrans configuration incomplete', [
+                        'server_key_set' => !empty($serverKey),
+                        'client_key_set' => !empty($clientKey),
+                    ]);
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Payment gateway not configured',
+                        'details' => 'Midtrans keys are missing. Please contact administrator.'
+                    ], 500);
+                }
+
+                try {
+                    // Initialize Midtrans configuration
+                    Config::$serverKey    = $serverKey;
+                    Config::$clientKey    = $clientKey;
+                    Config::$isProduction = filter_var(config('midtrans.is_production', false), FILTER_VALIDATE_BOOLEAN);
+                    Config::$isSanitized  = true;
+                    Config::$is3ds        = false;
+
+                    $midtransItems = array_map(function ($item) {
+                        return [
+                            'id'       => (string)$item['book']->id,
+                            'price'    => (int)round($item['book']->price),
+                            'quantity' => (int)$item['quantity'],
+                            'name'     => substr(trim($item['book']->title), 0, 50),
+                        ];
+                    }, $items);
+
+                    // Add shipping as a line item
+                    if ($shippingCost > 0) {
+                        $midtransItems[] = [
+                            'id'       => 'SHIPPING',
+                            'price'    => (int)round($shippingCost),
+                            'quantity' => 1,
+                            'name'     => 'Shipping',
+                        ];
+                    }
+
+                    // Validate that item total equals gross amount
+                    $itemTotal = array_reduce($midtransItems, function ($carry, $item) {
+                        return $carry + ($item['price'] * $item['quantity']);
+                    }, 0);
+
+                    if ($itemTotal !== (int)$grandTotal) {
+                        \Log::warning('Midtrans amount mismatch', [
+                            'itemTotal' => $itemTotal,
+                            'grandTotal' => $grandTotal,
+                            'difference' => $itemTotal - $grandTotal,
+                        ]);
+                    }
+
+                    $transaction = [
+                        'transaction_details' => [
+                            'order_id'     => $invoiceNumber,
+                            'gross_amount' => (int)$grandTotal,
+                        ],
+                        'item_details'     => $midtransItems,
+                        'customer_details' => [
+                            'first_name' => substr(Auth::user()->name ?? 'Customer', 0, 50),
+                            'email'      => Auth::user()->email,
+                            'phone'      => $validated['shipping_phone'],
+                        ],
+                        'billing_address' => [
+                            'first_name'   => substr($validated['shipping_name'], 0, 50),
+                            'phone'        => $validated['shipping_phone'],
+                            'address'      => substr($validated['shipping_address'], 0, 100),
+                            'city'         => substr($validated['shipping_city'], 0, 100),
+                            'postal_code'  => $validated['shipping_postal_code'],
+                            'country_code' => 'IDN',
+                        ],
+                    ];
+
+                    $snapToken = Snap::getSnapToken($transaction);
+                    \Log::info('Snap token created successfully', ['invoice' => $invoiceNumber]);
+                } catch (\Exception $e) {
+                    \Log::error('Midtrans Snap Token Error', [
+                        'message' => $e->getMessage(),
+                        'code' => $e->getCode(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                    ]);
+                    return response()->json([
+                        'error' => 'Failed to create payment token',
+                        'details' => 'Error: ' . $e->getMessage()
+                    ], 500);
+                }
+
+                return response()->json([
+                    'success'       => true,
+                    'snapToken'     => $snapToken,
+                    'orderId'       => $order->id,
+                    'invoiceNumber' => $invoiceNumber,
+                ]);
+            }, 5);  // Maximum 5 transaction retries for deadlocks
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Checkout transaction deadlock or error', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ]);
+            return response()->json(['error' => 'Database error - please retry checkout'], 500);
+        } catch (\Exception $e) {
+            \Log::error('Checkout process fatal error', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ]);
+            return response()->json(['error' => 'Checkout failed - please try again'], 500);
+        }
     }
     
     /**
      * Mark order as payment completed (called from frontend after successful payment)
+     * CRITICAL: Idempotent - safe to call multiple times without double-decrementing stock
      */
     public function markPaymentComplete(Request $request)
     {
@@ -316,31 +402,80 @@ class CheckoutController extends Controller
         }
         
         try {
-            // Find the most recent pending order for this user
-            $order = Order::where('user_id', $user->id)
-                ->where('status', 'pending')
-                ->latest('created_at')
-                ->first();
-            
-            if ($order) {
+            return DB::transaction(function () use ($user) {
+                // Find the most recent order that hasn't been marked as payment complete yet
+                $order = Order::where('user_id', $user->id)
+                    ->where('payment_processed', false)
+                    ->lockForUpdate()  // Pessimistic lock
+                    ->latest('created_at')
+                    ->first();
+                
+                if (!$order) {
+                    return response()->json(['error' => 'Order not found'], 404);
+                }
+
+                // CRITICAL IDEMPOTENCY CHECK: Prevent double-decrementing on webhook retry
+                if ($order->payment_processed) {
+                    \Log::warning('Payment already processed for order', ['order_id' => $order->id]);
+                    return response()->json([
+                        'success' => true, 
+                        'message' => 'Payment already processed',
+                        'isRetry' => true
+                    ]);
+                }
+
                 $updateData = [
-                    'status'          => 'paid',
-                    'shipping_status' => 'processing',
-                    'paid_at'         => now(),
+                    'status'              => 'paid',
+                    'shipping_status'     => 'processing',
+                    'paid_at'             => now(),
+                    'payment_processed'   => true,  // Mark as processed to prevent retries
                 ];
 
                 // Capture payment_method sent from the Midtrans onSuccess result object
-                $paymentType = $request->input('payment_type');
+                $paymentType = request()->input('payment_type');
                 if ($paymentType && !$order->payment_method) {
                     $updateData['payment_method'] = $paymentType;
                 }
 
                 $order->update($updateData);
                 
+                \Log::info('Order status updated to PAID', [
+                    'order_id' => $order->id,
+                    'invoice' => $order->invoice_number,
+                    'user_id' => $order->user_id,
+                    'old_status' => 'pending',
+                    'new_status' => 'paid',
+                    'payment_processed' => true,
+                    'paid_at' => now()->toDateTimeString(),
+                ]);
+                // Use locks to prevent concurrent stock modifications
+                foreach ($order->order_details as $detail) {
+                    $storeBook = $detail->book->storeLocations()
+                        ->where('store_location_id', $detail->store_id)
+                        ->lockForUpdate()  // Pessimistic lock on stock
+                        ->first();
+                    
+                    if ($storeBook) {
+                        $newStock = max(0, $storeBook->pivot->stock - $detail->quantity);
+                        $detail->book->storeLocations()
+                            ->updateExistingPivot($detail->store_id, ['stock' => $newStock]);
+                        
+                        \Log::info('Stock decremented', [
+                            'book_id' => $detail->book_id,
+                            'store_id' => $detail->store_id,
+                            'quantity' => $detail->quantity,
+                            'old_stock' => $storeBook->pivot->stock,
+                            'new_stock' => $newStock,
+                        ]);
+                    }
+                }
+                
                 return response()->json(['success' => true, 'message' => 'Payment marked complete']);
-            }
+            }, 5);  // Maximum 5 transaction retries
             
-            return response()->json(['error' => 'Order not found'], 404);
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Payment processing database error', ['message' => $e->getMessage()]);
+            return response()->json(['error' => 'Database error - payment may still be processing'], 500);
         } catch (\Exception $e) {
             \Log::error('Mark payment complete error', ['message' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to update order'], 500);
@@ -536,24 +671,44 @@ class CheckoutController extends Controller
                         
                         if ($statusCode == 200 || $statusCode == 201) {
                             if ($txStatus === 'capture' || $txStatus === 'settlement') {
-                                $order->status          = 'paid';
-                                $order->payment_method = $paymentType;
-                                $order->paid_at         = now();
-                                $order->shipping_status = 'processing';
-                                $order->save();
+                                // IMPORTANT: Only update if not already processed
+                                // Let markPaymentComplete handle the full status/stock update
+                                if (!$order->payment_processed) {
+                                    $order->payment_method = $paymentType;
+                                    $order->save();
+                                    
+                                    \Log::info('Webhook received payment settlement', [
+                                        'order_id' => $order->id,
+                                        'invoice' => $order->invoice_number,
+                                        'status' => 'awaiting_payment_complete_call'
+                                    ]);
+                                }
                             }
                         } elseif ($txStatus === 'pending') {
-                            $order->status = 'pending';
                             $order->payment_method = $paymentType;
                             $order->save();
                         } elseif (in_array($txStatus, ['deny', 'cancel', 'expire'])) {
-                            // Payment was cancelled, denied, or expired - set status and restore stock
-                            $order->status = 'cancelled';
-                            $order->payment_method = $paymentType;
-                            $order->save();
-                            // Restore stock for all items in cancelled order
-                            foreach ($order->order_details as $detail) {
-                                $detail->book->increment('stock', $detail->quantity);
+                            // Payment was cancelled, denied, or expired
+                            if ($order->status !== 'paid') {
+                                $order->status = 'cancelled';
+                                $order->payment_method = $paymentType;
+                                $order->save();
+                                
+                                // Restore stock for all items in cancelled order to their respective stores
+                                foreach ($order->order_details as $detail) {
+                                    if ($detail->store_id) {
+                                        $book = $detail->book;
+                                        $storeBook = $book->storeLocations()
+                                            ->where('store_location_id', $detail->store_id)
+                                            ->first();
+                                        
+                                        if ($storeBook) {
+                                            $newStock = $storeBook->pivot->stock + $detail->quantity;
+                                            $book->storeLocations()
+                                                ->updateExistingPivot($detail->store_id, ['stock' => $newStock]);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -1090,43 +1245,140 @@ class CheckoutController extends Controller
     }
 
     /**
-     * API endpoint to calculate shipping cost based on store and user coordinates
+     * API endpoint to calculate shipping cost using Binderbyte API
+     * Falls back to local calculation if API fails
      */
     public function calculateShipping(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
-            'store_id'     => 'required|integer|exists:store_locations,id',
-            'latitude'     => 'required|numeric|between:-90,90',
-            'longitude'    => 'required|numeric|between:-180,180',
-            'method'       => 'required|string|in:' . implode(',', array_keys(self::SHIPPING_METHODS)),
+            'store_id'              => 'required|integer|exists:store_locations,id',
+            'latitude'              => 'required|numeric|between:-90,90',
+            'longitude'             => 'required|numeric|between:-180,180',
+            'method'                => 'required|string|in:' . implode(',', array_keys(self::SHIPPING_METHODS)),
+            'weight_grams'          => 'required|numeric|min:100',
+            'destination_city'      => 'nullable|string|max:100',
+            'destination_province'  => 'nullable|string|max:100',
+            'zone'                  => 'nullable|string|in:A,B,C,D,E', // Optional: allow manual zone override
         ]);
 
         try {
             $store = StoreLocation::findOrFail($request->store_id);
+            $shippingService = new ShippingService();
             
-            $distance = $this->calculateDistance(
-                $request->latitude,
-                $request->longitude,
-                $store->latitude,
-                $store->longitude
-            );
-            
+            $weight_grams = $request->weight_grams;
             $method = $request->method;
-            $baseMethod = self::SHIPPING_METHODS[$method];
-            $cost = $this->calculateShippingCost($baseMethod['base_cost'], $distance, $method);
+            
+            // Initialize province variables
+            $origin_province = null;
+            $destination_province = null;
+            
+            // Determine zone
+            // Priority: 1) Manual zone override, 2) Auto-determine from provinces
+            if ($request->zone) {
+                $zone = $request->zone;
+                $origin_province = '?';
+                $destination_province = '?';
+                Log::info('[CHECKOUT] Using manual zone override', ['zone' => $zone]);
+            } else {
+                // Auto-determine zone from origin (store city → province) and destination provinces
+                $origin_city = $store->city ?? '';
+                $origin_province = $this->getCityProvince($origin_city) ?? 'Central Java'; // Fallback
+                $destination_province = $request->destination_province ?? 'Central Java'; // Fallback
+                
+                $zone = $shippingService->determineZone($origin_province, $destination_province);
+                
+                Log::info('[CHECKOUT] Auto-determined zone', [
+                    'store_city' => $origin_city,
+                    'origin_province' => $origin_province,
+                    'destination_province' => $destination_province,
+                    'zone' => $zone,
+                ]);
+            }
+            
+            // Calculate shipping cost using zone-based formula:
+            // cost = zone_base + weight_fee + service_fee
+            $result = $shippingService->calculateShippingCost($weight_grams, $zone, $method);
+            $cost = $result['cost'];
+            $breakdown = $result['breakdown'];
+            
+            Log::info('[CHECKOUT] Shipping cost calculated (zone-based)', [
+                'zone' => $zone,
+                'courier' => $method,
+                'weight_grams' => $weight_grams,
+                'cost' => $cost,
+                'breakdown' => $breakdown,
+            ]);
             
             return response()->json([
                 'success' => true,
-                'distance' => $distance,
+                'zone' => $zone,
                 'cost' => $cost,
+                'method' => $method,
                 'display' => 'Rp ' . number_format($cost, 0, ',', '.'),
+                'note' => $store->name . ' → ' . ($request->destination_city ?? 'Unknown'),
+                'origin_province' => $origin_province,
+                'destination_province' => $destination_province,
+                'breakdown' => [
+                    'zone' => $breakdown['zone'],
+                    'zone_base' => $breakdown['zone_base'],
+                    'weight_kg' => $breakdown['weight_kg'],
+                    'weight_fee' => $breakdown['weight_fee'],
+                    'extra_kg' => $breakdown['extra_kg'] ?? 0,
+                    'service_level' => $breakdown['service_level'],
+                    'service_surcharge' => $breakdown['service_surcharge'],
+                ],
             ]);
         } catch (\Exception $e) {
-            \Log::error('Shipping calculation error', ['error' => $e->getMessage()]);
+            Log::error('[CHECKOUT] Shipping calculation error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to calculate shipping cost'
-            ], 500);
+                'error' => 'Failed to calculate shipping cost: ' . $e->getMessage()
+            ], 400);
         }
+    }
+
+    /**
+     * Map city name to province name
+     * Uses mapping from major Indonesian cities
+     */
+    private function getCityProvince($city)
+    {
+        // City to province mapping for Indonesian cities
+        $cityToProvince = [
+            'jakarta' => 'DKI Jakarta',
+            'bandung' => 'Jawa Barat',
+            'bogor' => 'Jawa Barat',
+            'depok' => 'Jawa Barat',
+            'tasikmalaya' => 'Jawa Barat',
+            'bekasi' => 'Jawa Barat',
+            'surabaya' => 'Jawa Timur',
+            'malang' => 'Jawa Timur',
+            'gresik' => 'Jawa Timur',
+            'kediri' => 'Jawa Timur',
+            'yogyakarta' => 'Daerah Istimewa Yogyakarta',
+            'semarang' => 'Jawa Tengah',
+            'solo' => 'Jawa Tengah',
+            'denpasar' => 'Bali',
+            'medan' => 'Sumatera Utara',
+            'palembang' => 'Sumatera Selatan',
+            'bandar lampung' => 'Lampung',
+            'batam' => 'Kepulauan Bangka Belitung',
+            'pekanbaru' => 'Riau',
+            'jambi' => 'Jambi',
+            'makassar' => 'Sulawesi Selatan',
+            'manado' => 'Sulawesi Utara',
+            'pontianak' => 'Kalimantan Barat',
+            'banjarmasin' => 'Kalimantan Selatan',
+            'samarinda' => 'Kalimantan Timur',
+            'jayapura' => 'Papua',
+            'ambon' => 'Maluku',
+            'ternate' => 'Maluku Utara',
+        ];
+        
+        $cityLower = strtolower(trim($city ?? ''));
+        return $cityToProvince[$cityLower] ?? null;
     }
 }

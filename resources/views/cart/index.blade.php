@@ -93,6 +93,7 @@
                 <thead class="bg-dark bg-opacity-10 text-dark">
                     <tr>
                         <th class="ps-4 py-3 fw-bold border-0">Book Details</th>
+                        <th class="text-center py-3 fw-bold border-0">Store Location</th>
                         <th class="text-center py-3 fw-bold border-0">Price</th>
                         <th class="text-center py-3 fw-bold border-0">Quantity</th>
                         <th class="text-center py-3 fw-bold border-0">Subtotal</th>
@@ -117,11 +118,37 @@
                                 </div>
                             </div>
                         </td>
+                        <td class="text-center">
+                            <select name="store_ids[{{ $item['book']->id }}]" class="form-select form-select-sm store-selector rounded-2 fw-bold border-info" data-book-id="{{ $item['book']->id }}" style="width: 180px; margin: 0 auto;">
+                                <option value="">Select Store</option>
+                                @foreach($stores as $store)
+                                    @php
+                                        $storeBook = $item['book']->storeLocations()->where('store_location_id', $store->id)->first();
+                                        $storeStock = $storeBook ? $storeBook->pivot->stock : 0;
+                                        $isSelected = $item['store_id'] == $store->id;
+                                    @endphp
+                                    <option value="{{ $store->id }}" {{ $isSelected ? 'selected' : '' }} data-stock="{{ $storeStock }}">
+                                        {{ $store->city }} (Stock: {{ $storeStock }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="store-status-msg d-block mt-1" style="display: {{ $item['store_id'] ? 'none' : 'block' }};">
+                                <span class="text-danger">⚠️ Required</span>
+                            </small>
+                        </td>
                         <td class="text-center text-dark fw-medium">Rp {{ number_format($item['book']->price, 0, ',', '.') }}</td>
                         <td class="text-center">
                             <div class="d-inline-block">
-                                <input type="number" name="quantities[{{ $item['book']->id }}]" value="{{ $item['quantity'] }}" min="0" max="{{ $item['book']->stock }}" class="form-control form-control-sm text-center quantity-input fw-bold border-secondary rounded-3 shadow-sm mb-1" style="width: 80px; margin: 0 auto;" data-book-id="{{ $item['book']->id }}" />
-                                <small class="text-muted text-uppercase font-monospace" style="font-size: 0.7rem;">Stock: {{ $item['book']->stock }}</small>
+                                <input type="number" name="quantities[{{ $item['book']->id }}]" value="{{ $item['quantity'] }}" min="1" class="form-control form-control-sm text-center quantity-input fw-bold border-secondary rounded-3 shadow-sm mb-1" style="width: 80px; margin: 0 auto;" data-book-id="{{ $item['book']->id }}" />
+                                @if($item['store_id'])
+                                    @php
+                                        $storeBook = $item['book']->storeLocations()->where('store_location_id', $item['store_id'])->first();
+                                        $storeStock = $storeBook ? $storeBook->pivot->stock : 0;
+                                    @endphp
+                                    <small class="text-muted text-uppercase font-monospace" style="font-size: 0.7rem;">Max: {{ $storeStock }}</small>
+                                @else
+                                    <small class="text-warning text-uppercase font-monospace" style="font-size: 0.7rem;">Select store</small>
+                                @endif
                             </div>
                         </td>
                         <td class="text-center text-success fw-bold">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</td>
@@ -158,6 +185,83 @@
 
         <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Helper: Get selected store stock for a book
+            function getStoreStockForBook(bookId) {
+                const storeSelector = document.querySelector(`.store-selector[data-book-id="${bookId}"]`);
+                if (!storeSelector || !storeSelector.value) return 0;
+                const selectedOption = storeSelector.options[storeSelector.selectedIndex];
+                return parseInt(selectedOption.getAttribute('data-stock')) || 0;
+            }
+            
+            // Handle store selector changes
+            document.querySelectorAll('.store-selector').forEach(selector => {
+                selector.addEventListener('change', function() {
+                    const bookId = this.getAttribute('data-book-id');
+                    const selectedOption = this.options[this.selectedIndex];
+                    const storeStock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
+                    const quantityInput = document.querySelector(`.quantity-input[data-book-id="${bookId}"]`);
+                    const statusMsg = this.closest('td').querySelector('.store-status-msg');
+                    
+                    // Update required message visibility
+                    if (statusMsg) {
+                        statusMsg.style.display = this.value ? 'none' : 'block';
+                    }
+                    
+                    if (quantityInput) {
+                        if (storeStock <= 0) {
+                            quantityInput.value = 0;
+                            quantityInput.disabled = true;
+                            quantityInput.max = 0;
+                            showToast('Selected store has no stock for this book', 'warning', 3000);
+                        } else {
+                            quantityInput.disabled = false;
+                            quantityInput.max = storeStock;
+                            if (parseInt(quantityInput.value) > storeStock) {
+                                quantityInput.value = storeStock;
+                                showToast(`Quantity adjusted to max available: ${storeStock}`, 'info', 2000);
+                            } else if (parseInt(quantityInput.value) < 1) {
+                                quantityInput.value = 1;
+                            }
+                        }
+                    }
+                    
+                    // Validate selection on change
+                    updateCheckoutButton();
+                });
+            });
+            
+            // CRITICAL: Validate quantity against store stock on quantity change
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const bookId = this.getAttribute('data-book-id');
+                    const storeStock = getStoreStockForBook(bookId);
+                    const currentQty = parseInt(this.value) || 0;
+                    
+                    if (storeStock > 0 && currentQty > storeStock) {
+                        this.value = storeStock;
+                        showToast(`Cannot exceed store stock of ${storeStock}. Quantity adjusted.`, 'warning', 2000);
+                    } else if (currentQty < 1) {
+                        this.value = 1;
+                        showToast('Quantity must be at least 1', 'warning', 2000);
+                    }
+                });
+                
+                // Add blur event to enforce minimum 1 when user leaves field
+                input.addEventListener('blur', function() {
+                    const currentQty = parseInt(this.value) || 0;
+                    if (currentQty < 1) {
+                        this.value = 1;
+                    }
+                });
+                
+                // Set initial max attribute based on selected store
+                const bookId = input.getAttribute('data-book-id');
+                const storeStock = getStoreStockForBook(bookId);
+                if (storeStock > 0) {
+                    input.max = storeStock;
+                }
+            });
+
             // Handle remove buttons
             document.querySelectorAll('.btn-remove-item').forEach(button => {
                 button.addEventListener('click', function() {
@@ -167,23 +271,52 @@
                 });
             });
 
-            // AJAX quantity updates without page reload
-            document.querySelectorAll('.quantity-input').forEach(input => {
+            // Prevent checkout if stores not selected
+            function updateCheckoutButton() {
+                const allStoresSelected = Array.from(document.querySelectorAll('.store-selector')).every(selector => {
+                    return selector.value !== '';
+                });
+                
+                const checkoutBtn = document.querySelector('a[href="{{ route("checkout.show") }}"]');
+                if (checkoutBtn) {
+                    if (!allStoresSelected) {
+                        checkoutBtn.classList.add('disabled');
+                        checkoutBtn.style.pointerEvents = 'none';
+                        checkoutBtn.style.opacity = '0.6';
+                    } else {
+                        checkoutBtn.classList.remove('disabled');
+                        checkoutBtn.style.pointerEvents = 'auto';
+                        checkoutBtn.style.opacity = '1';
+                    }
+                }
+            }
+            
+            updateCheckoutButton();
+
+            // AJAX quantity and store updates without page reload
+            document.querySelectorAll('.quantity-input, .store-selector').forEach(input => {
                 input.addEventListener('change', async function() {
-                    const bookId = this.getAttribute('data-book-id');
-                    const quantity = parseInt(this.value) || 0;
-                    const maxStock = parseInt(this.getAttribute('max'));
+                    const allStoresSelected = Array.from(document.querySelectorAll('.store-selector')).every(selector => {
+                        return selector.value !== '';
+                    });
                     
-                    // Validate stock
-                    if (quantity > maxStock) {
-                        this.value = maxStock;
-                        showToast(`Maximum available stock is ${maxStock}`, 'warning', 3000);
+                    if (!allStoresSelected) {
+                        showToast('Please select a store location for all items', 'warning', 3000);
                         return;
                     }
                     
                     try {
                         const formData = new FormData();
-                        formData.append('quantities[' + bookId + ']', quantity);
+                        
+                        document.querySelectorAll('.quantity-input').forEach(qInput => {
+                            const bookId = qInput.getAttribute('data-book-id');
+                            formData.append('quantities[' + bookId + ']', parseInt(qInput.value) || 0);
+                        });
+                        
+                        document.querySelectorAll('.store-selector').forEach(selector => {
+                            const bookId = selector.getAttribute('data-book-id');
+                            formData.append('store_ids[' + bookId + ']', selector.value || '');
+                        });
                         
                         const response = await fetch('{{ route("cart.update") }}', {
                             method: 'POST',
@@ -194,32 +327,29 @@
                         });
                         
                         if (response.ok) {
-                            // Get all quantities and recalculate
-                            const quantities = {};
-                            document.querySelectorAll('.quantity-input').forEach(qInput => {
-                                quantities[qInput.getAttribute('data-book-id')] = parseInt(qInput.value) || 0;
-                            });
-                            
-                            // Update subtotal for this row
+                            // Update subtotal for each row
                             const rows = document.querySelectorAll('tbody tr');
                             let newGrandTotal = 0;
-                            rows.forEach(row => {
-                                const priceText = row.querySelector('td:nth-child(2)').textContent;
+                            rows.forEach((row, index) => {
+                                const priceText = row.querySelector('td:nth-child(3)').textContent;
                                 const price = parseInt(priceText.replace(/\D/g, ''));
                                 const rowQuantityInput = row.querySelector('.quantity-input');
                                 const rowQuantity = parseInt(rowQuantityInput.value) || 0;
                                 const rowSubtotal = price * rowQuantity;
-                                row.querySelector('td:nth-child(4)').textContent = 'Rp ' + rowSubtotal.toLocaleString('id-ID');
+                                row.querySelector('td:nth-child(5)').textContent = 'Rp ' + rowSubtotal.toLocaleString('id-ID');
                                 newGrandTotal += rowSubtotal;
                             });
                             
                             // Update grand total
-                            const totalDisplay = document.querySelector('.tracking-wider').closest('div').querySelector('h2');
+                            const totalDisplay = document.querySelector('h2.fw-bold.text-success');
                             if (totalDisplay) {
                                 totalDisplay.textContent = 'Rp ' + newGrandTotal.toLocaleString('id-ID');
                             }
                             
+                            updateCheckoutButton();
                             showToast('Cart updated', 'success', 2000);
+                        } else {
+                            showToast('Error updating cart', 'error', 3000);
                         }
                     } catch (error) {
                         console.error('Error updating cart:', error);

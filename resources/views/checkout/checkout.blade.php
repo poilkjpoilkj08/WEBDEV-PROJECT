@@ -119,6 +119,26 @@
         border: 2px solid #dc3545 !important;
     }
     
+    /* Order Summary Prominence */
+    #shippingDisplay {
+        font-size: 1.1rem !important;
+        font-weight: bold !important;
+        color: #198754 !important;
+        display: block !important;
+    }
+    
+    #shippingRate {
+        display: block !important;
+        color: #666 !important;
+        font-size: 0.9rem !important;
+        margin-top: 4px;
+    }
+
+    #grandTotalDisplay {
+        color: #198754 !important;
+        font-weight: 700 !important;
+    }
+    
     .error-message {
         display: none;
         color: #dc3545;
@@ -323,25 +343,66 @@
         {{-- LEFT: Order Summary + Shipping Form --}}
         <div class="col-lg-7">
 
-            {{-- Order summary Card --}}
+            {{-- Order summary with Store Selection Card --}}
             <div class="card shadow-lg border-0 bg-white rounded-4 overflow-hidden mb-4">
                 <div class="card-body p-4 p-md-5">
                     <h3 class="h5 fw-bold text-dark border-bottom pb-3 mb-4">
-                        <i class="fas fa-shopping-bag text-primary me-2"></i>Order Summary
+                        <i class="fas fa-shopping-bag text-primary me-2"></i>Order Summary & Store Selection
+                        <span id="shippingCalculatedBadge" class="badge bg-success ms-2" style="display: none;">
+                            <i class="fas fa-check-circle me-1"></i>Shipping Calculated
+                        </span>
                     </h3>
                     
-                    <div class="pe-1 mb-4" style="max-height: 380px; overflow-y: auto;">
+                    <div class="pe-1 mb-4" style="max-height: 500px; overflow-y: auto;">
                         @foreach($items as $item)
-                        <div class="d-flex justify-content-between align-items-center py-3 border-bottom hover-lift">
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="{{ $item['book']->cover_image_src }}" alt="{{ $item['book']->title }}"
-                                     style="width:40px;height:55px;object-fit:cover;border-radius:4px;" class="border shadow-sm">
-                                <div>
-                                    <h4 class="h6 fw-bold text-dark mb-1 text-truncate" style="max-width: 280px;" title="{{ $item['book']->title }}">{{ $item['book']->title }}</h4>
-                                    <small class="text-muted font-monospace bg-light px-2 py-0.5 rounded border small">Qty: {{ $item['quantity'] }} × Rp {{ number_format($item['book']->price, 0, ',', '.') }}</small>
+                        <div class="py-3 border-bottom cart-item" 
+                             data-book-id="{{ $item['book']->id }}"
+                             data-weight-grams="{{ (int)($item['book']->weight_grams ?? 300) }}"
+                             data-quantity="{{ $item['quantity'] }}">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ $item['book']->cover_image_src }}" alt="{{ $item['book']->title }}"
+                                         style="width:40px;height:55px;object-fit:cover;border-radius:4px;" class="border shadow-sm">
+                                    <div>
+                                        <h4 class="h6 fw-bold text-dark mb-1 text-truncate" style="max-width: 280px;" title="{{ $item['book']->title }}">{{ $item['book']->title }}</h4>
+                                        <small class="text-muted font-monospace bg-light px-2 py-0.5 rounded border small">Qty: {{ $item['quantity'] }} × Rp {{ number_format($item['book']->price, 0, ',', '.') }} | Weight: {{ (int)($item['book']->weight_grams ?? 300) }}g</small>
+                                    </div>
                                 </div>
+                                <span class="fw-bold text-secondary">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</span>
                             </div>
-                            <span class="fw-bold text-secondary">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</span>
+                            
+                            {{-- Store Selection for this item --}}
+                            <div class="ms-5 ps-2 mb-2">
+                                <label class="form-label fw-medium text-dark small mb-2">
+                                    Select Store for this item
+                                    <span class="item-store-required text-danger" style="display: @if(!$item['store_id']) inline @else none @endif;">*</span>
+                                </label>
+                                <select name="store_ids[{{ $item['book']->id }}]" form="paymentForm" 
+                                        class="form-select form-select-sm rounded-2 border-info fw-semibold item-store-select" 
+                                        data-book-id="{{ $item['book']->id }}" 
+                                        @if(!$item['store_id']) required @endif>
+                                    <option value="">-- Choose Store --</option>
+                                    @foreach($stores as $store)
+                                        @php
+                                            $storeBook = $item['book']->storeLocations()->where('store_location_id', $store->id)->first();
+                                            $storeStock = $storeBook ? $storeBook->pivot->stock : 0;
+                                            $isSelected = $item['store_id'] == $store->id;
+                                        @endphp
+                                        <option value="{{ $store->id }}" 
+                                                {{ $isSelected ? 'selected' : '' }}
+                                                data-stock="{{ $storeStock }}"
+                                                data-lat="{{ $store->latitude }}"
+                                                data-lng="{{ $store->longitude }}">
+                                            {{ $store->city }} (Stock: {{ $storeStock }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="item-store-message d-block mt-1" 
+                                       style="display: @if(!$item['store_id']) block @else none @endif;">
+                                    <span class="text-danger" style="display: @if(!$item['store_id']) inline @else none @endif;">⚠️ Store selection required</span>
+                                    <span class="text-success" style="display: @if($item['store_id']) inline @else none @endif;">✓ Store selected</span>
+                                </small>
+                            </div>
                         </div>
                         @endforeach
                     </div>
@@ -352,7 +413,10 @@
                     </div>
                     <div class="d-flex justify-content-between align-items-center pt-2 mb-2">
                         <span class="text-muted small text-uppercase fw-bold">Shipping cost</span>
-                        <span id="shippingDisplay" class="text-muted fw-semibold" style="display: none;">— select method</span>
+                        <div class="text-end">
+                            <span id="shippingDisplay" class="d-block fw-bold text-success" style="display: none; font-size: 1.1rem;">— select method</span>
+                            <span id="shippingRate" class="d-block text-muted small" style="display: none; margin-top: 4px;"></span>
+                        </div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center pt-2 mb-2">
                         <span class="text-muted small text-uppercase fw-bold">Payment Method</span>
@@ -362,44 +426,6 @@
                     <div class="d-flex justify-content-between align-items-center pt-3 mt-2 border-top">
                         <span class="text-muted small text-uppercase fw-bold tracking-wider">Grand Total Amount</span>
                         <span class="h3 text-success fw-bold mb-0" id="grandTotalDisplay">Rp {{ number_format($total, 0, ',', '.') }}</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Store Selection Card --}}
-            <div class="card shadow-lg border-0 bg-white rounded-4 overflow-hidden mb-4">
-                <div class="card-body p-4 p-md-5">
-                    <h3 class="h5 fw-bold text-dark border-bottom pb-3 mb-4">
-                        <i class="fas fa-store text-primary me-2"></i>Select Store Location
-                    </h3>
-                    
-                    <div class="row g-3">
-                        @forelse($stores as $store)
-                        <div class="col-md-6">
-                            <label class="store-card p-3 rounded-3 border border-2 border-light hover-lift" 
-                                   style="cursor:pointer; transition: all 0.3s;" for="store_{{ $store->id }}">
-                                <div class="d-flex align-items-start gap-2">
-                                    <input type="radio" name="store_id" id="store_{{ $store->id }}"
-                                           value="{{ $store->id }}"
-                                           data-lat="{{ $store->latitude }}"
-                                           data-lng="{{ $store->longitude }}"
-                                           form="paymentForm"
-                                           class="form-check-input store-radio mt-1"
-                                           {{ $loop->first ? 'required checked' : '' }}>
-                                    <div class="flex-grow-1">
-                                        <div class="fw-bold text-dark">{{ $store->name }}</div>
-                                        <small class="text-muted d-block">{{ $store->address }}</small>
-                                        <small class="text-muted d-block">{{ $store->city }}, {{ $store->country }}</small>
-                                        <small class="text-success mt-1 d-block"><i class="fas fa-phone me-1"></i>{{ $store->phone }}</small>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                        @empty
-                        <div class="col-12">
-                            <div class="alert alert-warning mb-0">No stores available</div>
-                        </div>
-                        @endforelse
                     </div>
                 </div>
             </div>
@@ -554,7 +580,7 @@
             {{-- Shipping method Selection Card --}}
             <div class="card shadow-lg border-0 bg-white rounded-4 overflow-hidden mb-4">
                 <div class="card-header bg-white fw-bold py-3 border-bottom">
-                    <i class="fas fa-truck me-2 text-primary"></i>Shipping Method (Dynamic Pricing)
+                    <i class="fas fa-truck me-2 text-primary"></i>Shipping Method
                 </div>
                 <div class="card-body p-0">
                     @php
@@ -574,9 +600,7 @@
                                 <div class="fw-bold text-dark">{{ $method['name'] }}</div>
                             </div>
                         </div>
-                        <span class="fw-bold text-primary shipping-cost" data-method="{{ $key }}">
-                            Rp {{ number_format($method['base_cost'], 0, ',', '.') }}
-                        </span>
+                        <div></div>
                     </label>
                     @endforeach
                 </div>
@@ -633,11 +657,7 @@ const indonesianLocations = {!! json_encode($indonesianLocations) !!};
 let mapInstance, mapMarker, storeMarker, mapPickerModal, selectedMapLocation = null;
 let currentStoreLocation = null;  // Track selected store location
 let userSelectedLocation = null;  // Track user's manually selected location
-
-// Initialize location search
-const locationSearchInput = document.getElementById('location_search');
-const locationSuggestions = document.getElementById('locationSuggestions');
-const postalCodeSelect = document.getElementById('shipping_postal_code_input');
+let locationSearchInput, locationSuggestions, postalCodeSelect;  // Will be initialized in DOMContentLoaded
 
 // Build flat location list for searching (3-level hierarchy: Province -> City -> District)
 function buildLocationsList() {
@@ -666,48 +686,6 @@ function buildLocationsList() {
 }
 
 const allLocations = buildLocationsList();
-
-// Location search functionality
-if (locationSearchInput) {
-    locationSearchInput.addEventListener('input', function() {
-        const query = this.value.trim().toLowerCase();
-        locationSuggestions.innerHTML = '';
-        
-        if (!query || query.length < 2) {
-            locationSuggestions.classList.remove('show');
-            return;
-        }
-        
-        const filtered = allLocations.filter(loc => {
-            const searchText = `${loc.district} ${loc.city} ${loc.province}`.toLowerCase();
-            return searchText.includes(query);
-        });
-        
-        if (filtered.length > 0) {
-            filtered.forEach(loc => {
-                const div = document.createElement('div');
-                div.className = 'location-suggestion-item';
-                div.innerHTML = `
-                    <div class="location-suggestion-label">${loc.district}</div>
-                    <div class="location-suggestion-desc">${loc.city}, ${loc.province} - ${loc.postal_code}</div>
-                `;
-                div.addEventListener('click', function() {
-                    selectLocation(loc);
-                });
-                locationSuggestions.appendChild(div);
-            });
-            locationSuggestions.classList.add('show');
-        } else {
-            locationSuggestions.classList.remove('show');
-        }
-    });
-    
-    locationSearchInput.addEventListener('blur', function() {
-        setTimeout(() => {
-            locationSuggestions.classList.remove('show');
-        }, 200);
-    });
-}
 
 function selectLocation(location) {
     locationSearchInput.value = `${location.district}, ${location.city}`;
@@ -1168,136 +1146,366 @@ if (mapConfirmButton) {
     });
 }
 
-// Store selection changes - preserve user's address
-document.querySelectorAll('.store-radio').forEach(function(radio) {
-    radio.addEventListener('change', function() {
-        // Update current store location
-        currentStoreLocation = {
-            lat: parseFloat(this.dataset.lat),
-            lng: parseFloat(this.dataset.lng)
-        };
-        
-        // IMPORTANT: Check if user already entered an address
-        const userLat = document.getElementById('shipping_latitude').value;
-        const userLng = document.getElementById('shipping_longitude').value;
-        
-        if (userLat && userLng) {
-            // User already entered address - recalculate with new store
-            calculateShippingCost();
-        } else {
-            // No address yet - show only base cost
-            const methodRadio = document.querySelector('.shipping-radio:checked');
-            const baseCost = parseInt(methodRadio?.dataset.baseCost || 0);
-            showBaseCost(baseCost);
-        }
-        
-        // Reinitialize map if it's open to show new store marker
-        if (mapInstance) {
-            mapInstance = null;
-            mapMarker = null;
-            if (document.getElementById('mapElement')) {
-                initMapPicker();
-            }
-        }
-    });
-});
 
-// Shipping method changes
-document.querySelectorAll('.shipping-radio').forEach(function(radio) {
-    radio.addEventListener('change', calculateShippingCost);
-});
 
 async function calculateShippingCost() {
     try {
-        const storeId = document.querySelector('.store-radio:checked')?.value;
         const method = document.querySelector('.shipping-radio:checked')?.value;
         const lat = parseFloat(document.getElementById('shipping_latitude').value) || null;
         const lng = parseFloat(document.getElementById('shipping_longitude').value) || null;
+        const destinationCity = document.getElementById('shipping_city').value || null;
+        const destinationProvince = document.getElementById('shipping_province').value || null;
 
-        console.log('[CALC] storeId:', storeId, 'method:', method, 'lat:', lat, 'lng:', lng);
+        console.log('[CALC] === SHIPPING COST CALCULATION START (Multi-Store) ===');
+        console.log('[CALC] method:', method);
+        console.log('[CALC] destination:', destinationCity, ',', destinationProvince);
 
-        // No store selected - hide shipping
-        if (!storeId || !method) {
-            console.log('[CALC] No store/method selected');
+        // No method selected - hide shipping
+        if (!method) {
+            console.log('[CALC] ❌ No shipping method selected');
             hideShippingCost();
             return;
         }
 
-        // Store selected but address NOT filled - show base cost only
-        if (!lat || !lng) {
-            console.log('[CALC] Store selected, address NOT filled - showing base cost only');
-            const methodRadio = document.querySelector('.shipping-radio:checked');
-            const baseCost = parseInt(methodRadio?.dataset.baseCost || 0);
-            showBaseCost(baseCost);
+        // Address NOT filled - hide shipping
+        if (!lat || !lng || !destinationCity) {
+            console.log('[CALC] ⚠️ Address incomplete - hiding shipping');
+            hideShippingCost();
             return;
         }
 
-        // BOTH store and address filled - calculate full cost with distance
-        console.log('[CALC] Both store and address filled - calculating distance cost...');
-        const response = await axios.post('{{ route("checkout.calculate-shipping") }}', {
-            store_id: storeId,
-            latitude: lat,
-            longitude: lng,
-            method: method
-        }, {
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content }
+        // GROUP ITEMS BY STORE
+        const storeGroups = {};
+        document.querySelectorAll('.cart-item').forEach(item => {
+            const select = item.querySelector('.item-store-select');
+            const storeId = select?.value;
+            
+            if (!storeId) {
+                console.warn('[CALC] ⚠️ Item has no store selected:', item.dataset.bookId);
+                return;
+            }
+            
+            if (!storeGroups[storeId]) {
+                storeGroups[storeId] = {
+                    store_id: storeId,
+                    weight_grams: 0,
+                    items: []
+                };
+            }
+            
+            const weightGrams = parseInt(item.dataset.weightGrams || 300);
+            const quantity = parseInt(item.dataset.quantity || 1);
+            const itemTotal = weightGrams * quantity;
+            storeGroups[storeId].weight_grams += itemTotal;
+            storeGroups[storeId].items.push({
+                book_id: item.dataset.bookId,
+                weight: weightGrams,
+                qty: quantity,
+                total: itemTotal
+            });
+            console.log(`[CALC] Book #${item.dataset.bookId}: ${weightGrams}g × ${quantity} = ${itemTotal}g`);
         });
 
-        console.log('[CALC] Response:', response.data);
-        if (response.data.success) {
-            updateTotalsDisplay(response.data.cost);
-            if (document.getElementById('shippingDisplay')) {
-                document.getElementById('shippingDisplay').title = ` (${response.data.distance} km)`;
+        const storeIds = Object.keys(storeGroups);
+        console.log('[CALC] Grouped into', storeIds.length, 'store(s):', storeIds);
+        storeIds.forEach(sid => {
+            console.log(`[CALC] Store #${sid}: Total Weight = ${storeGroups[sid].weight_grams}g = ${(storeGroups[sid].weight_grams/1000).toFixed(3)}kg`);
+        });
+        
+        if (storeIds.length === 0) {
+            console.log('[CALC] ❌ No items with selected stores');
+            hideShippingCost();
+            return;
+        }
+
+        // CALCULATE SHIPPING FOR EACH STORE
+        let totalShippingCost = 0;
+        // Make shippingByStore global so form submission can access it for breakdown data
+        window.shippingByStore = {};
+        
+        for (const storeId of storeIds) {
+            const group = storeGroups[storeId];
+            const payload = {
+                store_id: group.store_id,
+                latitude: lat,
+                longitude: lng,
+                method: method,
+                weight_grams: Math.max(group.weight_grams, 100),
+                destination_city: destinationCity,
+                destination_province: destinationProvince
+            };
+            
+            console.log(`[CALC] API Request Store #${storeId}:`, {
+                weight_grams_raw: group.weight_grams,
+                weight_grams_sent: payload.weight_grams,
+                weight_kg: (payload.weight_grams / 1000).toFixed(3),
+                items_count: group.items.length,
+                items: group.items
+            });
+            
+            const response = await axios.post('{{ route("checkout.calculate-shipping") }}', payload, {
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content }
+            });
+
+            if (response.data.success) {
+                const cost = response.data.cost;
+                const breakdown = response.data.breakdown || {};
+                
+                console.log(`[CALC] API Response Store #${storeId}:`, {
+                    cost: response.data.cost,
+                    zone: response.data.zone,
+                    breakdown: breakdown
+                });
+                
+                window.shippingByStore[storeId] = {
+                    cost: cost,
+                    display: response.data.display,
+                    zone: response.data.zone,
+                    breakdown: breakdown,
+                    note: response.data.note,
+                    origin_province: response.data.origin_province,
+                    destination_province: response.data.destination_province
+                };
+                
+                totalShippingCost += cost;
+                
+                console.log(`[CALC] ✓ Store #${storeId}: ${response.data.display} (Zone ${breakdown.zone}) | ${response.data.origin_province} → ${response.data.destination_province}`);
+            } else {
+                console.error(`[CALC] ❌ Store #${storeId} failed:`, response.data.error);
+                hideShippingCost();
+                return;
             }
         }
+
+        console.log('[CALC] ✓ All stores calculated - Total:', 'Rp ' + totalShippingCost.toLocaleString('id-ID'));
+        console.log('[CALC] Per-store breakdown:', window.shippingByStore);
+        
+        // Update display with per-store breakdown
+        updateTotalsDisplay(totalShippingCost, 'Rp ' + totalShippingCost.toLocaleString('id-ID'), window.shippingByStore);
+        
+        // Also display detailed per-store breakdown below subtotal
+        displayPerStoreShippingBreakdown(window.shippingByStore);
+        
+        console.log('[CALC] === SHIPPING COST CALCULATION END ===');
     } catch (error) {
-        console.error('[CALC] Error:', error);
+        console.error('[CALC] ❌ ERROR:', error.message);
+        console.error('[CALC] Response:', error.response?.data);
         hideShippingCost();
     }
 }
 
-function hideShippingCost() {
-    const shippingDisplay = document.getElementById('shippingDisplay');
-    if (shippingDisplay) {
-        shippingDisplay.style.display = 'none'; // Hide completely
+function displayPerStoreShippingBreakdown(shippingByStore) {
+    // Find or create the breakdown container - insert after shipping cost section
+    let breakdownContainer = document.getElementById('perStoreShippingBreakdown');
+    
+    if (!breakdownContainer) {
+        breakdownContainer = document.createElement('div');
+        breakdownContainer.id = 'perStoreShippingBreakdown';
+        
+        // Find the shipping cost div and insert after it
+        const shippingDisplay = document.getElementById('shippingDisplay');
+        if (shippingDisplay && shippingDisplay.parentElement) {
+            shippingDisplay.parentElement.parentElement.insertAdjacentElement('afterend', breakdownContainer);
+        } else {
+            // Fallback: insert before grand total
+            const grandTotal = document.getElementById('grandTotalDisplay');
+            if (grandTotal) {
+                grandTotal.closest('.d-flex').insertAdjacentElement('beforebegin', breakdownContainer);
+            } else {
+                console.error('[DISPLAY] Could not find insertion point for breakdown');
+                return;
+            }
+        }
     }
+
+    // Zone category labels
+    const zoneLabels = {
+        'A': 'Same Province',
+        'B': 'Same Province, Different City',
+        'C': 'Same Island, Different Province',
+        'D': 'Different Main Islands',
+        'E': 'Remote Area'
+    };
+
+    // Build HTML for each store
+    let html = '<div class="p-3 my-3 rounded-2" style="background: #f0f8f5; border-left: 4px solid #198754;"><p class="mb-2 text-muted small fw-bold">SHIPPING BREAKDOWN PER STORE</p>';
+    
+    // Build a map of store IDs to store names and books
+    const storeInfo = {};
+    document.querySelectorAll('.item-store-select').forEach(select => {
+        const storeId = parseInt(select.value);
+        const bookTitle = select.closest('.cart-item').dataset.bookTitle || select.closest('.cart-item').querySelector('h6')?.textContent || 'Unknown';
+        const selectedOption = select.options[select.selectedIndex];
+        const storeName = selectedOption?.textContent?.split('(')[0]?.trim() || 'Unknown Store';
+        
+        if (storeId && shippingByStore[storeId]) {
+            if (!storeInfo[storeId]) {
+                storeInfo[storeId] = { name: storeName, books: [] };
+            }
+            if (!storeInfo[storeId].books.includes(bookTitle)) {
+                storeInfo[storeId].books.push(bookTitle);
+            }
+        }
+    });
+    
+    for (const [storeId, data] of Object.entries(shippingByStore)) {
+        const b = data.breakdown;
+        const totalWeight = (b.weight_kg || 0).toFixed(2);
+        const extraWeight = (b.extra_kg || 0).toFixed(2);
+        const zoneCategory = zoneLabels[b.zone] || 'Unknown Zone';
+        const storeName = storeInfo[storeId]?.name || `Store #${storeId}`;
+        const books = storeInfo[storeId]?.books || [];
+        
+        console.log(`[DISPLAY] Store #${storeId} breakdown:`, {weight_kg: b.weight_kg, extra_kg: b.extra_kg, weight_fee: b.weight_fee, zone_base: b.zone_base, service_surcharge: b.service_surcharge});
+        
+        // Build weight display: show total, then clarify if there's extra above 1kg
+        let weightDisplay = `${totalWeight}kg`;
+        if (extraWeight > 0) {
+            weightDisplay += ` (above 1kg: ${extraWeight}kg)`;
+        }
+        
+        // Build books list HTML
+        let booksHtml = books.length > 0 ? books.map(b => `<div class="ps-2 small text-muted">• ${b}</div>`).join('') : '';
+        
+        html += `
+        <div class="mb-2 p-2" style="background: white; border-left: 3px solid #198754; border-radius: 3px;">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <strong>Store: ${storeName}</strong>
+                    ${booksHtml}
+                    <small class="d-block text-muted mt-1">Zone <strong style="color: #198754;">${b.zone}</strong> (${zoneCategory})</small>
+                </div>
+                <strong style="color: #198754; font-size: 1rem;">${data.display}</strong>
+            </div>
+            <small class="d-block text-muted mb-2">Weight: ${weightDisplay}</small>
+            <div class="ps-2" style="font-size: 0.8rem; color: #666;">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>• Base:</span>
+                    <span>Rp ${(b.zone_base || 0).toLocaleString('id-ID')}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span>• Weight Fee:</span>
+                    <span>Rp ${(b.weight_fee || 0).toLocaleString('id-ID')}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>• Service (${b.service_level || 'N/A'}):</span>
+                    <span>Rp ${(b.service_surcharge || 0).toLocaleString('id-ID')}</span>
+                </div>
+            </div>
+        </div>
+        `;
+    }
+    
+    html += '</div>';
+    breakdownContainer.innerHTML = html;
+    breakdownContainer.style.display = 'block';
+    
+    console.log('[DISPLAY] ✓ Per-store breakdown displayed with', Object.keys(shippingByStore).length, 'store(s)');
+}
+
+function hideShippingCost() {
+    console.log('[HIDE] hideShippingCost called');
+    const shippingDisplay = document.getElementById('shippingDisplay');
+    const shippingRate = document.getElementById('shippingRate');
+    const perStoreBreakdown = document.getElementById('perStoreShippingBreakdown');
+    
+    if (shippingDisplay) {
+        shippingDisplay.style.display = 'none';
+        shippingDisplay.textContent = '';
+    }
+    if (shippingRate) {
+        shippingRate.style.display = 'none';
+        shippingRate.textContent = '';
+    }
+    if (perStoreBreakdown) {
+        perStoreBreakdown.style.display = 'none';
+    }
+    
     // Show only subtotal without shipping
-    document.getElementById('grandTotalDisplay').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+    const grandTotalDisplay = document.getElementById('grandTotalDisplay');
+    if (grandTotalDisplay) {
+        grandTotalDisplay.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+        grandTotalDisplay.style.color = 'inherit';
+    }
     currentShippingCost = 0;
 }
 
 function showBaseCost(baseCost) {
+    console.log('[BASE] showBaseCost called with:', baseCost);
     currentShippingCost = baseCost;
+    
     const shippingDisplay = document.getElementById('shippingDisplay');
+    const shippingRate = document.getElementById('shippingRate');
+    
     if (shippingDisplay) {
-        shippingDisplay.style.display = 'block';
-        shippingDisplay.title = '(base cost only - address will be used to calculate final distance cost)';
+        shippingDisplay.style.cssText = 'display: block !important; visibility: visible !important; font-size: 1.1rem; font-weight: bold; color: #6c757d;';
         shippingDisplay.textContent = baseCost === 0 ? 'FREE' : 'Rp ' + baseCost.toLocaleString('id-ID');
+        shippingDisplay.title = '(base cost only - enter full address for distance-based calculation)';
+        console.log('[BASE] shippingDisplay updated with base cost:', shippingDisplay.textContent);
     }
+    
+    if (shippingRate) {
+        shippingRate.style.cssText = 'display: block !important; visibility: visible !important;';
+        shippingRate.textContent = '(awaiting address...)';
+        shippingRate.style.color = '#999';
+    }
+    
     // Update grand total with base cost
     const grand = subtotal + baseCost;
-    document.getElementById('grandTotalDisplay').textContent = 'Rp ' + grand.toLocaleString('id-ID');
+    const grandTotalDisplay = document.getElementById('grandTotalDisplay');
+    if (grandTotalDisplay) {
+        grandTotalDisplay.textContent = 'Rp ' + grand.toLocaleString('id-ID');
+        console.log('[BASE] Grand total updated to:', grand);
+    }
 }
 
-function updateTotalsDisplay(cost) {
-    currentShippingCost = cost;
-    const grand = subtotal + cost;
+function updateTotalsDisplay(totalCost, totalDisplay, shippingByStore) {
+    console.log('[UPDATE] Updating totals - total cost:', totalCost, 'per-store breakdown:', shippingByStore);
     
-    const shippingDisplay = document.getElementById('shippingDisplay');
-    if (shippingDisplay) {
-        shippingDisplay.style.display = 'block'; // Show only after calculation with location
-        shippingDisplay.textContent = cost === 0
-            ? 'FREE'
-            : 'Rp ' + cost.toLocaleString('id-ID');
+    currentShippingCost = totalCost;
+    const grand = subtotal + totalCost;
+    
+    // Show success badge
+    const badge = document.getElementById('shippingCalculatedBadge');
+    if (badge) {
+        badge.style.display = 'inline-block';
+        console.log('[UPDATE] ✓ Showing shipping calculated badge');
     }
     
-    document.getElementById('grandTotalDisplay').textContent = 'Rp ' + grand.toLocaleString('id-ID');
+    // Update main shipping cost display (total)
+    const shippingDisplay = document.getElementById('shippingDisplay');
+    const shippingRate = document.getElementById('shippingRate');
+    
+    if (shippingDisplay) {
+        shippingDisplay.style.cssText = 'display: block !important; visibility: visible !important; font-size: 1.1rem; font-weight: bold; color: #198754;';
+        shippingDisplay.textContent = totalCost === 0 ? 'FREE' : totalDisplay;
+        shippingDisplay.title = `Total shipping for ${Object.keys(shippingByStore).length} store(s)`;
+        console.log('[UPDATE] ✓ Total shipping cost displayed:', shippingDisplay.textContent);
+    }
+    
+    if (shippingRate) {
+        const numStores = Object.keys(shippingByStore).length;
+        shippingRate.style.cssText = 'display: block !important; visibility: visible !important;';
+        shippingRate.textContent = `${numStores} store${numStores > 1 ? 's' : ''} (see breakdown below)`;
+        shippingRate.style.color = '#666';
+        shippingRate.style.fontSize = '0.9rem';
+        console.log('[UPDATE] ✓ Number of stores displayed:', shippingRate.textContent);
+    }
+    
+    // Update grand total
+    const grandTotalDisplay = document.getElementById('grandTotalDisplay');
+    if (grandTotalDisplay) {
+        grandTotalDisplay.textContent = 'Rp ' + grand.toLocaleString('id-ID');
+        grandTotalDisplay.style.color = '#198754';
+        console.log('[UPDATE] ✓ Grand total:', grandTotalDisplay.textContent);
+    }
+    
+    console.log('[UPDATE] === TOTALS UPDATE COMPLETE ===');
 }
 
 // Form validation
 function validateCheckoutForm() {
     const requiredFields = [
-        { id: 'store-0', type: 'radio', name: 'Store Location' },
         { id: 'shipping_name', type: 'text', name: 'Recipient Name' },
         { id: 'shipping_phone', type: 'tel', name: 'Phone Number' },
         { id: 'location_search', type: 'text', name: 'Location' },
@@ -1308,6 +1516,7 @@ function validateCheckoutForm() {
     
     let isValid = true;
     const emptyFields = [];
+    const stockErrors = [];
     
     requiredFields.forEach(field => {
         const element = document.getElementById(field.id);
@@ -1323,13 +1532,44 @@ function validateCheckoutForm() {
         }
     });
     
+    // Validate all books have store selections
+    const storeSelects = document.querySelectorAll('.item-store-select');
+    storeSelects.forEach(select => {
+        if (!select.value) {
+            select.classList.add('field-error-highlight');
+            emptyFields.push('Store location for ' + select.dataset.bookId);
+            isValid = false;
+        } else {
+            select.classList.remove('field-error-highlight');
+            
+            // CRITICAL: Validate quantity does not exceed store stock
+            const cartItem = select.closest('.cart-item');
+            const quantity = parseInt(cartItem.dataset.quantity || 1);
+            const selectedOption = select.options[select.selectedIndex];
+            const stock = parseInt(selectedOption.dataset.stock || 0);
+            
+            if (quantity > stock) {
+                stockErrors.push(`"${cartItem.dataset.bookTitle}" - Need ${quantity} but only ${stock} available at selected store`);
+                isValid = false;
+            }
+        }
+    });
+    
     if (!isValid) {
-        const message = 'Please fill in all required fields:\n\n' + emptyFields.map(f => '• ' + f).join('\n');
+        let message = 'Please fix the following errors:\n\n';
+        if (emptyFields.length > 0) {
+            message += 'Required fields:\n' + emptyFields.map(f => '• ' + f).join('\n');
+        }
+        if (stockErrors.length > 0) {
+            if (emptyFields.length > 0) message += '\n\n';
+            message += 'Inventory issues:\n' + stockErrors.map(f => '• ' + f).join('\n');
+        }
         alert(message);
     }
     
     return isValid;
 }
+
 
 // Real-time validation
 ['shipping_name', 'shipping_phone', 'location_search', 'shipping_postal_code_input', 'shipping_address'].forEach(fieldId => {
@@ -1348,6 +1588,15 @@ function validateCheckoutForm() {
     }
 });
 
+// Validate store selection on change
+document.querySelectorAll('.item-store-select').forEach(select => {
+    select.addEventListener('change', function() {
+        if (this.value) {
+            this.classList.remove('field-error-highlight');
+        }
+    });
+});
+
 // Pay button
 document.getElementById('payButton').addEventListener('click', function(e) {
     e.preventDefault();
@@ -1363,6 +1612,20 @@ document.getElementById('payButton').addEventListener('click', function(e) {
 
     const formData = new FormData(document.getElementById('paymentForm'));
     formData.append('shipping_cost', currentShippingCost);
+    
+    // CRITICAL: Send zone-based shipping breakdown for database storage
+    // This allows order display to show detailed breakdown instead of just recalculating
+    if (window.shippingByStore && Object.keys(window.shippingByStore).length > 0) {
+        // Get the first store's breakdown as the "primary" breakdown
+        const firstStoreId = Object.keys(window.shippingByStore)[0];
+        const firstStoreData = window.shippingByStore[firstStoreId];
+        
+        if (firstStoreData && firstStoreData.breakdown) {
+            formData.append('shipping_zone', firstStoreData.breakdown.zone || 'C');
+            formData.append('shipping_breakdown', JSON.stringify(firstStoreData.breakdown));
+            console.log('[SUBMIT] Including shipping breakdown:', firstStoreData.breakdown);
+        }
+    }
 
     fetch('{{ route("checkout.process") }}', {
         method: 'POST',
@@ -1390,6 +1653,8 @@ document.getElementById('payButton').addEventListener('click', function(e) {
         if (data.success && data.snapToken) {
             snap.pay(data.snapToken, {
                 onSuccess: function(result) {
+                    console.log('[PAYMENT] Success callback triggered', result);
+                    
                     // Mark payment as complete on backend, passing payment_type from Midtrans result
                     fetch('{{ route("checkout.mark-payment-complete") }}', {
                         method: 'POST',
@@ -1399,7 +1664,17 @@ document.getElementById('payButton').addEventListener('click', function(e) {
                             'Accept': 'application/json'
                         },
                         body: JSON.stringify({ payment_type: result.payment_type || null })
-                    }).then(() => {
+                    })
+                    .then(response => {
+                        console.log('[PAYMENT] markPaymentComplete response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`Payment complete call failed: ${response.status} ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('[PAYMENT] markPaymentComplete success:', data);
+                        
                         // Save address to user record
                         const addressData = {
                             latitude: parseFloat(document.getElementById('shipping_latitude').value),
@@ -1420,13 +1695,28 @@ document.getElementById('payButton').addEventListener('click', function(e) {
                             },
                             body: JSON.stringify(addressData)
                         });
-                    }).finally(() => {
-                        fetch('{{ route("cart.clear") }}', {
+                    })
+                    .then(response => {
+                        console.log('[PAYMENT] saveAddress response:', response.status);
+                        return response.json();
+                    })
+                    .then(() => {
+                        // Clear cart
+                        return fetch('{{ route("cart.clear") }}', {
                             method: 'POST',
                             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-                        }).finally(() => {
-                            window.location.href = '{{ route("orders.index") }}?success=true';
                         });
+                    })
+                    .then(() => {
+                        console.log('[PAYMENT] Cart cleared:', response.status);
+                        // Force refresh to bypass cache
+                        window.location.href = '{{ route("orders.index") }}?success=true&t=' + Date.now();
+                    })
+                    .catch(error => {
+                        console.error('[PAYMENT] Error during post-payment operations:', error);
+                        // Payment already succeeded and order status updated, just redirect
+                        // Errors here are non-critical (address save or cart clear failures)
+                        window.location.href = '{{ route("orders.index") }}?success=true&t=' + Date.now();
                     });
                 },
                 onPending: function() {
@@ -1462,14 +1752,100 @@ document.getElementById('payButton').addEventListener('click', function(e) {
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('[INIT] DOMContentLoaded fired');
+    
+    // Initialize location search elements NOW that DOM is loaded
+    locationSearchInput = document.getElementById('location_search');
+    locationSuggestions = document.getElementById('locationSuggestions');
+    postalCodeSelect = document.getElementById('shipping_postal_code_input');
+    
+    console.log('[INIT] Location search input:', !!locationSearchInput);
+    console.log('[INIT] Location suggestions:', !!locationSuggestions);
+    
+    // Setup location search functionality
+    if (locationSearchInput) {
+        locationSearchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            locationSuggestions.innerHTML = '';
+            
+            if (!query || query.length < 2) {
+                locationSuggestions.classList.remove('show');
+                return;
+            }
+            
+            const filtered = allLocations.filter(loc => {
+                const searchText = `${loc.district} ${loc.city} ${loc.province}`.toLowerCase();
+                return searchText.includes(query);
+            });
+            
+            if (filtered.length > 0) {
+                filtered.forEach(loc => {
+                    const div = document.createElement('div');
+                    div.className = 'location-suggestion-item';
+                    div.innerHTML = `
+                        <div class="location-suggestion-label">${loc.district}</div>
+                        <div class="location-suggestion-desc">${loc.city}, ${loc.province} - ${loc.postal_code}</div>
+                    `;
+                    div.addEventListener('click', function() {
+                        selectLocation(loc);
+                    });
+                    locationSuggestions.appendChild(div);
+                });
+                locationSuggestions.classList.add('show');
+            } else {
+                locationSuggestions.classList.remove('show');
+            }
+        });
+        
+        locationSearchInput.addEventListener('blur', function() {
+            setTimeout(() => {
+                locationSuggestions.classList.remove('show');
+            }, 200);
+        });
+        
+        console.log('[INIT] Location search event listeners attached');
+    } else {
+        console.error('[INIT] locationSearchInput not found!');
+    }
+    
     const selectedStore = document.querySelector('.store-radio:checked');
     const selectedMethod = document.querySelector('.shipping-radio:checked');
+    
+    console.log('[INIT] Store selected:', !!selectedStore, 'Method selected:', !!selectedMethod);
+    
     if (selectedStore && selectedMethod) {
         // IMPORTANT: Do NOT fill shipping coordinates with store coordinates
         // Only show base shipping cost until user enters their delivery address
         const baseCost = parseInt(selectedMethod.dataset.baseCost || 0);
+        console.log('[INIT] Showing base cost:', baseCost);
         showBaseCost(baseCost);
     }
+    
+    // Initialize per-km rates for all methods with base costs
+    console.log('[INIT] Initializing per-km rates for all shipping methods');
+    document.querySelectorAll('.shipping-radio').forEach(radio => {
+        const methodCode = radio.value;
+        const baseCost = parseInt(radio.dataset.baseCost || 0);
+        const rateDisplay = document.querySelector(`.shipping-rate[data-method="${methodCode}"]`);
+        
+        if (rateDisplay && baseCost > 0) {
+            // Show base rate as estimate
+            rateDisplay.style.cssText = 'display: block !important; color: #999; font-size: 0.85rem;';
+            rateDisplay.textContent = `(loading rates...)`;
+            console.log(`[INIT] Method ${methodCode} rate display initialized`);
+        }
+    });
+    
+    // Trigger calculation if everything is already filled (e.g., from saved address)
+    const userLat = document.getElementById('shipping_latitude').value;
+    const userLng = document.getElementById('shipping_longitude').value;
+    const userCity = document.getElementById('shipping_city').value;
+    if (userLat && userLng && userCity && selectedStore && selectedMethod) {
+        console.log('[INIT] Auto-calculating with pre-filled address');
+        setTimeout(() => calculateShippingCost(), 100);
+    }
+    
+
     
     // Handle saved address toggle
     @if($savedAddress)
@@ -1530,6 +1906,140 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     @endif
+    
+    // CRITICAL: Debounce function to prevent API call spam on rapid address changes
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Create debounced shipping calculation (500ms delay)
+    const debouncedCalculateShipping = debounce(calculateShippingCost, 500);
+    
+    // Store selection changes - validate and update location
+    document.querySelectorAll('.item-store-select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            const bookId = this.dataset.bookId;
+            const selectedOption = this.options[this.selectedIndex];
+            const storeStock = parseInt(selectedOption.dataset.stock || 0);
+            const cartItem = this.closest('.cart-item');
+            const currentQuantity = parseInt(cartItem.dataset.quantity || 1);
+            const messageEl = this.closest('div').querySelector('.item-store-message');
+            const requiredBadge = this.closest('div').querySelector('.item-store-required');
+            
+            if (!this.value) {
+                // No store selected - show error, add required attribute
+                this.setAttribute('required', 'required');
+                if (requiredBadge) requiredBadge.style.display = 'inline';
+                if (messageEl) {
+                    const errSpan = messageEl.querySelector('.text-danger');
+                    const okSpan = messageEl.querySelector('.text-success');
+                    if (errSpan) errSpan.style.display = 'inline';
+                    if (okSpan) okSpan.style.display = 'none';
+                    messageEl.style.display = 'block';
+                }
+                return;
+            }
+            
+            // Store selected - remove required attribute, show success
+            this.removeAttribute('required');
+            if (requiredBadge) requiredBadge.style.display = 'none';
+            if (messageEl) {
+                const errSpan = messageEl.querySelector('.text-danger');
+                const okSpan = messageEl.querySelector('.text-success');
+                if (errSpan) errSpan.style.display = 'none';
+                if (okSpan) okSpan.style.display = 'inline';
+                messageEl.style.display = 'block';
+            }
+            
+            if (storeStock <= 0) {
+                alert('⚠️ Selected store has no stock for this book');
+                this.value = '';
+                this.setAttribute('required', 'required');
+                return;
+            }
+            
+            // Check if quantity exceeds store stock
+            if (currentQuantity > storeStock) {
+                alert(`⚠️ Selected store only has ${storeStock} stock but your quantity is ${currentQuantity}.\n\nPlease go back to cart and adjust quantity to max ${storeStock}.`);
+                console.log(`[STORE] Stock mismatch: Qty ${currentQuantity} > Stock ${storeStock}`);
+            }
+            
+            // If we have location data already, recalculate shipping with first selected store
+            const userLat = document.getElementById('shipping_latitude').value;
+            const userLng = document.getElementById('shipping_longitude').value;
+            
+            if (userLat && userLng) {
+                // Update current store location to first selected store
+                let firstSelect = null;
+                document.querySelectorAll('.item-store-select').forEach(select => {
+                    if (!firstSelect && select.value) {
+                        firstSelect = select;
+                    }
+                });
+                
+                if (firstSelect) {
+                    const selectedOption = firstSelect.options[firstSelect.selectedIndex];
+                    currentStoreLocation = {
+                        lat: parseFloat(selectedOption.dataset.lat),
+                        lng: parseFloat(selectedOption.dataset.lng)
+                    };
+                    calculateShippingCost();
+                }
+            }
+        });
+    });
+
+    // Shipping method changes
+    document.querySelectorAll('.shipping-radio').forEach(function(radio) {
+        radio.addEventListener('change', calculateShippingCost);
+    });
+    
+    // Watch for changes on ALL address/location fields that affect shipping
+    // CRITICAL: Use debounce to prevent API spam on rapid consecutive changes
+    const addressFields = [
+        'shipping_latitude',
+        'shipping_longitude', 
+        'shipping_city',
+        'shipping_province',
+        'shipping_district',
+        'shipping_street',
+        'shipping_postal_code_input'
+    ];
+    
+    addressFields.forEach(function(fieldId) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', function() {
+                console.log('[ADDRESS] Changed:', fieldId, '=', this.value);
+                debouncedCalculateShipping();
+            });
+            
+            // Also watch for input/blur to catch manual edits
+            field.addEventListener('blur', function() {
+                console.log('[ADDRESS] Blur on:', fieldId);
+                debouncedCalculateShipping();
+            });
+        }
+    });
+    
+    // Watch for dropdown changes (province/city selects)
+    document.querySelectorAll('select[id*="shipping"]').forEach(function(select) {
+        select.addEventListener('change', function() {
+            if (!this.classList.contains('item-store-select')) {
+                console.log('[SELECT] Changed:', this.id, '=', this.value);
+                debouncedCalculateShipping();
+            }
+        });
+    });
 });
 </script>
 @endsection
+
