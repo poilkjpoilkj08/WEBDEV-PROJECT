@@ -12,4 +12,8 @@
        class="btn btn-sm {{ $active === 'orders' ? 'btn-dark' : 'btn-outline-dark' }}">
         <i class="fas fa-receipt me-1"></i> Manage Orders
     </a>
+    <a href="{{ route('admin.refunds.index') }}"
+       class="btn btn-sm {{ $active === 'refunds' ? 'btn-dark' : 'btn-outline-dark' }}">
+        <i class="fas fa-undo me-1"></i> Manage Refunds
+    </a>
 </div>

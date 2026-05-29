@@ -150,7 +150,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/orders', [OrderController::class, 'adminIndex'])->name('admin.orders.index');
         Route::put('/admin/orders/{order_id}', [OrderController::class, 'update'])->name('admin.orders.update');
         
-        // Admin refund management        Route::get('/admin/refunds', [OrderController::class, 'adminRefundsIndex'])->name('admin.refunds.index');        Route::post('/admin/refunds/{refund_id}/approve', [OrderController::class, 'approveRefund'])->name('admin.refunds.approve');
+        // Admin refund management
+        Route::get('/admin/refunds', [OrderController::class, 'adminRefundsIndex'])->name('admin.refunds.index');
+        Route::post('/admin/refunds/{refund_id}/approve', [OrderController::class, 'approveRefund'])->name('admin.refunds.approve');
         Route::post('/admin/refunds/{refund_id}/reject', [OrderController::class, 'rejectRefund'])->name('admin.refunds.reject');
         Route::post('/admin/refunds/{refund_id}/complete', [OrderController::class, 'completeRefund'])->name('admin.refunds.complete');
     });

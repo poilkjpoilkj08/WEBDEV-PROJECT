@@ -107,10 +107,13 @@ class Order extends Model
      */
     public function canRequestRefund(): bool
     {
-        // Can only refund if delivery not confirmed and not already refunded
-        return !$this->delivery_confirmed_by_user && 
-               $this->refund_status === 'none' &&
-               $this->status === 'paid';
+        // Can request refund if:
+        // 1. Payment is paid (not pending or cancelled)
+        // 2. User hasn't manually confirmed delivery
+        // 3. No refund already in progress or completed
+        return $this->status === 'paid'
+            && !$this->delivery_confirmed_by_user
+            && in_array($this->refund_status ?? 'none', ['none', null]);
     }
 }
 

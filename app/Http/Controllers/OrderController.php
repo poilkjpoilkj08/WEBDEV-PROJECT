@@ -88,14 +88,48 @@ class OrderController extends Controller
         $order = Order::findOrFail($order_id);
         
         $validated = $request->validate([
+            'status'          => 'nullable|in:pending,paid,cancelled',
             'shipping_status' => 'required|in:pending,processing,shipped,delivered,failed',
             'tracking_number' => 'nullable|string|max:100',
-            'notes' => 'nullable|string|max:500',
+            'notes'           => 'nullable|string|max:500',
         ]);
 
         $updateData = [
             'shipping_status' => $validated['shipping_status'],
         ];
+
+        // Update payment status if provided
+        if (!empty($validated['status'])) {
+            $updateData['status'] = $validated['status'];
+
+            // If admin manually marks as paid, record paid_at
+            if ($validated['status'] === 'paid' && !$order->paid_at) {
+                $updateData['paid_at'] = now();
+            }
+
+            // If cancelled, clear paid_at and restore stock
+            if ($validated['status'] === 'cancelled' && $order->status !== 'cancelled') {
+                $updateData['paid_at'] = null;
+
+                // Only restore stock if the order was already paid (stock was deducted on payment)
+                if ($order->status === 'paid') {
+                    $order->load('order_details.book');
+                    foreach ($order->order_details as $detail) {
+                        if ($detail->store_id) {
+                            $storeBook = $detail->book->storeLocations()
+                                ->where('store_location_id', $detail->store_id)
+                                ->first();
+                            if ($storeBook) {
+                                $detail->book->storeLocations()
+                                    ->updateExistingPivot($detail->store_id, [
+                                        'stock' => $storeBook->pivot->stock + $detail->quantity
+                                    ]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         if ($validated['shipping_status'] === 'shipped') {
             $updateData['shipped_at'] = now();

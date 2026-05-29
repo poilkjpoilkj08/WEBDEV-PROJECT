@@ -218,7 +218,11 @@
                             <i class="fas fa-lock me-2"></i>Pay Now
                         </button>
                     @endif
-                    <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary w-100 mt-2">Back to Orders</a>
+                    @if(in_array('admin', $userRoles) || in_array('owner', $userRoles))
+                        <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary w-100 mt-2">Back to Manage Orders</a>
+                    @else
+                        <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary w-100 mt-2">Back to My Orders</a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -288,56 +292,61 @@
     </div>
     @endif
 
-    {{-- Refund Request Section --}}
-    @if($order->canRequestRefund())
-    <div class="row g-4 mt-4">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 border-danger">
-                <div class="card-header bg-danger bg-opacity-10 fw-bold py-3">
-                    <i class="fas fa-undo me-2 text-danger"></i>Request a Refund
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">
-                        You can request a refund for this order before delivery is confirmed. Once you confirm delivery, refunds will not be allowed.
-                    </p>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#requestRefundModal">
-                        <i class="fas fa-money-bill-wave me-2"></i>Request Refund
-                    </button>
+    {{-- Refund Request Section (users only) --}}
+    @if(!in_array('admin', $userRoles) && !in_array('owner', $userRoles))
+        @if($order->canRequestRefund())
+        <div class="row g-4 mt-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 border-danger">
+                    <div class="card-header bg-danger bg-opacity-10 fw-bold py-3">
+                        <i class="fas fa-undo me-2 text-danger"></i>Request a Refund
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            You can request a refund for this order before delivery is confirmed. Once you confirm delivery, refunds will not be allowed.
+                        </p>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#requestRefundModal">
+                            <i class="fas fa-money-bill-wave me-2"></i>Request Refund
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Request Refund Modal -->
-    <div class="modal fade" id="requestRefundModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Request Refund</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <!-- Request Refund Modal -->
+        <div class="modal fade" id="requestRefundModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Request Refund</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="POST" action="{{ route('orders.request-refund', $order->id) }}">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="refundReason" class="form-label">Reason for Refund</label>
+                                <textarea class="form-control" id="refundReason" name="reason" rows="4" required placeholder="Please describe why you'd like to request a refund..."></textarea>
+                                <small class="text-muted">Provide a clear reason so our team can process your request quickly</small>
+                            </div>
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Refund Amount:</strong> Rp {{ number_format($order->total_price + ($order->shipping_cost ?? 0), 0, ',', '.') }}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Submit Refund Request</button>
+                        </div>
+                    </form>
                 </div>
-                <form method="POST" action="{{ route('orders.request-refund', $order->id) }}">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="refundReason" class="form-label">Reason for Refund</label>
-                            <textarea class="form-control" id="refundReason" name="reason" rows="4" required placeholder="Please describe why you'd like to request a refund..."></textarea>
-                            <small class="text-muted">Provide a clear reason so our team can process your request quickly</small>
-                        </div>
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Refund Amount:</strong> Rp {{ number_format($order->total_price + ($order->shipping_cost ?? 0), 0, ',', '.') }}
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Submit Refund Request</button>
-                    </div>
-                </form>
             </div>
         </div>
-    </div>
-    @elseif($order->refund_status !== 'none')
+        @endif
+    @endif {{-- end user-only refund request button --}}
+
+    {{-- Refund Status Section (visible to everyone, when a refund exists) --}}
+    @if($order->refund_status && $order->refund_status !== 'none')
     <div class="row g-4 mt-4">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
@@ -347,22 +356,23 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <p class="text-muted small mb-1">Status</p>
-                        <span class="badge bg-{{ $order->refund_status === 'approved' ? 'success' : ($order->refund_status === 'rejected' ? 'danger' : 'warning') }}">
+                        <span class="badge bg-{{ $order->refund_status === 'approved' ? 'success' : ($order->refund_status === 'rejected' ? 'danger' : ($order->refund_status === 'completed' ? 'secondary' : 'warning')) }}">
                             {{ ucfirst($order->refund_status) }}
                         </span>
                     </div>
                     @if($order->refund_reason)
                     <div class="mb-3">
-                        <p class="text-muted small mb-1">Your Reason</p>
+                        <p class="text-muted small mb-1">{{ in_array('admin', $userRoles) || in_array('owner', $userRoles) ? 'Customer Reason' : 'Your Reason' }}</p>
                         <p class="mb-0">{{ $order->refund_reason }}</p>
                     </div>
                     @endif
                     @if($order->refund_amount)
-                    <div class="mb-0">
+                    <div class="mb-3">
                         <p class="text-muted small mb-1">Refund Amount</p>
                         <p class="mb-0 fw-semibold text-success">Rp {{ number_format($order->refund_amount, 0, ',', '.') }}</p>
                     </div>
                     @endif
+
                 </div>
             </div>
         </div>
