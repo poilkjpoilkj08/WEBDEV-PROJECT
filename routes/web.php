@@ -1,0 +1,171 @@
+<?php
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\StoreLocationController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ReviewController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
+Route::get('/api/current-locale', [LanguageController::class, 'getCurrentLocale'])->name('language.current');
+
+Route::get('/', [BookController::class, 'index'])->name('home');
+Route::get('/books', [BookController::class, 'listing'])->name('books.listing');
+Route::get('/books/search', [BookController::class, 'search'])->name('books.search');
+Route::get('/books/{id}', [BookController::class, 'show'])->whereNumber('id')->name('books.show');
+
+Route::get('/authors', [AuthorController::class, 'index'])->name('authors.index');
+Route::get('/authors/{id}', [AuthorController::class, 'show'])->whereNumber('id')->name('authors.show');
+
+Route::get('/about', function () { return view('about'); })->name('about');
+
+Route::get('/subscribe', [SubscriptionController::class, 'plans'])->name('subscribe.plans');
+Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscribe');
+Route::get('/unsubscribe/{token}', [SubscriptionController::class, 'unsubscribe'])->name('unsubscribe');
+
+Route::get('/api/stores', [StoreLocationController::class, 'all'])->name('stores.all');
+Route::get('/api/stores/book/{bookId}', [StoreLocationController::class, 'forBook'])->name('stores.for-book');
+
+Route::post('/checkout/callback', [CheckoutController::class, 'callback'])->name('checkout.callback');
+Route::post('/checkout/calculate-shipping', [CheckoutController::class, 'calculateShipping'])->name('checkout.calculate-shipping');
+Route::post('/checkout/get-cities', [CheckoutController::class, 'getCitiesByProvince'])->name('checkout.get-cities');
+Route::post('/checkout/get-streets', [CheckoutController::class, 'getStreetsByCity'])->name('checkout.get-streets');
+Route::post('/checkout/fetch-location-details', [CheckoutController::class, 'fetchLocationDetails'])->name('checkout.fetch-location-details');
+
+// Debug route for testing shipping calculation
+Route::get('/debug/shipping-test', function () {
+    $shippingService = new \App\Services\ShippingService();
+    
+    $testCases = [
+        [
+            'from' => 'Yogyakarta',
+            'to' => 'Jakarta',
+            'weight' => 1,
+            'method' => 'jne_reg',
+        ],
+        [
+            'from' => 'Surabaya',
+            'to' => 'Bandung',
+            'weight' => 1,
+            'method' => 'sicepat',
+        ],
+        [
+            'from' => 'Denpasar',
+            'to' => 'Jakarta',
+            'weight' => 1,
+            'method' => 'gosend',
+        ],
+    ];
+
+    $results = [];
+    foreach ($testCases as $test) {
+        $cost = $shippingService->calculateShippingCost(
+            $test['from'],
+            $test['to'],
+            $test['weight'],
+            $test['method']
+        );
+        $results[] = [
+            'from' => $test['from'],
+            'to' => $test['to'],
+            'method' => $test['method'],
+            'cost' => $cost,
+            'display' => 'Rp ' . number_format($cost, 0, ',', '.'),
+        ];
+    }
+
+    return response()->json([
+        'message' => 'Shipping calculation test results',
+        'results' => $results,
+        'log_file' => storage_path('logs/laravel.log'),
+    ]);
+})->name('debug.shipping-test');
+
+Route::get('/login', [AuthController::class, 'show_login'])->name('login.show')->middleware('guest');
+Route::post('/login_auth', [AuthController::class, 'login_auth'])->name('login.auth')->middleware('guest');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order_id}', [OrderController::class, 'order_details'])->name('orders.show');
+    
+    // User order actions - delivery confirmation and refund requests
+    Route::post('/orders/{order_id}/confirm-delivery', [OrderController::class, 'confirmDelivery'])->name('orders.confirm-delivery');
+    Route::post('/orders/{order_id}/request-refund', [OrderController::class, 'requestRefund'])->name('orders.request-refund');
+
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('wishlist.add');
+    Route::post('/wishlist/remove', [WishlistController::class, 'remove'])->name('wishlist.remove');
+    Route::get('/wishlist/check/{bookId}', [WishlistController::class, 'isInWishlist'])->name('wishlist.check');
+
+    Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::post('/checkout/mark-payment-complete', [CheckoutController::class, 'markPaymentComplete'])->name('checkout.mark-payment-complete');
+    Route::post('/checkout/generate-payment-token', [CheckoutController::class, 'generatePaymentToken'])->name('checkout.generate-payment-token');
+    Route::post('/checkout/save-address', [CheckoutController::class, 'saveAddress'])->name('checkout.save-address');
+
+    Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('books.reviews.store');
+
+    Route::middleware(['role:admin,owner'])->group(function () {
+
+        // ── Books CRUD ───────────────────────────────────────────────────────
+        Route::get('/admin/books', [BookController::class, 'admin_index'])->name('admin.books.index');
+        Route::get('/books/create-form', [BookController::class, 'create_form'])->name('books.create-form');
+        Route::post('/books', [BookController::class, 'store'])->name('books.store');
+        Route::get('/books/{id}/edit-form', [BookController::class, 'edit_form'])->name('books.edit-form');
+        Route::put('/books/{id}', [BookController::class, 'update'])->name('books.update');
+        Route::delete('/books/{id}', [BookController::class, 'destroy'])->name('books.destroy');
+
+        // ── Authors CRUD ─────────────────────────────────────────────────────
+        Route::get('/admin/authors', [AuthorController::class, 'admin_index'])->name('admin.authors.index');
+        Route::get('/authors/create-form', [AuthorController::class, 'create_form'])->name('authors.create-form');
+        Route::post('/authors', [AuthorController::class, 'store'])->name('authors.store');
+        Route::get('/authors/{id}/edit-form', [AuthorController::class, 'edit_form'])->name('authors.edit-form');
+        Route::put('/authors/{id}', [AuthorController::class, 'update'])->name('authors.update');
+        Route::delete('/authors/{id}', [AuthorController::class, 'destroy'])->name('authors.destroy');
+
+        // ── Store Locations CRUD ─────────────────────────────────────────────
+        Route::get('/admin/stores', [StoreLocationController::class, 'index'])->name('admin.stores.index');
+        Route::get('/admin/stores/create', [StoreLocationController::class, 'create_form'])->name('admin.stores.create');
+        Route::post('/admin/stores', [StoreLocationController::class, 'store'])->name('admin.stores.store');
+        Route::get('/admin/stores/{id}/edit', [StoreLocationController::class, 'edit_form'])->name('admin.stores.edit');
+        Route::put('/admin/stores/{id}', [StoreLocationController::class, 'update'])->name('admin.stores.update');
+        Route::delete('/admin/stores/{id}', [StoreLocationController::class, 'destroy'])->name('admin.stores.destroy');
+
+        // ── Orders Management ────────────────────────────
+        Route::get('/admin/orders', [OrderController::class, 'adminIndex'])->name('admin.orders.index');
+        Route::put('/admin/orders/{order_id}', [OrderController::class, 'update'])->name('admin.orders.update');
+        
+        // Admin refund management
+        Route::get('/admin/refunds', [OrderController::class, 'adminRefundsIndex'])->name('admin.refunds.index');
+        Route::post('/admin/refunds/{refund_id}/approve', [OrderController::class, 'approveRefund'])->name('admin.refunds.approve');
+        Route::post('/admin/refunds/{refund_id}/reject', [OrderController::class, 'rejectRefund'])->name('admin.refunds.reject');
+        Route::post('/admin/refunds/{refund_id}/complete', [OrderController::class, 'completeRefund'])->name('admin.refunds.complete');
+    });
+});
+
+// --- FAQ Terminal ---
+Route::get('/faq', function () {
+    // Optional array payload configuration matching your template manifest properties
+    $indonesianLocations = \App\Http\Controllers\CheckoutController::indonesianLocations() ?? [];
+    return view('faq.faq', compact('indonesianLocations'));
+})->name('faq');
+
+// --- Recommendation Roulette ---
+    Route::get('/roulette', function () {
+        return view('roulette.roulette');
+    })->name('books.roulette');
