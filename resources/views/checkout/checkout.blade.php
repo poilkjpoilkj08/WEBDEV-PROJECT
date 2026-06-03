@@ -1650,7 +1650,17 @@ document.getElementById('payButton').addEventListener('click', function(e) {
                 },
                 onPending: function() { alert('Transaction processing status: Pending.'); resetBtn(); },
                 onError: function() { alert('Transaction authentication signature failed.'); resetBtn(); },
-                onClose: function() { alert('Gateway connection cancelled.'); resetBtn(); }
+                onClose: function() { 
+                    // Clear cart on payment cancellation
+                    fetch('{{ route("cart.clear") }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                    }).then(() => {
+                        window.location.href = '{{ route("orders.index") }}?cancelled=true&t=' + Date.now();
+                    }).catch(() => {
+                        window.location.href = '{{ route("orders.index") }}?cancelled=true&t=' + Date.now();
+                    });
+                }
             });
         } else {
             const errorMsg = data.message || data.error || data.details || 'Payment engine execution error.';
