@@ -100,7 +100,41 @@ Route::post('/register', [AuthController::class, 'register_store'])->name('regis
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('auth.google')->middleware('guest');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback')->middleware('guest');
 
-Route::middleware('auth')->group(function () {
+// Debug test routes
+Route::middleware('auth')->get('/test/auth-check', function () {
+    return response()->json([
+        'authenticated' => true,
+        'user_id' => auth()->id(),
+        'user_email' => auth()->user()->email,
+        'csrf_token_exists' => csrf_token() ? 'yes' : 'no',
+    ]);
+});
+
+Route::middleware('auth')->post('/test/echo-csrf', function () {
+    return response()->json([
+        'csrf_header_received' => request()->header('X-CSRF-TOKEN') ? 'yes' : 'no',
+        'csrf_token_correct' => csrf_token() === request()->header('X-CSRF-TOKEN') ? 'yes' : 'no',
+    ]);
+});
+
+Route::middleware('auth')->get('/test/send-email', function () {
+    $user = auth()->user();
+    $order = $user->orders()->latest()->first();
+    
+    if (!$order) {
+        return response()->json(['error' => 'No orders found'], 404);
+    }
+    
+    try {
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderReceiptMail($order));
+        return response()->json(['success' => 'Email sent to ' . $user->email]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+
+Route::middleware('auth')
+->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

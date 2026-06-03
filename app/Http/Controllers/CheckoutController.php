@@ -539,25 +539,34 @@ class CheckoutController extends Controller
      */
     public function generatePaymentToken(Request $request)
     {
-        $user = Auth::user();
-        if (!$user) {
-            \Log::warning('generatePaymentToken: User not authenticated');
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         try {
-            $request->validate([
-                'order_id' => 'required|integer|exists:orders,id',
+            \Log::info('generatePaymentToken called', [
+                'path' => $request->path(),
+                'method' => $request->method(),
+                'has_auth' => auth()->check(),
+                'request_data' => $request->all(),
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::warning('generatePaymentToken: Validation failed', [
-                'errors' => $e->errors(),
-                'order_id' => $request->order_id,
-            ]);
-            throw $e;
-        }
 
-        try {
+            $user = Auth::user();
+            if (!$user) {
+                \Log::warning('generatePaymentToken: User not authenticated');
+                return response()->json(['error' => 'Unauthorized - Not authenticated'], 401);
+            }
+
+            \Log::info('User authenticated', ['user_id' => $user->id]);
+
+            try {
+                $request->validate([
+                    'order_id' => 'required|integer|exists:orders,id',
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                \Log::warning('generatePaymentToken: Validation failed', [
+                    'errors' => $e->errors(),
+                    'order_id' => $request->order_id,
+                ]);
+                throw $e;
+            }
+
             $order = Order::findOrFail($request->order_id);
 
             \Log::info('generatePaymentToken: Order found', [
@@ -695,8 +704,15 @@ class CheckoutController extends Controller
 
             return response()->json(['error' => 'Midtrans not configured'], 500);
         } catch (\Exception $e) {
-            \Log::error('Generate payment token error', ['message' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to generate payment token'], 500);
+            \Log::error('Generate payment token outer catch', [
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'error' => 'Failed to generate payment token',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
     
