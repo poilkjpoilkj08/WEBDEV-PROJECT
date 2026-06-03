@@ -66,29 +66,45 @@
 
         <h2>Courier Breakdown & Logistics</h2>
         <div class="courier-section">
-            @if($order->shipping_breakdown && is_array($order->shipping_breakdown) && count($order->shipping_breakdown) > 0)
-                @php
-                    $breakdown = $order->shipping_breakdown;
-                    // Handle both indexed and associative arrays
-                    if(isset($breakdown['from']) || isset($breakdown['total_cost'])) {
-                        $breakdown = [$breakdown]; // Wrap single item in array
+            @php
+                $hasBreakdown = false;
+                $breakdown = [];
+                
+                // Try to get shipping breakdown
+                if ($order->shipping_breakdown) {
+                    // If it's stored as JSON string, decode it
+                    if (is_string($order->shipping_breakdown)) {
+                        $breakdown = json_decode($order->shipping_breakdown, true);
+                    } else {
+                        $breakdown = $order->shipping_breakdown;
                     }
-                @endphp
+                    
+                    // Check if breakdown has items
+                    if (is_array($breakdown) && count($breakdown) > 0) {
+                        // If it's a single courier (has 'from' key), wrap in array
+                        if (isset($breakdown['from']) || isset($breakdown['total_cost'])) {
+                            $breakdown = [$breakdown];
+                        }
+                        $hasBreakdown = true;
+                    }
+                }
+            @endphp
+            
+            @if($hasBreakdown)
                 @foreach($breakdown as $courier)
-                    @if(is_array($courier) && !empty($courier))
+                    @if(is_array($courier) && (isset($courier['total_cost']) && $courier['total_cost'] > 0))
                     <div class="courier-item">
-                        <div class="courier-from">From: {{ $courier['from'] ?? $order->store->name ?? 'Store' }}</div>
+                        <div class="courier-from">From: {{ $courier['from'] ?? ($order->store->name ?? 'Store') }}</div>
                         @if(!empty($courier['items']) && is_array($courier['items']))
                             @foreach($courier['items'] as $item)
-                            <div class="book-title">{{ $item['title'] ?? $item ?? '' }}</div>
+                            <div class="book-title">• {{ is_array($item) ? ($item['title'] ?? '') : $item }}</div>
                             @endforeach
                         @endif
-                        @if(!empty($courier['total_cost']) && $courier['total_cost'] > 0)
                         <div style="margin: 8px 0;">
                             <strong>Zone {{ $courier['zone'] ?? 'A' }}</strong>
                             <span style="float: right; color: #28a745; font-weight: bold;">Rp {{ number_format($courier['total_cost'], 0, ',', '.') }}</span>
                         </div>
-                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Combined Weight: {{ $courier['weight'] ?? '0' }}kg</div>
+                        <div style="clear: both; font-size: 12px; color: #666; margin-top: 5px;">Combined Weight: {{ $courier['weight'] ?? '0' }}kg</div>
                         <div class="breakdown-row">
                             <span class="breakdown-label">Base Tariff:</span>
                             <span class="breakdown-value">Rp {{ number_format($courier['base_tariff'] ?? 0, 0, ',', '.') }}</span>
@@ -101,12 +117,14 @@
                             <span class="breakdown-label">Service ({{ $courier['service'] ?? 'standard' }}):</span>
                             <span class="breakdown-value">Rp {{ number_format($courier['service_fee'] ?? 0, 0, ',', '.') }}</span>
                         </div>
-                        @endif
                     </div>
                     @endif
                 @endforeach
             @else
-                <p style="color: #666; font-size: 13px;">Shipping cost: Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</p>
+                <p style="color: #666; font-size: 13px; padding: 15px; background: #fafafa; border-radius: 4px;">
+                    <strong>Shipping Cost:</strong> Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}<br>
+                    <small>Zone: {{ $order->shipping_zone ?? 'Standard' }}</small>
+                </p>
             @endif
         </div>
 
