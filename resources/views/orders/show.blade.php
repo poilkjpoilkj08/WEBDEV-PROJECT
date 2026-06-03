@@ -527,8 +527,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                const errorMsg = error.response?.data?.message || error.message || 'Failed to process payment';
+                console.error('Full Error:', error);
+                console.error('Response Status:', error.response?.status);
+                console.error('Response Data:', error.response?.data);
+                
+                let errorMsg = 'Failed to process payment';
+                if (error.response?.data?.message) {
+                    errorMsg = error.response.data.message;
+                } else if (error.response?.data?.error) {
+                    errorMsg = error.response.data.error;
+                } else if (error.response?.status === 403) {
+                    errorMsg = 'Access denied. You may not have permission to pay this order. Please ensure you are logged in.';
+                } else if (error.response?.status === 422) {
+                    errorMsg = 'Cannot pay this order. ' + (error.response?.data?.message || 'Order may not be in pending status.');
+                } else if (error.message) {
+                    errorMsg = error.message;
+                }
+                
                 alert('Error: ' + errorMsg);
                 resetPayBtn();
             });

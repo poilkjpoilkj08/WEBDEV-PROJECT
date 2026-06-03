@@ -128,8 +128,8 @@
         <h2>Delivery Address</h2>
         <div class="shipping-info">
             <p>
-                <strong>Recipient Name:</strong> {{ $order->shipping_name }}<br>
-                <strong>Phone:</strong> {{ $order->shipping_phone }}<br>
+                <strong>Recipient Name:</strong> {{ $order->shipping_name ?? 'Not Specified' }}<br>
+                <strong>Phone:</strong> {{ $order->shipping_phone ?? 'Not Provided' }}<br>
                 <strong>Address:</strong> {{ $order->shipping_address }}<br>
                 <strong>City:</strong> {{ $order->shipping_city }}, {{ $order->shipping_province }} {{ $order->shipping_postal_code }}<br>
                 <strong>Country:</strong> {{ $order->shipping_country }}

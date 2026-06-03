@@ -541,18 +541,39 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
+            \Log::warning('generatePaymentToken: User not authenticated');
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $request->validate([
-            'order_id' => 'required|integer|exists:orders,id',
-        ]);
+        try {
+            $request->validate([
+                'order_id' => 'required|integer|exists:orders,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('generatePaymentToken: Validation failed', [
+                'errors' => $e->errors(),
+                'order_id' => $request->order_id,
+            ]);
+            throw $e;
+        }
 
         try {
             $order = Order::findOrFail($request->order_id);
 
+            \Log::info('generatePaymentToken: Order found', [
+                'order_id' => $order->id,
+                'user_id' => $user->id,
+                'order_user_id' => $order->user_id,
+                'status' => $order->status,
+            ]);
+
             // Verify order belongs to authenticated user
             if ($order->user_id !== $user->id) {
+                \Log::warning('generatePaymentToken: User not authorized for order', [
+                    'user_id' => $user->id,
+                    'order_user_id' => $order->user_id,
+                    'order_id' => $order->id,
+                ]);
                 return response()->json(['error' => 'Unauthorized - Order does not belong to user'], 403);
             }
 
