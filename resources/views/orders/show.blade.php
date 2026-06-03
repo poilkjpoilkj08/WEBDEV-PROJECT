@@ -477,15 +477,13 @@ document.addEventListener('DOMContentLoaded', function() {
             this.disabled = true;
             this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading payment...';
             
-            // Request new payment token
+            // Request new payment token using axios with global CSRF config
+            console.log('Making request to:', '{{ route("checkout.generate-payment-token") }}');
+            console.log('Order ID:', parseInt(orderId));
+            console.log('CSRF Token exists:', !!document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
+            
             axios.post('{{ route("checkout.generate-payment-token") }}', {
                 order_id: parseInt(orderId)
-            }, {
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
             })
             .then(response => {
                 if (response.data.success && response.data.snapToken) {

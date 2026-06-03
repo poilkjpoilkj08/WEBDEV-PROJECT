@@ -11,6 +11,46 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <!-- Axios for HTTP requests -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script>
+        // Configure axios globally for CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+        axios.defaults.headers.post['X-CSRF-TOKEN'] = csrfToken;
+        
+        // Log axios requests in development
+        if (true) { // Always log for now
+            axios.interceptors.request.use(config => {
+                console.log('[AXIOS REQUEST]', {
+                    method: config.method,
+                    url: config.url,
+                    has_csrf: !!config.headers['X-CSRF-TOKEN'],
+                    csrf_token: config.headers['X-CSRF-TOKEN']?.substring(0, 20) + '...',
+                });
+                return config;
+            });
+            
+            axios.interceptors.response.use(
+                response => {
+                    console.log('[AXIOS RESPONSE] Success:', response.status, response.data);
+                    return response;
+                },
+                error => {
+                    console.error('[AXIOS RESPONSE] Error:', {
+                        status: error.response?.status,
+                        statusText: error.response?.statusText,
+                        data: error.response?.data,
+                        config: {
+                            url: error.config?.url,
+                            method: error.config?.method,
+                        }
+                    });
+                    return Promise.reject(error);
+                }
+            );
+        }
+    </script>
     <style>
         * {
             box-sizing: border-box;
