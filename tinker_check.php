@@ -10,17 +10,33 @@ $response = $kernel->handle($request);
 
 // Full email test
 echo "=== FULL EMAIL TEST ===\n";
-$order = \App\Models\Order::where('invoice_number', 'BH-20260603124736-353')->first();
+
+// Find latest order
+$order = \App\Models\Order::orderBy('created_at', 'desc')->first();
 
 if (!$order) {
-    echo "Order not found!\n";
+    echo "No orders found!\n";
     exit(1);
 }
+
+echo "Using latest order: " . $order->invoice_number . "\n";
 
 $user = $order->user;
 echo "Order: " . $order->invoice_number . "\n";
 echo "User: " . $user->email . "\n";
-echo "Google ID: " . ($user->google_id ? "✓ Yes" : "✗ No") . "\n\n";
+echo "Google ID: " . ($user->google_id ? "✓ Yes" : "✗ No") . "\n";
+
+// Debug shipping breakdown
+echo "\nShipping Breakdown Debug:\n";
+echo "  Raw breakdown: " . print_r($order->shipping_breakdown, true);
+echo "  Type: " . gettype($order->shipping_breakdown) . "\n";
+if (is_array($order->shipping_breakdown)) {
+    echo "  Array count: " . count($order->shipping_breakdown) . "\n";
+    if (count($order->shipping_breakdown) > 0) {
+        echo "  First item keys: " . implode(', ', array_keys($order->shipping_breakdown[0] ?? [])) . "\n";
+    }
+}
+echo "\n";
 
 // Step 1: Render the view
 echo "Step 1: Rendering email template...\n";
