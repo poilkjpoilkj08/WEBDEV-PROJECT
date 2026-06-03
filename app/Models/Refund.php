@@ -10,6 +10,7 @@ class Refund extends Model
         'order_id',
         'user_id',
         'reason',
+        'image_path',
         'amount',
         'status',
         'admin_notes',

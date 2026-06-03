@@ -352,8 +352,31 @@ class CheckoutController extends Controller
                         ],
                     ];
 
-                    $snapToken = Snap::getSnapToken($transaction);
-                    \Log::info('Snap token created successfully', ['invoice' => $invoiceNumber]);
+                    // Retry Snap token generation up to 3 times with delays
+                    $snapToken = null;
+                    $attempts = 0;
+                    $maxAttempts = 3;
+                    
+                    while ($snapToken === null && $attempts < $maxAttempts) {
+                        try {
+                            $snapToken = Snap::getSnapToken($transaction);
+                            \Log::info('Snap token created successfully', ['invoice' => $invoiceNumber, 'attempt' => $attempts + 1]);
+                            break;
+                        } catch (\Exception $retryE) {
+                            $attempts++;
+                            \Log::warning('Snap token retry', [
+                                'attempt' => $attempts,
+                                'error' => $retryE->getMessage(),
+                            ]);
+                            
+                            if ($attempts < $maxAttempts) {
+                                // Wait before retrying (exponential backoff)
+                                sleep(1 * $attempts);
+                            } else {
+                                throw $retryE;
+                            }
+                        }
+                    }
                 } catch (\Exception $e) {
                     \Log::error('Midtrans Snap Token Error', [
                         'message' => $e->getMessage(),
@@ -361,9 +384,17 @@ class CheckoutController extends Controller
                         'file' => $e->getFile(),
                         'line' => $e->getLine(),
                     ]);
+                    
+                    // Return user-friendly error message
+                    $errorMsg = $e->getMessage();
+                    if (strpos($errorMsg, 'Could not resolve host') !== false) {
+                        $errorMsg = 'Payment gateway temporarily unavailable. Please try again in a moment.';
+                    }
+                    
                     return response()->json([
                         'error' => 'Failed to create payment token',
-                        'details' => 'Error: ' . $e->getMessage()
+                        'details' => $errorMsg,
+                        'debug_message' => 'Error: ' . $e->getMessage()
                     ], 500);
                 }
 
@@ -577,7 +608,31 @@ class CheckoutController extends Controller
                         ],
                     ];
 
-                    $snapToken = Snap::getSnapToken($transaction);
+                    // Retry Snap token generation up to 3 times with delays
+                    $snapToken = null;
+                    $attempts = 0;
+                    $maxAttempts = 3;
+                    
+                    while ($snapToken === null && $attempts < $maxAttempts) {
+                        try {
+                            $snapToken = Snap::getSnapToken($transaction);
+                            \Log::info('Payment token created successfully', ['order_id' => $order->id, 'attempt' => $attempts + 1]);
+                            break;
+                        } catch (\Exception $retryE) {
+                            $attempts++;
+                            \Log::warning('Payment token retry', [
+                                'order_id' => $order->id,
+                                'attempt' => $attempts,
+                                'error' => $retryE->getMessage(),
+                            ]);
+                            
+                            if ($attempts < $maxAttempts) {
+                                sleep(1 * $attempts);
+                            } else {
+                                throw $retryE;
+                            }
+                        }
+                    }
 
                     return response()->json([
                         'success'   => true,

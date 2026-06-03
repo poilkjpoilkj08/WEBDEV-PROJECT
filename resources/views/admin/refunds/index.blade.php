@@ -25,9 +25,6 @@
             <a href="{{ route('admin.refunds.index', ['status' => 'rejected']) }}" class="btn btn-outline-danger {{ request('status') === 'rejected' ? 'active' : '' }}">
                 <i class="fas fa-times-circle me-1"></i>Rejected
             </a>
-            <a href="{{ route('admin.refunds.index', ['status' => 'completed']) }}" class="btn btn-outline-secondary {{ request('status') === 'completed' ? 'active' : '' }}">
-                <i class="fas fa-check me-1"></i>Completed
-            </a>
         </div>
     </div>
 
@@ -85,23 +82,15 @@
                                 @if($refund->status === 'pending')
                                     <div class="btn-group btn-group-sm" role="group">
                                         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveRefundModal{{ $refund->id }}">
-                                            <i class="fas fa-check"></i>
+                                            <i class="fas fa-check"></i>Approve
                                         </button>
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectRefundModal{{ $refund->id }}">
-                                            <i class="fas fa-times"></i>
+                                            <i class="fas fa-times"></i>Reject
                                         </button>
                                     </div>
-                                @elseif($refund->status === 'approved')
-                                    <form method="POST" action="{{ route('admin.refunds.complete', $refund->id) }}" style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-secondary" onclick="return confirm('Mark refund as completed?')">
-                                            <i class="fas fa-check me-1"></i>Complete
-                                        </button>
-                                    </form>
                                 @else
-                                    <span class="text-muted small">—</span>
+                                    <a href="{{ route('orders.show', $refund->order_id) }}" class="btn btn-sm btn-outline-primary">View Order</a>
                                 @endif
-                                <a href="{{ route('orders.show', $refund->order_id) }}" class="btn btn-sm btn-outline-primary">View Order</a>
                             </td>
                         </tr>
 
@@ -124,6 +113,12 @@
                                                 <p class="text-muted small">Customer Reason</p>
                                                 <p class="mb-0">{{ $refund->reason }}</p>
                                             </div>
+                                            @if($refund->image_path)
+                                            <div class="mb-3">
+                                                <p class="text-muted small">Evidence Image</p>
+                                                <img src="{{ Storage::url($refund->image_path) }}" alt="Refund evidence" class="img-fluid rounded border" style="max-height: 300px; object-fit: contain;">
+                                            </div>
+                                            @endif
                                             <div class="alert alert-info mb-0">
                                                 <i class="fas fa-info-circle me-2"></i>
                                                 Stock will be automatically restored to the fulfilling store.

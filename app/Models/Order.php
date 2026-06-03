@@ -91,7 +91,7 @@ class Order extends Model
      */
     public function isDeliveryConfirmationPending(): bool
     {
-        return $this->shipping_status === 'shipped' && !$this->delivery_confirmed_by_user;
+        return $this->shipping_status === 'delivered' && !$this->delivery_confirmed_by_user;
     }
 
     /**
@@ -109,11 +109,13 @@ class Order extends Model
     {
         // Can request refund if:
         // 1. Payment is paid (not pending or cancelled)
-        // 2. User hasn't manually confirmed delivery
-        // 3. No refund already in progress or completed
+        // 2. User hasn't manually confirmed delivery (delivery_confirmed_by_user = false)
+        // 3. No refund already exists for this order (regardless of status)
+        // NOTE: Can request refund even if admin marked shipping as delivered
+        // User just can't confirm delivery to finalize it
         return $this->status === 'paid'
             && !$this->delivery_confirmed_by_user
-            && in_array($this->refund_status ?? 'none', ['none', null]);
+            && !$this->refunds()->exists();
     }
 }
 

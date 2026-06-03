@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Gate;
 class OrderController extends Controller
 {
     public function index(Request $request){
-        $status = $request->query('status'); // 'paid' or 'pending'
+        $status = $request->query('status');
         $user = Auth::user();
         
         // User only sees their OWN orders (order history)
@@ -24,6 +24,8 @@ class OrderController extends Controller
             $query = $query->where('status', 'paid');
         } elseif($status === 'pending'){
             $query = $query->where('status', 'pending');
+        } elseif($status === 'refunded'){
+            $query = $query->where('status', 'refunded');
         }
         
         $orders = $query->get();
@@ -89,7 +91,7 @@ class OrderController extends Controller
         
         $validated = $request->validate([
             'status'          => 'nullable|in:pending,paid,cancelled',
-            'shipping_status' => 'required|in:pending,processing,shipped,delivered,failed',
+            'shipping_status' => 'required|in:pending,processing,delivered',
             'tracking_number' => 'nullable|string|max:100',
             'notes'           => 'nullable|string|max:500',
         ]);
@@ -131,12 +133,6 @@ class OrderController extends Controller
             }
         }
 
-        if ($validated['shipping_status'] === 'shipped') {
-            $updateData['shipped_at'] = now();
-            // Set delivery confirmation deadline to 3 days from now
-            $updateData['delivery_confirmation_deadline'] = now()->addDays(3);
-        }
-
         if ($validated['tracking_number']) {
             $updateData['tracking_number'] = $validated['tracking_number'];
         }
@@ -163,9 +159,9 @@ class OrderController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Can only confirm if order is shipped
-        if ($order->shipping_status !== 'shipped') {
-            return response()->json(['error' => 'Order has not been shipped yet'], 400);
+        // Can only confirm if order is delivered
+        if ($order->shipping_status !== 'delivered') {
+            return response()->json(['error' => 'Order has not been delivered yet'], 400);
         }
 
         // Can only confirm within deadline

@@ -99,6 +99,202 @@
         font-size: 0.9rem !important;
         margin-top: 4px;
     }
+    
+    /* Map Modal Styling - Ensure map is visible and responsive */
+    #mapPickerModal {
+        z-index: 9999 !important;
+    }
+    
+    #mapPickerModal .modal-dialog {
+        z-index: 9999 !important;
+    }
+    
+    #mapPickerModal .modal-content {
+        position: relative;
+        z-index: 10000;
+        background: white;
+    }
+    
+    #mapPickerContainer {
+        position: relative;
+        width: 100% !important;
+        height: 480px !important;
+        background: white !important;
+        z-index: 1052;
+        overflow: visible !important;
+        display: block !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    
+    #mapElement {
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 1052 !important;
+        background: white !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        display: block !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    
+    #mapElement > * {
+        pointer-events: auto !important;
+    }
+    
+    #mapElement img {
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    
+    #mapSearchBox {
+        pointer-events: auto !important;
+    }
+    
+    #mapSearchInput {
+        pointer-events: auto !important;
+    }
+    
+    /* Ensure modal backdrop is never visible */
+    .modal-backdrop {
+        display: none !important;
+        opacity: 0 !important;
+        z-index: -9999 !important;
+    }
+    
+    .modal-backdrop.show {
+        display: none !important;
+        opacity: 0 !important;
+        z-index: -9999 !important;
+    }
+    
+    .modal-backdrop.fade {
+        display: none !important;
+        opacity: 0 !important;
+    }
+    
+    /* Prevent any overlay effect */
+    body.modal-open {
+        overflow: auto !important;
+    }
+    
+    /* Map modal should be hidden and not blocking by default */
+    #mapPickerModal {
+        pointer-events: none !important;
+        z-index: 1050 !important;
+        position: fixed !important;
+        display: none !important;
+    }
+    
+    /* When shown, make modal overlay everything including navbar */
+    #mapPickerModal.show {
+        pointer-events: auto !important;
+        z-index: 9999 !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(0, 0, 0, 0.7) !important;
+        overflow-y: auto !important;
+    }
+    
+    #mapPickerModal .modal-dialog {
+        pointer-events: auto !important;
+        z-index: 10000 !important;
+        position: relative !important;
+        width: 95vw !important;
+        max-width: 1200px !important;
+        height: 85vh !important;
+        max-height: 850px !important;
+        margin: auto !important;
+        top: auto !important;
+        left: auto !important;
+    }
+    
+    #mapPickerModal .modal-content {
+        pointer-events: auto !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    #mapPickerModal .modal-body {
+        pointer-events: auto !important;
+        flex: 1 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+    }
+    
+    #mapPickerContainer {
+        pointer-events: auto !important;
+        width: 100% !important;
+        height: 100% !important;
+        position: relative !important;
+    }
+    
+    #mapElement {
+        pointer-events: auto !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 1052 !important;
+        background: white !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    #mapElement > * {
+        pointer-events: auto !important;
+    }
+    
+    #mapSearchBox {
+        pointer-events: auto !important;
+    }
+    
+    #mapSearchInput {
+        pointer-events: auto !important;
+    }
+    
+    .map-autocomplete-results {
+        position: absolute !important;
+        top: 50px !important;
+        left: 15px !important;
+        width: 320px !important;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1055 !important;
+        display: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        pointer-events: auto !important;
+    }
+    
+    .map-autocomplete-results.show {
+        display: block !important;
+    }
+    
+    .map-result-item {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        font-size: 0.85rem;
+        pointer-events: auto !important;
+    }
+    
+    .map-result-item:hover {
+        background-color: #f5f5f5;
+    }
+    }
 
     #grandTotalDisplay {
         color: #c25e25 !important;
@@ -419,7 +615,7 @@
                 </div>
 
                 {{-- Map Picker Modal Container Engine --}}
-                <div class="modal fade" id="mapPickerModal" tabindex="-1" aria-labelledby="mapPickerModalLabel" aria-hidden="true">
+                <div class="modal fade" id="mapPickerModal" tabindex="-1" aria-labelledby="mapPickerModalLabel">
                     <div class="modal-dialog modal-lg modal-dialog-centered">
                         <div class="modal-content border-0 rounded-4 overflow-hidden shadow-lg">
                             <div class="modal-header border-bottom-0 py-3 px-4">
@@ -429,7 +625,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body p-0">
-                                <div id="mapPickerContainer" style="width: 100%; height: 480px; position: relative;">
+                                <div id="mapPickerContainer" style="width: 100%; height: 100%; position: relative;">
                                     <div id="mapElement" style="width: 100%; height: 100%;"></div>
                                     <div id="mapSearchBox" style="position: absolute; top: 15px; left: 15px; z-index: 10; width: 320px;">
                                         <input type="text" id="mapSearchInput" class="form-control shadow-sm border rounded-3 py-2 px-3 text-dark" style="font-size: 0.85rem;" placeholder="Search location area or landmark..." />
@@ -495,11 +691,6 @@
                                 <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5" style="font-size: 0.7rem;"><i class="fas fa-wallet text-warning me-1"></i>E-Wallets</span>
                             </div>
                         </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold text-muted small" style="font-size: 0.75rem;">Billing Account Email</label>
-                            <input type="email" class="form-control rounded-3 border bg-light text-muted" style="font-size: 0.85rem;" value="{{ auth()->user()->email }}" disabled />
-                        </div>
                         
                         <div class="alert border-0 text-dark rounded-4 d-flex gap-2 p-3 mb-4" style="background-color: #fdf6f0 !important; border: 1px solid #fbd3bc !important;">
                             <i class="fas fa-info-circle mt-0.5" style="color: #c25e25;"></i>
@@ -518,11 +709,51 @@
             </div>
         </div>
     </div>
+    
+    {{-- Refund Request Modal --}}
+    <div class="modal fade" id="refundRequestModal" tabindex="-1" aria-labelledby="refundRequestLabel">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-3 shadow-lg">
+                <div class="modal-header border-bottom-0 py-3 px-4 bg-light">
+                    <h5 class="modal-title fw-bold text-dark" id="refundRequestLabel">
+                        <i class="fas fa-undo-alt text-danger me-2"></i>Request Refund
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="refundForm">
+                    <div class="modal-body p-4">
+                        <input type="hidden" id="refundOrderId" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Reason for Refund</label>
+                            <textarea id="refundReason" class="form-control rounded-3" rows="3" placeholder="Please explain why you want to request a refund..." required></textarea>
+                            <small class="text-muted d-block mt-1">Max 500 characters</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Upload Supporting Photo (Optional)</label>
+                            <div class="upload-area border-2 border-dashed rounded-3 p-4 text-center" id="uploadArea" style="cursor: pointer; background-color: #f8f9fa; border-color: #dee2e6;">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #6c757d;"></i>
+                                <p class="mt-2 text-muted small">Drag and drop or click to select image</p>
+                                <input type="file" id="refundImage" accept="image/*" style="display: none;" />
+                                <small class="d-block text-muted" style="font-size: 0.7rem;">Max 5MB (JPG, PNG, GIF)</small>
+                            </div>
+                            <small id="imageFileName" class="d-block mt-2 text-success" style="display: none;"></small>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 py-3 px-4">
+                        <button type="button" class="btn btn-light fw-semibold rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger fw-bold rounded-pill px-4" id="submitRefundBtn">Submit Refund Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ $clientKey }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places,geocoding"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places,geocoding&loading=async"></script>
 <script>
 const subtotal = {{ $total }};
 let currentShippingCost = 0;
@@ -598,13 +829,41 @@ function selectLocation(location) {
 function initMapPicker() {
     const mapElement = document.getElementById('mapElement');
     
-    const storeRadio = document.querySelector('.store-radio:checked');
-    if (storeRadio) {
-        currentStoreLocation = {
-            lat: parseFloat(storeRadio.dataset.lat),
-            lng: parseFloat(storeRadio.dataset.lng)
-        };
+    if (!mapElement) {
+        console.error('Map element not found');
+        return;
     }
+    
+    // Ensure map element is visible and sized properly with proper pointer events
+    mapElement.style.width = '100%';
+    mapElement.style.height = '100%';
+    mapElement.style.display = 'block';
+    mapElement.style.visibility = 'visible';
+    mapElement.style.opacity = '1';
+    mapElement.style.background = 'white';
+    mapElement.style.pointerEvents = 'auto';
+    
+    const storeSelects = document.querySelectorAll('.item-store-select');
+    let storeLocation = null;
+    
+    if (storeSelects.length > 0) {
+        // Get first selected store's location
+        for (let select of storeSelects) {
+            if (select.value) {
+                const selectedOption = select.querySelector(`option[value="${select.value}"]`);
+                if (selectedOption) {
+                    const lat = parseFloat(selectedOption.dataset.lat);
+                    const lng = parseFloat(selectedOption.dataset.lng);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        storeLocation = { lat, lng };
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    currentStoreLocation = storeLocation;
     
     const userLat = parseFloat(document.getElementById('shipping_latitude').value);
     const userLng = parseFloat(document.getElementById('shipping_longitude').value);
@@ -620,7 +879,8 @@ function initMapPicker() {
     mapInstance = new google.maps.Map(mapElement, {
         zoom: 15,
         center: center,
-        streetViewControl: false
+        streetViewControl: false,
+        backgroundColor: '#ffffff'
     });
     
     if (currentStoreLocation) {
@@ -705,16 +965,111 @@ function initMapPicker() {
     });
 }
 
+// Set up persistent modal cleanup handler (attach once globally)
+const mapModal = document.getElementById('mapPickerModal');
+if (mapModal) {
+    mapModal.addEventListener('hidden.bs.modal', function() {
+        // Aggressive cleanup of ALL modal elements - runs after Bootstrap hides modal
+        setTimeout(() => {
+            // Step 1: Remove all modal backdrops completely
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Step 2: Remove modal-open class to restore scrolling
+            document.body.classList.remove('modal-open');
+            
+            // Step 3: Restore body styles
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            // Step 4: Force remove any remaining fade/show classes
+            document.querySelectorAll('.modal').forEach(m => {
+                m.classList.remove('show');
+                m.style.display = 'none';
+            });
+            
+            // Step 5: Double-check no backdrops are hiding
+            const anyBackdrops = document.querySelectorAll('.modal-backdrop, [class*="backdrop"]');
+            anyBackdrops.forEach(backdrop => {
+                if (backdrop.className.includes('backdrop')) {
+                    backdrop.remove();
+                }
+            });
+        }, 200);
+    });
+}
+
+// Map picker button handler with proper Bootstrap modal event handling
 document.getElementById('mapPickerBtn').addEventListener('click', function() {
-    mapPickerModal = new bootstrap.Modal(document.getElementById('mapPickerModal'));
-    mapPickerModal.show();
+    const mapModal = document.getElementById('mapPickerModal');
+    const mapElement = document.getElementById('mapElement');
     
-    setTimeout(function() {
-        mapInstance = null;
-        mapMarker = null;
-        selectedMapLocation = null;
-        initMapPicker();
-    }, 300);
+    // Reset map instance
+    mapInstance = null;
+    mapMarker = null;
+    selectedMapLocation = null;
+    
+    // Clear map container
+    if (mapElement) {
+        mapElement.innerHTML = '';
+    }
+    
+    // Handle modal shown event - initialize map when fully displayed
+    const handleModalShown = function() {
+        // Small delay to ensure DOM is ready
+        setTimeout(function() {
+            const mapEl = document.getElementById('mapElement');
+            if (mapEl) {
+                mapEl.style.width = '100%';
+                mapEl.style.height = '100%';
+                mapEl.style.display = 'block';
+                mapEl.style.visibility = 'visible';
+                mapEl.style.opacity = '1';
+            }
+            
+            // Initialize the map
+            initMapPicker();
+            
+            // Resize and center the map with more aggressive centering
+            if (mapInstance) {
+                // Trigger resize event
+                google.maps.event.trigger(mapInstance, 'resize');
+                
+                // Wait for resize to complete before setting center
+                setTimeout(function() {
+                    let centerLocation = null;
+                    
+                    // Priority: user selected location > store location > default Jakarta
+                    if (userSelectedLocation && userSelectedLocation.lat && userSelectedLocation.lng) {
+                        centerLocation = new google.maps.LatLng(userSelectedLocation.lat, userSelectedLocation.lng);
+                    } else if (currentStoreLocation && currentStoreLocation.lat && currentStoreLocation.lng) {
+                        centerLocation = new google.maps.LatLng(currentStoreLocation.lat, currentStoreLocation.lng);
+                    } else {
+                        centerLocation = new google.maps.LatLng(-6.2088, 106.8456); // Jakarta default
+                    }
+                    
+                    // Set zoom first, then center
+                    mapInstance.setZoom(15);
+                    mapInstance.setCenter(centerLocation);
+                    
+                    // Ensure proper positioning
+                    google.maps.event.trigger(mapInstance, 'resize');
+                }, 100);
+            }
+        }, 300);
+    };
+    
+    // Attach shown handler without once flag - persists across opens
+    mapModal.addEventListener('shown.bs.modal', handleModalShown);
+    
+    // Show the modal using Bootstrap API with backdrop disabled
+    // This prevents Bootstrap from creating the dark overlay entirely
+    const modal = new bootstrap.Modal(mapModal, { 
+        backdrop: false,  // Disable backdrop completely
+        keyboard: true    // Allow ESC to close
+    });
+    modal.show();
 });
 
 let mapConfirmButton = document.getElementById('confirmMapLocation');
@@ -867,6 +1222,29 @@ if (mapConfirmButton) {
             if (modal) {
                 modal.hide();
             }
+            
+            // Aggressive backdrop cleanup after modal hide completes
+            setTimeout(() => {
+                // Remove ALL modal backdrop elements from DOM
+                document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                    backdrop.remove();
+                });
+                
+                // Remove modal-open from body
+                document.body.classList.remove('modal-open');
+                
+                // Force restore scroll  
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+                
+                // Check again and remove any stuck backdrops
+                const backdrops = document.querySelectorAll('[class*="backdrop"]');
+                backdrops.forEach(el => {
+                    if (el.style.display !== 'block' || el.className.includes('modal-backdrop')) {
+                        el.remove();
+                    }
+                });
+            }, 400);
             
             setTimeout(() => {
                 const locationDisplayElem = document.getElementById('location_display');
@@ -1212,18 +1590,28 @@ document.getElementById('payButton').addEventListener('click', function(e) {
         headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
     })
     .then(r => {
-        if (!r.ok && r.status === 422) {
-            return r.json().then(data => {
-                const errorMessages = [];
-                if (data.errors) {
-                    Object.keys(data.errors).forEach(field => { errorMessages.push(`${data.errors[field].join(', ')}`); });
-                }
-                throw new Error(errorMessages.join('\n') || 'Validation failed');
-            });
+        if (!r.ok) {
+            if (r.status === 422) {
+                return r.json().then(data => {
+                    const errorMessages = [];
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => { errorMessages.push(`${field}: ${data.errors[field].join(', ')}`); });
+                    }
+                    throw new Error(errorMessages.join('\n') || 'Validation failed');
+                });
+            } else if (r.status >= 500) {
+                return r.json().then(data => {
+                    throw new Error(data.details || data.error || `Server error: ${r.status}`);
+                }).catch(e => {
+                    throw new Error(`Server error: ${r.status}`);
+                });
+            }
+            throw new Error(`HTTP ${r.status}: ${r.statusText}`);
         }
         return r.json();
     })
     .then(data => {
+        console.log('Checkout response:', data);
         if (data.success && data.snapToken) {
             snap.pay(data.snapToken, {
                 onSuccess: function(result) {
@@ -1265,11 +1653,14 @@ document.getElementById('payButton').addEventListener('click', function(e) {
                 onClose: function() { alert('Gateway connection cancelled.'); resetBtn(); }
             });
         } else {
-            alert('Error: ' + (data.message || 'Payment engine execution error.'));
+            const errorMsg = data.message || data.error || data.details || 'Payment engine execution error.';
+            console.error('Checkout error:', data);
+            alert('Error: ' + errorMsg);
             resetBtn();
         }
     })
     .catch(err => { 
+        console.error('Checkout exception:', err);
         alert('Checkout Fault:\n\n' + (err.message || 'An operational error has occurred. Retrying validation recommended.'));
         resetBtn();
     });
@@ -1448,6 +1839,116 @@ document.addEventListener('DOMContentLoaded', function() {
         if (field) {
             field.addEventListener('change', function() { debouncedCalculateShipping(); });
             field.addEventListener('blur', function() { debouncedCalculateShipping(); });
+        }
+    });
+
+    // ===== Refund Modal Handler =====
+    const uploadArea = document.getElementById('uploadArea');
+    const refundImage = document.getElementById('refundImage');
+    const imageFileName = document.getElementById('imageFileName');
+    let selectedFile = null;
+
+    // File upload click handler
+    uploadArea.addEventListener('click', () => refundImage.click());
+
+    // File input change
+    refundImage.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                refundImage.value = '';
+                return;
+            }
+            if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+                alert('Only JPG, PNG, and GIF formats are allowed');
+                refundImage.value = '';
+                return;
+            }
+            selectedFile = file;
+            imageFileName.textContent = '✓ ' + file.name;
+            imageFileName.style.display = 'block';
+            uploadArea.style.borderColor = '#28a745';
+            uploadArea.style.backgroundColor = '#f0fdf4';
+        }
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#c25e25';
+        uploadArea.style.backgroundColor = '#fff5f0';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '#dee2e6';
+        uploadArea.style.backgroundColor = '#f8f9fa';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#dee2e6';
+        uploadArea.style.backgroundColor = '#f8f9fa';
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            refundImage.files = files;
+            const event = new Event('change', { bubbles: true });
+            refundImage.dispatchEvent(event);
+        }
+    });
+
+    // Submit refund request
+    document.getElementById('submitRefundBtn').addEventListener('click', async function() {
+        const orderId = document.getElementById('refundOrderId').value;
+        const reason = document.getElementById('refundReason').value.trim();
+
+        if (!orderId) {
+            alert('Order ID not found');
+            return;
+        }
+
+        if (!reason || reason.length < 10) {
+            alert('Please provide a detailed reason (at least 10 characters)');
+            return;
+        }
+
+        if (reason.length > 500) {
+            alert('Reason must be less than 500 characters');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('order_id', orderId);
+        formData.append('reason', reason);
+        if (selectedFile) {
+            formData.append('image', selectedFile);
+        }
+
+        try {
+            const response = await fetch('{{ route("refunds.request") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                alert('✓ Refund request submitted successfully!');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('refundRequestModal'));
+                modal.hide();
+                document.getElementById('refundForm').reset();
+                selectedFile = null;
+                imageFileName.style.display = 'none';
+            } else {
+                alert('Error: ' + (data.message || 'Failed to submit refund request'));
+            }
+        } catch (err) {
+            console.error('Refund request error:', err);
+            alert('Failed to submit refund request. Please try again.');
         }
     });
 });

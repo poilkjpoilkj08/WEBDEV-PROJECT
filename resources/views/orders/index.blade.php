@@ -20,8 +20,11 @@
             <a href="{{ route('orders.index', ['status' => 'pending']) }}" class="btn btn-outline-warning {{ request('status') === 'pending' ? 'active bg-warning text-dark' : '' }}">
                 <i class="fas fa-clock me-1"></i>Pending
             </a>
-            <a href="{{ route('orders.index', ['status' => 'paid']) }}" class="btn btn-outline-success {{ request('status') === 'paid' ? 'active bg-success text-white' : '' }} rounded-end-pill">
+            <a href="{{ route('orders.index', ['status' => 'paid']) }}" class="btn btn-outline-success {{ request('status') === 'paid' ? 'active bg-success text-white' : '' }}">
                 <i class="fas fa-check-circle me-1"></i>Paid
+            </a>
+            <a href="{{ route('orders.index', ['status' => 'refunded']) }}" class="btn btn-outline-danger {{ request('status') === 'refunded' ? 'active bg-danger text-white' : '' }} rounded-end-pill">
+                <i class="fas fa-undo me-1"></i>Refunded
             </a>
         </div>
     </div>
@@ -44,14 +47,20 @@
         <div class="row g-3">
             @foreach($orders as $order)
             @php
-                $isPaid = $order->status === 'paid';
-                $statusColor = $isPaid ? 'success' : ($order->status === 'cancelled' ? 'danger' : 'warning');
-                $statusLabel = match($order->status) {
-                    'paid'     => 'Paid',
-                    'pending'  => 'Pending Payment',
-                    'cancelled' => 'Cancelled',
-                    default    => ucfirst($order->status),
+                $statusColor = match($order->status) {
+                    'refunded' => 'danger',
+                    'paid' => 'success',
+                    'cancelled' => 'danger',
+                    default => 'warning'
                 };
+                $statusLabel = match($order->status) {
+                    'refunded' => 'Refunded',
+                    'paid' => 'Paid',
+                    'pending' => 'Pending Payment',
+                    'cancelled' => 'Cancelled',
+                    default => ucfirst($order->status),
+                };
+                $isPaid = in_array($order->status, ['paid', 'refunded']);
                 $grandTotal = $order->total_price + ($order->shipping_cost ?? 0);
             @endphp
             <div class="col-12">
@@ -99,7 +108,15 @@
                                     {{-- Status + Action --}}
                                     <div class="col-12 col-sm-auto text-sm-end">
                                         <span class="badge bg-{{ $statusColor }} {{ $statusColor === 'warning' ? 'text-dark' : '' }} rounded-pill py-2 px-3 mb-2 d-block d-sm-inline-block">
-                                            <i class="fas fa-{{ $isPaid ? 'check-circle' : ($order->status === 'cancelled' ? 'times-circle' : 'clock') }} me-1"></i>
+                                            @if($order->status === 'refunded')
+                                                <i class="fas fa-undo me-1"></i>
+                                            @elseif($order->status === 'paid')
+                                                <i class="fas fa-check-circle me-1"></i>
+                                            @elseif($order->status === 'cancelled')
+                                                <i class="fas fa-times-circle me-1"></i>
+                                            @else
+                                                <i class="fas fa-clock me-1"></i>
+                                            @endif
                                             {{ $statusLabel }}
                                         </span>
                                         <div class="d-flex gap-2 justify-content-sm-end">

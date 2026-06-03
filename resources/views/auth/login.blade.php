@@ -127,6 +127,25 @@
         border-color: #c25e25 !important;
         box-shadow: 0 0 0 0.2rem rgba(194, 94, 37, 0.15) !important;
     }
+
+    /* Google Sign-In Button Styling */
+    .google-signin-btn {
+        background-color: #ffffff !important;
+        color: #3c4043 !important;
+        border: 1px solid #dadce0 !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .google-signin-btn:hover {
+        background-color: #f8f9fa !important;
+        border-color: #d2d3d4 !important;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .google-signin-btn:active {
+        background-color: #f1f3f4 !important;
+        border-color: #dadce0 !important;
+    }
 </style>
 
 <div class="container my-auto content-wrapper">
@@ -222,8 +241,22 @@
                                     </button>
                                 </div>
 
+                                <!-- Divider -->
+                                <div class="d-flex align-items-center my-4">
+                                    <hr class="flex-grow-1">
+                                    <span class="px-3 text-muted small">or</span>
+                                    <hr class="flex-grow-1">
+                                </div>
+
+                                <!-- Google Sign-In Button -->
+                                <div class="d-grid mb-3">
+                                    <a href="{{ route('auth.google') }}" class="btn btn-lg fs-6 fw-bold py-2.5 rounded-3 shadow-sm google-signin-btn">
+                                        <i class="fab fa-google me-2"></i>Sign in with Google
+                                    </a>
+                                </div>
+
                                 <div class="text-center mt-4">
-                                    <p class="text-muted mb-0 small">Don't have an account? <a href="" class="text-soft-orange text-decoration-none fw-bold">Sign up here</a></p>
+                                    <p class="text-muted mb-0 small">Don't have an account? <a href="{{ route('register.show') }}" class="text-soft-orange text-decoration-none fw-bold">Sign up here</a></p>
                                 </div>
                             </form>
 

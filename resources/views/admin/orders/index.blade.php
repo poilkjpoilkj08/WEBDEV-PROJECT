@@ -42,8 +42,10 @@
         @php
             $countPaid      = $orders->where('status', 'paid')->count();
             $countPending   = $orders->where('status', 'pending')->count();
+            $countRefunded  = $orders->where('status', 'refunded')->count();
             $countCancelled = $orders->where('status', 'cancelled')->count();
-            $totalRevenue   = $orders->where('status', 'paid')->sum(fn($o) => $o->total_price + ($o->shipping_cost ?? 0));
+            // Revenue only counts when user confirms delivery AND revenue_recorded is true
+            $totalRevenue   = $orders->where('revenue_recorded', true)->sum(fn($o) => $o->total_price + ($o->shipping_cost ?? 0));
         @endphp
         <div class="row g-3 mb-4 mt-1">
             <div class="col-6 col-md-3">
@@ -60,8 +62,8 @@
             </div>
             <div class="col-6 col-md-3">
                 <div class="card border-0 bg-danger bg-opacity-10 text-center py-3">
-                    <div class="fw-bold fs-4 text-danger">{{ $countCancelled }}</div>
-                    <div class="text-muted small">Cancelled</div>
+                    <div class="fw-bold fs-4 text-danger">{{ $countRefunded }}</div>
+                    <div class="text-muted small">Refunded</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
@@ -93,12 +95,18 @@
                     <tbody>
                         @foreach($orders as $order)
                         @php
-                            $isPaid = $order->status === 'paid';
-                            $statusColor = $isPaid ? 'success' : ($order->status === 'cancelled' ? 'danger' : 'warning');
+                            $statusColor = match($order->status) {
+                                'paid'       => 'success',
+                                'pending'    => 'warning',
+                                'cancelled'  => 'danger',
+                                'refunded'   => 'danger',
+                                default      => 'secondary',
+                            };
                             $statusLabel = match($order->status) {
                                 'paid'       => 'Paid',
                                 'pending'    => 'Pending',
                                 'cancelled'  => 'Cancelled',
+                                'refunded'   => 'Refunded',
                                 default      => ucfirst($order->status),
                             };
                             $shippingColors = [
@@ -160,7 +168,16 @@
                                 @endif
                             </td>
                             <td class="pe-4 text-end">
-                                <div class="d-flex gap-2 justify-content-end">
+                                <div class="d-flex gap-2 justify-content-end align-items-center">
+                                    {{-- Show pending refund indicator --}}
+                                    @php
+                                        $pendingRefund = $order->refunds()->where('status', 'pending')->first();
+                                    @endphp
+                                    @if($pendingRefund)
+                                    <a href="{{ route('admin.refunds.index', ['status' => 'pending']) }}" class="badge bg-danger rounded-pill" title="Click to manage pending refunds" data-bs-toggle="tooltip" style="text-decoration: none;">
+                                        <i class="fas fa-exclamation-circle me-1"></i>Refund Pending
+                                    </a>
+                                    @endif
                                     <a href="{{ route('orders.show', $order->id) }}" class="btn btn-outline-primary btn-sm rounded-pill" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
@@ -212,9 +229,7 @@
                         <select name="shipping_status" class="form-select" id="modalShippingStatus">
                             <option value="pending">Pending</option>
                             <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
                             <option value="delivered">Delivered</option>
-                            <option value="failed">Failed</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -252,6 +267,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 '/admin/orders/' + orderId;
         });
     }
+
+    // Initialize tooltips for refund indicators
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 });
 </script>
 @endsection
