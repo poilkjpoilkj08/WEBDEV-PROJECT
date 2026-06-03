@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderReceiptMail;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -498,6 +500,25 @@ class CheckoutController extends Controller
                             'old_stock' => $storeBook->pivot->stock,
                             'new_stock' => $newStock,
                         ]);
+                    }
+                }
+                
+                // Send receipt email if user logged in via Google
+                if ($user->google_id) {
+                    try {
+                        Mail::to($user->email)->send(new OrderReceiptMail($order));
+                        \Log::info('Receipt email sent', [
+                            'user_id' => $user->id,
+                            'order_id' => $order->id,
+                            'email' => $user->email,
+                        ]);
+                    } catch (\Exception $emailError) {
+                        \Log::warning('Failed to send receipt email', [
+                            'user_id' => $user->id,
+                            'order_id' => $order->id,
+                            'error' => $emailError->getMessage(),
+                        ]);
+                        // Don't fail the payment if email fails to send
                     }
                 }
                 
