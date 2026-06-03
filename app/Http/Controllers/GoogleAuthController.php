@@ -31,7 +31,7 @@ class GoogleAuthController extends Controller
             if ($user) {
                 // User exists, log them in
                 Auth::login($user, true);
-                return redirect('/dashboard')->with('success', 'Welcome back! Logged in with Google.');
+                return redirect('/')->with('success', 'Welcome back! Logged in with Google.');
             } else {
                 // Check if email already exists (from previous email/password registration)
                 $existingUser = User::where('email', $googleUser->getEmail())->first();
@@ -40,7 +40,7 @@ class GoogleAuthController extends Controller
                     // Link Google ID to existing account
                     $existingUser->update(['google_id' => $googleUser->getId()]);
                     Auth::login($existingUser, true);
-                    return redirect('/dashboard')->with('success', 'Google ID linked to your account!');
+                    return redirect('/')->with('success', 'Google ID linked to your account!');
                 } else {
                     // Create new user with Google data
                     $newUser = User::create([
@@ -51,7 +51,7 @@ class GoogleAuthController extends Controller
                     ]);
 
                     Auth::login($newUser, true);
-                    return redirect('/dashboard')->with('success', 'Account created and logged in with Google!');
+                    return redirect('/')->with('success', 'Account created and logged in with Google!');
                 }
             }
         } catch (Exception $e) {
