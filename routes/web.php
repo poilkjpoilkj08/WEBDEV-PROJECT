@@ -117,6 +117,69 @@ Route::middleware('auth')->post('/test/echo-csrf', function () {
     ]);
 });
 
+// Diagnostic endpoint to trace the 403 error
+Route::middleware('auth')->post('/test/diagnose-payment-token', function (\Illuminate\Http\Request $request) {
+    $diagnosis = [
+        'timestamp' => now()->toIso8601String(),
+        'request' => [
+            'method' => $request->method(),
+            'path' => $request->path(),
+            'url' => $request->url(),
+            'origin' => $request->header('Origin'),
+        ],
+        'auth' => [
+            'authenticated' => auth()->check(),
+            'user_id' => auth()->id(),
+            'user_email' => auth()->user()?->email,
+        ],
+        'csrf' => [
+            'header_sent' => $request->header('X-CSRF-TOKEN') ? 'YES' : 'NO',
+            'header_value' => $request->header('X-CSRF-TOKEN') ? substr($request->header('X-CSRF-TOKEN'), 0, 20) . '...' : 'NONE',
+            'session_token' => csrf_token() ? substr(csrf_token(), 0, 20) . '...' : 'NONE',
+            'tokens_match' => ($request->header('X-CSRF-TOKEN') === csrf_token()) ? 'YES' : 'NO',
+        ],
+        'session' => [
+            'session_id' => session()->getId(),
+            'session_driver' => config('session.driver'),
+            'session_cookie_name' => config('session.cookie'),
+            'session_path' => config('session.path'),
+            'session_domain' => config('session.domain'),
+            'session_secure' => config('session.secure'),
+            'session_http_only' => config('session.http_only'),
+            'session_same_site' => config('session.same_site'),
+        ],
+        'cookies' => [
+            'received' => array_keys($_COOKIE),
+            'has_session_cookie' => isset($_COOKIE[config('session.cookie')]) ? 'YES' : 'NO',
+        ],
+        'headers' => [
+            'content_type' => $request->header('Content-Type'),
+            'accept' => $request->header('Accept'),
+            'user_agent' => $request->header('User-Agent'),
+        ],
+    ];
+
+    \Log::info('DIAGNOSIS - Payment Token Request', $diagnosis);
+    
+    return response()->json($diagnosis);
+});
+
+// Test endpoint WITHOUT CSRF validation to verify session cookie and credentials
+Route::middleware('auth')->post('/test/session-test', function (\Illuminate\Http\Request $request) {
+    $result = [
+        'status' => 'SESSION TEST - No CSRF validation',
+        'session_maintained' => session()->has('_token') ? 'YES' : 'NO',
+        'session_id' => session()->getId(),
+        'user_authenticated' => auth()->check() ? 'YES' : 'NO',
+        'user_id' => auth()->id(),
+        'timestamp' => now()->toIso8601String(),
+    ];
+    
+    \Log::info('SESSION TEST - Session is working', $result);
+    
+    return response()->json($result);
+});
+
 Route::middleware('auth')->get('/test/send-email', function () {
     $user = auth()->user();
     $order = $user->orders()->latest()->first();

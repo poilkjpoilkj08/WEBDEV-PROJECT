@@ -15,6 +15,19 @@ class HandleCorsRequests
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Log all CORS-relevant information for debugging
+        if ($request->path() === 'checkout/generate-payment-token') {
+            \Log::info('HandleCorsRequests middleware - Payment Token Request', [
+                'method' => $request->method(),
+                'path' => $request->path(),
+                'origin' => $request->header('Origin'),
+                'has_csrf_header' => $request->header('X-CSRF-TOKEN') ? 'YES' : 'NO',
+                'has_session_cookie' => isset($_COOKIE[config('session.cookie')]) ? 'YES' : 'NO',
+                'session_cookie_name' => config('session.cookie'),
+                'all_cookies' => array_keys($_COOKIE),
+            ]);
+        }
+
         // Get origin from request
         $origin = $request->header('Origin');
         $allowedOrigins = [
