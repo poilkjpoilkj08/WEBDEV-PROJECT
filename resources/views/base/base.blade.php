@@ -317,7 +317,7 @@
             }
         }
     </style>
-    @yield('styles')
+    @stack('styles')
 </head>
 <body>
     {{-- Toast Notification --}}
@@ -487,5 +487,6 @@
             if (toastTimeout) clearTimeout(toastTimeout);
         });
     </script>
+    @stack('scripts')
 </body>
 </html>
