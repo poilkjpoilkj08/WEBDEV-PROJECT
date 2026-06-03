@@ -540,10 +540,16 @@ class CheckoutController extends Controller
     public function generatePaymentToken(Request $request)
     {
         try {
+            // Log detailed CSRF and session info for debugging
             \Log::info('generatePaymentToken called', [
                 'path' => $request->path(),
                 'method' => $request->method(),
                 'has_auth' => auth()->check(),
+                'user_id' => auth()->id(),
+                'csrf_from_header' => $request->header('X-CSRF-TOKEN') ? substr($request->header('X-CSRF-TOKEN'), 0, 20) . '...' : 'MISSING',
+                'csrf_from_session' => csrf_token() ? substr(csrf_token(), 0, 20) . '...' : 'MISSING',
+                'session_id' => session()->getId(),
+                'cookies' => array_keys($_COOKIE),
                 'request_data' => $request->all(),
             ]);
 

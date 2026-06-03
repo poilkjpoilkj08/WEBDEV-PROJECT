@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\UserRoleMiddleware;
+use App\Http\Middleware\HandleCorsRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Only redirect guests to login, don't redirect authenticated users away from login
         $middleware->redirectGueststo(fn(Request $request) => route('login.show'));
+        $middleware->web(HandleCorsRequests::class);
         $middleware->web(SetLocale::class);
         $middleware->alias([
             'role' => UserRoleMiddleware::class,

@@ -16,9 +16,19 @@
     <script>
         // Configure axios globally for CSRF token and credentials
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        // Debug: Log CSRF token
+        console.log('[BOOTSTRAP] CSRF Token found:', !!csrfToken, csrfToken ? csrfToken.substring(0, 20) + '...' : 'NONE');
+        
+        // Set CSRF token on all requests
         axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
         axios.defaults.headers.post['X-CSRF-TOKEN'] = csrfToken;
-        axios.defaults.withCredentials = true; // CRITICAL: Send cookies with requests
+        
+        // CRITICAL: Send cookies with requests (enables session authentication)
+        axios.defaults.withCredentials = true;
+        
+        // Set response type for proper handling
+        axios.defaults.responseType = 'json';
         
         // Log axios requests in development
         if (true) { // Always log for now
