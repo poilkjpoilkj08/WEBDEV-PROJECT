@@ -479,8 +479,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Request new payment token
             axios.post('{{ route("checkout.generate-payment-token") }}', {
-                order_id: orderId,
-                _token: '{{ csrf_token() }}'
+                order_id: parseInt(orderId)
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
             })
             .then(response => {
                 if (response.data.success && response.data.snapToken) {
