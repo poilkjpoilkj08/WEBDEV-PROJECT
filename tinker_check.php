@@ -9,17 +9,27 @@ $request = \Illuminate\Http\Request::create('/', 'GET');
 $response = $kernel->handle($request);
 
 // Now run queries
-$order = \App\Models\Order::find(48);
-if (!$order) {
-    echo "Order 48 not found!\n";
-    exit(1);
+echo "=== CHECKING LOCAL DATABASE ===\n";
+$allOrders = \App\Models\Order::orderByDesc('id')->limit(5)->get();
+if ($allOrders->isEmpty()) {
+    echo "No orders found in local database!\n";
+    echo "\nYou were checking production (subsif13_ticktesting).\n";
+    echo "To debug email on production, SSH into deicide.my.id and run:\n";
+    echo "  php tinker_check.php\n";
+    exit(0);
 }
 
+echo "Recent orders in local database:\n";
+foreach ($allOrders as $order) {
+    echo "  Order #" . $order->id . " - User ID: " . $order->user_id . " - Status: " . $order->status . "\n";
+}
+
+// Try the first order instead
+$order = $allOrders->first();
 $user = $order->user;
-echo "=== ORDER 48 DEBUG ===\n";
-echo "Order ID: " . $order->id . "\n";
+echo "\n=== CHECKING ORDER #" . $order->id . " ===\n";
 echo "User ID: " . $order->user_id . "\n";
 echo "User Email: " . $user->email . "\n";
 echo "User Google ID: " . ($user->google_id ?: "NULL - Did NOT login via Google") . "\n";
 echo "\nIf Google ID is NULL, email won't be sent (by design).\n";
-echo "User needs to log in via Google for email to be sent.\n";
+echo "Email only sends if user logged in via Google.\n";
