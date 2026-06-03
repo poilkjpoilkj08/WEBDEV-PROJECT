@@ -66,33 +66,44 @@
 
         <h2>Courier Breakdown & Logistics</h2>
         <div class="courier-section">
-            @if($order->shipping_breakdown && is_array($order->shipping_breakdown))
-                @foreach($order->shipping_breakdown as $courier)
-                <div class="courier-item">
-                    <div class="courier-from">From: {{ $courier['from'] ?? 'Store' }}</div>
-                    @if(!empty($courier['items']))
-                        @foreach($courier['items'] as $item)
-                        <div class="book-title">{{ $item['title'] ?? '' }}</div>
-                        @endforeach
+            @if($order->shipping_breakdown && is_array($order->shipping_breakdown) && count($order->shipping_breakdown) > 0)
+                @php
+                    $breakdown = $order->shipping_breakdown;
+                    // Handle both indexed and associative arrays
+                    if(isset($breakdown['from']) || isset($breakdown['total_cost'])) {
+                        $breakdown = [$breakdown]; // Wrap single item in array
+                    }
+                @endphp
+                @foreach($breakdown as $courier)
+                    @if(is_array($courier) && !empty($courier))
+                    <div class="courier-item">
+                        <div class="courier-from">From: {{ $courier['from'] ?? $order->store->name ?? 'Store' }}</div>
+                        @if(!empty($courier['items']) && is_array($courier['items']))
+                            @foreach($courier['items'] as $item)
+                            <div class="book-title">{{ $item['title'] ?? $item ?? '' }}</div>
+                            @endforeach
+                        @endif
+                        @if(!empty($courier['total_cost']) && $courier['total_cost'] > 0)
+                        <div style="margin: 8px 0;">
+                            <strong>Zone {{ $courier['zone'] ?? 'A' }}</strong>
+                            <span style="float: right; color: #28a745; font-weight: bold;">Rp {{ number_format($courier['total_cost'], 0, ',', '.') }}</span>
+                        </div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Combined Weight: {{ $courier['weight'] ?? '0' }}kg</div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Base Tariff:</span>
+                            <span class="breakdown-value">Rp {{ number_format($courier['base_tariff'] ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Weight Fee:</span>
+                            <span class="breakdown-value">Rp {{ number_format($courier['weight_fee'] ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Service ({{ $courier['service'] ?? 'standard' }}):</span>
+                            <span class="breakdown-value">Rp {{ number_format($courier['service_fee'] ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        @endif
+                    </div>
                     @endif
-                    <div style="margin: 8px 0;">
-                        <strong>Zone {{ $courier['zone'] ?? 'A' }}</strong>
-                        <span style="float: right; color: #28a745; font-weight: bold;">Rp {{ number_format($courier['total_cost'] ?? 0, 0, ',', '.') }}</span>
-                    </div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Combined Weight: {{ $courier['weight'] ?? '0' }}kg</div>
-                    <div class="breakdown-row">
-                        <span class="breakdown-label">Base Tariff:</span>
-                        <span class="breakdown-value">Rp {{ number_format($courier['base_tariff'] ?? 0, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="breakdown-row">
-                        <span class="breakdown-label">Weight Fee:</span>
-                        <span class="breakdown-value">Rp {{ number_format($courier['weight_fee'] ?? 0, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="breakdown-row">
-                        <span class="breakdown-label">Service ({{ $courier['service'] ?? 'standard' }}):</span>
-                        <span class="breakdown-value">Rp {{ number_format($courier['service_fee'] ?? 0, 0, ',', '.') }}</span>
-                    </div>
-                </div>
                 @endforeach
             @else
                 <p style="color: #666; font-size: 13px;">Shipping cost: Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</p>
@@ -108,12 +119,16 @@
                 <strong>City:</strong> {{ $order->shipping_city }}, {{ $order->shipping_province }} {{ $order->shipping_postal_code }}<br>
                 <strong>Country:</strong> {{ $order->shipping_country }}
             </p>
-            @if($order->store && $order->store->latitude && $order->store->longitude)
             <div class="coordinates" style="margin-top: 12px;">
-                <strong>Pinpoint Coordinates:</strong><br>
+                <strong>Delivery Location:</strong><br>
+                <a href="https://www.google.com/maps/search/{{ urlencode($order->shipping_address . ', ' . $order->shipping_city . ', ' . $order->shipping_province . ', ' . $order->shipping_country) }}" target="_blank" style="color: #007bff; text-decoration: none;">📍 View Delivery Address on Google Maps</a>
+            </div>
+            @if($order->store && $order->store->latitude && $order->store->longitude)
+            <div class="coordinates" style="margin-top: 8px;">
+                <strong>Store Pickup Location:</strong><br>
                 Latitude: {{ $order->store->latitude }}<br>
                 Longitude: {{ $order->store->longitude }}<br>
-                <a href="https://maps.google.com/?q={{ $order->store->latitude }},{{ $order->store->longitude }}" target="_blank" style="color: #007bff; text-decoration: none;">View on Google Maps</a>
+                <a href="https://maps.google.com/?q={{ $order->store->latitude }},{{ $order->store->longitude }}" target="_blank" style="color: #007bff; text-decoration: none;">📍 View Store on Google Maps</a>
             </div>
             @endif
             <p style="margin-top: 10px;">
