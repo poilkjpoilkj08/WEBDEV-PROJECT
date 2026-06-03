@@ -67,56 +67,63 @@
         <h2>Courier Breakdown & Logistics</h2>
         <div class="courier-section">
             @php
-                $hasBreakdown = false;
                 $breakdown = [];
                 
-                // Try to get shipping breakdown
+                // Get shipping breakdown
                 if ($order->shipping_breakdown) {
-                    // If it's stored as JSON string, decode it
                     if (is_string($order->shipping_breakdown)) {
                         $breakdown = json_decode($order->shipping_breakdown, true);
                     } else {
                         $breakdown = $order->shipping_breakdown;
                     }
                     
-                    // Check if breakdown has items
-                    if (is_array($breakdown) && count($breakdown) > 0) {
-                        // If it's a single courier (has 'from' key), wrap in array
-                        if (isset($breakdown['from']) || isset($breakdown['total_cost'])) {
-                            $breakdown = [$breakdown];
-                        }
-                        $hasBreakdown = true;
+                    // Ensure it's an array
+                    if (!is_array($breakdown)) {
+                        $breakdown = [];
+                    }
+                    
+                    // If it's a single courier (has 'from' key), wrap in array
+                    if (isset($breakdown['from'])) {
+                        $breakdown = [$breakdown];
                     }
                 }
             @endphp
             
-            @if($hasBreakdown)
+            @if(count($breakdown) > 0)
                 @foreach($breakdown as $courier)
-                    @if(is_array($courier) && (isset($courier['total_cost']) && $courier['total_cost'] > 0))
+                    @if(is_array($courier))
                     <div class="courier-item">
-                        <div class="courier-from">From: {{ $courier['from'] ?? ($order->store->name ?? 'Store') }}</div>
+                        <div class="courier-from">From: {{ $courier['from'] ?? 'Store' }}</div>
                         @if(!empty($courier['items']) && is_array($courier['items']))
                             @foreach($courier['items'] as $item)
                             <div class="book-title">• {{ is_array($item) ? ($item['title'] ?? '') : $item }}</div>
                             @endforeach
                         @endif
+                        @if(isset($courier['total_cost']))
                         <div style="margin: 8px 0;">
                             <strong>Zone {{ $courier['zone'] ?? 'A' }}</strong>
                             <span style="float: right; color: #28a745; font-weight: bold;">Rp {{ number_format($courier['total_cost'], 0, ',', '.') }}</span>
                         </div>
                         <div style="clear: both; font-size: 12px; color: #666; margin-top: 5px;">Combined Weight: {{ $courier['weight'] ?? '0' }}kg</div>
+                        @endif
+                        @if(isset($courier['base_tariff']))
                         <div class="breakdown-row">
                             <span class="breakdown-label">Base Tariff:</span>
-                            <span class="breakdown-value">Rp {{ number_format($courier['base_tariff'] ?? 0, 0, ',', '.') }}</span>
+                            <span class="breakdown-value">Rp {{ number_format($courier['base_tariff'], 0, ',', '.') }}</span>
                         </div>
+                        @endif
+                        @if(isset($courier['weight_fee']))
                         <div class="breakdown-row">
                             <span class="breakdown-label">Weight Fee:</span>
-                            <span class="breakdown-value">Rp {{ number_format($courier['weight_fee'] ?? 0, 0, ',', '.') }}</span>
+                            <span class="breakdown-value">Rp {{ number_format($courier['weight_fee'], 0, ',', '.') }}</span>
                         </div>
+                        @endif
+                        @if(isset($courier['service_fee']))
                         <div class="breakdown-row">
                             <span class="breakdown-label">Service ({{ $courier['service'] ?? 'standard' }}):</span>
-                            <span class="breakdown-value">Rp {{ number_format($courier['service_fee'] ?? 0, 0, ',', '.') }}</span>
+                            <span class="breakdown-value">Rp {{ number_format($courier['service_fee'], 0, ',', '.') }}</span>
                         </div>
+                        @endif
                     </div>
                     @endif
                 @endforeach
