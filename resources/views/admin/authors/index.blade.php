@@ -31,7 +31,7 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>#</th>
+                                <th>ID</th>
                                 <th>Photo</th>
                                 <th>Name</th>
                                 <th>Email</th>
@@ -44,7 +44,7 @@
                         <tbody>
                             @foreach($authors as $index => $author)
                             <tr>
-                                <td class="text-muted">{{ $authors->firstItem() + $index }}</td>
+                                <td class="text-muted">{{ $author->id }}</td>
                                 <td>
                                     @if($author->photo_url)
                                         <img src="{{ $author->photo_url }}" alt="{{ $author->name }}"
@@ -67,18 +67,14 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ route('authors.show', $author->id) }}" class="btn btn-sm btn-outline-secondary me-1" title="View">
-                                        <i class="fas fa-eye"></i>
+                                    <a href="{{ route('authors.edit-form', $author->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="fas fa-edit"></i> Edit
                                     </a>
-                                    <a href="{{ route('authors.edit-form', $author->id) }}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('authors.destroy', $author->id) }}" method="POST" class="d-inline"
-                                          onsubmit="return confirm('Delete {{ addslashes($author->name) }}?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                    <form action="{{ route('authors.destroy', $author->id) }}" method="POST" class="d-inline"onsubmit="return confirm('Delete {{ addslashes($author->name) }}?')">
+                                       @csrf @method('DELETE')
+                                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                         <i class="fas fa-trash"></i>
+                                         </button>
                                     </form>
                                 </td>
                             </tr>

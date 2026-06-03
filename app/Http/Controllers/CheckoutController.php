@@ -583,7 +583,7 @@ class CheckoutController extends Controller
             ]);
 
             // Verify order belongs to authenticated user
-            if ($order->user_id !== $user->id) {
+            if ($order->user_id != $user->id) {
                 \Log::warning('generatePaymentToken: User not authorized for order', [
                     'user_id' => $user->id,
                     'order_user_id' => $order->user_id,

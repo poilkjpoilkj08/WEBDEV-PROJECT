@@ -27,7 +27,7 @@ class AuthorController extends Controller
     /** Admin: paginated list of ALL authors with edit/delete */
     public function admin_index(): \Illuminate\View\View
     {
-        $authors = Author::withCount('books')->orderByRaw('id DESC')->paginate(20);
+        $authors = Author::withCount('books')->orderByRaw('id')->paginate(20);
         return view('admin.authors.index', compact('authors'));
     }
 

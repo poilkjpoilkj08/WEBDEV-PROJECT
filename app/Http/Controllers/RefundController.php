@@ -12,7 +12,7 @@ class RefundController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->user() || !auth()->user()->is_admin) {
+        if (!auth()->user() || !auth()->user()->hasRole(['admin', 'owner'])) {
             abort(403, 'Unauthorized');
         }
 
@@ -42,7 +42,7 @@ class RefundController extends Controller
             $order = Order::findOrFail($validated['order_id']);
 
             // Check if order belongs to authenticated user
-            if ($order->user_id !== Auth::id()) {
+            if ($order->user_id != Auth::id()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized to request refund for this order'
@@ -111,7 +111,7 @@ class RefundController extends Controller
 
     public function approve(Request $request, Refund $refund)
     {
-        if (!Auth::user()->is_admin) {
+        if (!Auth::user()->hasRole(['admin', 'owner'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -152,7 +152,7 @@ class RefundController extends Controller
 
     public function reject(Request $request, Refund $refund)
     {
-        if (!Auth::user()->is_admin) {
+        if (!Auth::user()->hasRole(['admin', 'owner'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 

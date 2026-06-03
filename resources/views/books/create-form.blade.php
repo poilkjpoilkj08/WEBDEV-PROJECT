@@ -1,4 +1,8 @@
 @extends('base.base')
+@section('styles')
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+@endsection
 @section('content')
 <div class="container py-5">
     <div class="row justify-content-center">

@@ -317,6 +317,7 @@
             }
         }
     </style>
+    @yield('styles')
 </head>
 <body>
     {{-- Toast Notification --}}
