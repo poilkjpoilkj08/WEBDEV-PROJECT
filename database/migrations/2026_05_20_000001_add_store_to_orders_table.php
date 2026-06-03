@@ -22,7 +22,7 @@ return new class extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
             if (Schema::hasColumn('orders', 'store_id')) {
-                $table->dropForeignKey(['store_id']);
+                $table->dropForeign(['store_id']);
                 $table->dropColumn('store_id');
             }
             if (Schema::hasColumn('orders', 'shipping_distance_km')) {

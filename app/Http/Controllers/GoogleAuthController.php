@@ -55,7 +55,11 @@ class GoogleAuthController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return redirect('/login')->with('error', 'Failed to authenticate with Google. Please try again.');
+            \Log::error('Google Auth Error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'app_url' => config('app.url'),
+            ]);
+            return redirect('/login')->with('error', 'Failed to authenticate with Google: ' . $e->getMessage());
         }
     }
 }
