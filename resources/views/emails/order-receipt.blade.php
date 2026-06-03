@@ -67,7 +67,7 @@
         <h2>Courier Breakdown & Logistics</h2>
         <div class="courier-section">
             @php
-                $breakdown = [];
+                $breakdown = null;
                 
                 // Get shipping breakdown
                 if ($order->shipping_breakdown) {
@@ -76,57 +76,47 @@
                     } else {
                         $breakdown = $order->shipping_breakdown;
                     }
-                    
-                    // Ensure it's an array
-                    if (!is_array($breakdown)) {
-                        $breakdown = [];
-                    }
-                    
-                    // If it's a single courier (has 'from' key), wrap in array
-                    if (isset($breakdown['from'])) {
-                        $breakdown = [$breakdown];
-                    }
                 }
             @endphp
             
-            @if(count($breakdown) > 0)
-                @foreach($breakdown as $courier)
-                    @if(is_array($courier))
-                    <div class="courier-item">
-                        <div class="courier-from">From: {{ $courier['from'] ?? 'Store' }}</div>
-                        @if(!empty($courier['items']) && is_array($courier['items']))
-                            @foreach($courier['items'] as $item)
-                            <div class="book-title">• {{ is_array($item) ? ($item['title'] ?? '') : $item }}</div>
-                            @endforeach
-                        @endif
-                        @if(isset($courier['total_cost']))
-                        <div style="margin: 8px 0;">
-                            <strong>Zone {{ $courier['zone'] ?? 'A' }}</strong>
-                            <span style="float: right; color: #28a745; font-weight: bold;">Rp {{ number_format($courier['total_cost'], 0, ',', '.') }}</span>
-                        </div>
-                        <div style="clear: both; font-size: 12px; color: #666; margin-top: 5px;">Combined Weight: {{ $courier['weight'] ?? '0' }}kg</div>
-                        @endif
-                        @if(isset($courier['base_tariff']))
-                        <div class="breakdown-row">
-                            <span class="breakdown-label">Base Tariff:</span>
-                            <span class="breakdown-value">Rp {{ number_format($courier['base_tariff'], 0, ',', '.') }}</span>
-                        </div>
-                        @endif
-                        @if(isset($courier['weight_fee']))
-                        <div class="breakdown-row">
-                            <span class="breakdown-label">Weight Fee:</span>
-                            <span class="breakdown-value">Rp {{ number_format($courier['weight_fee'], 0, ',', '.') }}</span>
-                        </div>
-                        @endif
-                        @if(isset($courier['service_fee']))
-                        <div class="breakdown-row">
-                            <span class="breakdown-label">Service ({{ $courier['service'] ?? 'standard' }}):</span>
-                            <span class="breakdown-value">Rp {{ number_format($courier['service_fee'], 0, ',', '.') }}</span>
-                        </div>
-                        @endif
+            @if($breakdown && is_array($breakdown) && isset($breakdown['zone']))
+                <div class="courier-item">
+                    <div class="courier-from">Zone: {{ $breakdown['zone'] }}</div>
+                    
+                    @if(isset($breakdown['weight_kg']))
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Weight:</span>
+                        <span class="breakdown-value">{{ $breakdown['weight_kg'] }}kg @if(isset($breakdown['extra_kg']) && $breakdown['extra_kg'] > 0) (+{{ $breakdown['extra_kg'] }}kg extra)@endif</span>
                     </div>
                     @endif
-                @endforeach
+                    
+                    @if(isset($breakdown['zone_base']))
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Base Tariff:</span>
+                        <span class="breakdown-value">Rp {{ number_format($breakdown['zone_base'], 0, ',', '.') }}</span>
+                    </div>
+                    @endif
+                    
+                    @if(isset($breakdown['weight_fee']))
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Weight Fee:</span>
+                        <span class="breakdown-value">Rp {{ number_format($breakdown['weight_fee'], 0, ',', '.') }}</span>
+                    </div>
+                    @endif
+                    
+                    @if(isset($breakdown['service_surcharge']))
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Service ({{ $breakdown['service_level'] ?? 'standard' }}):</span>
+                        <span class="breakdown-value">Rp {{ number_format($breakdown['service_surcharge'], 0, ',', '.') }}</span>
+                    </div>
+                    @endif
+                    
+                    <div style="margin: 12px 0; padding-top: 12px; border-top: 1px solid #ddd;">
+                        <strong style="color: #28a745;">Total Shipping Cost:</strong>
+                        <span style="float: right; color: #28a745; font-weight: bold;">Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
             @else
                 <p style="color: #666; font-size: 13px; padding: 15px; background: #fafafa; border-radius: 4px;">
                     <strong>Shipping Cost:</strong> Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}<br>
