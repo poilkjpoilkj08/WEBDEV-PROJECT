@@ -8,8 +8,8 @@ $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 $request = \Illuminate\Http\Request::create('/', 'GET');
 $response = $kernel->handle($request);
 
-// Find order and check shipping breakdown data
-echo "=== CHECKING SHIPPING BREAKDOWN DATA ===\n";
+// Full email test
+echo "=== FULL EMAIL TEST ===\n";
 $order = \App\Models\Order::where('invoice_number', 'BH-20260603124736-353')->first();
 
 if (!$order) {
@@ -17,40 +17,62 @@ if (!$order) {
     exit(1);
 }
 
-echo "Order ID: " . $order->id . "\n";
-echo "Invoice: " . $order->invoice_number . "\n";
-echo "Shipping Cost: " . $order->shipping_cost . "\n";
-echo "Shipping Zone: " . ($order->shipping_zone ?? 'NULL') . "\n";
-echo "Shipping Breakdown (raw): " . var_export($order->shipping_breakdown, true) . "\n";
+$user = $order->user;
+echo "Order: " . $order->invoice_number . "\n";
+echo "User: " . $user->email . "\n";
+echo "Google ID: " . ($user->google_id ? "✓ Yes" : "✗ No") . "\n\n";
 
-if ($order->shipping_breakdown) {
-    echo "\nBreakdown exists:\n";
+// Step 1: Render the view
+echo "Step 1: Rendering email template...\n";
+try {
+    $html = \Illuminate\Support\Facades\View::make('emails.order-receipt', [
+        'order' => $order,
+        'user' => $user,
+        'orderDetails' => $order->order_details,
+    ])->render();
     
-    // Try to decode if string
-    $breakdown = $order->shipping_breakdown;
-    if (is_string($breakdown)) {
-        echo "  Type: String (JSON)\n";
-        $decoded = json_decode($breakdown, true);
-        echo "  Decoded: " . var_export($decoded, true) . "\n";
-    } else if (is_array($breakdown)) {
-        echo "  Type: Array\n";
-        echo "  Count: " . count($breakdown) . "\n";
-        echo "  Content:\n";
-        foreach ($breakdown as $key => $value) {
-            echo "    [$key] => " . var_export($value, true) . "\n";
-        }
-    } else {
-        echo "  Type: " . gettype($breakdown) . "\n";
+    echo "✓ Rendered (" . strlen($html) . " bytes)\n";
+    
+    // Check for key sections
+    $checks = [
+        'Courier Breakdown' => strpos($html, 'Courier Breakdown') !== false,
+        'Google Maps' => strpos($html, 'google') !== false,
+        'Delivery Address' => strpos($html, 'Delivery Address') !== false,
+        'Rp currency' => strpos($html, 'Rp') !== false,
+        'Zone' => strpos($html, 'Zone') !== false,
+        'Base Tariff' => strpos($html, 'Base Tariff') !== false,
+    ];
+    
+    echo "\nContent checks:\n";
+    foreach ($checks as $section => $found) {
+        echo "  " . ($found ? "✓" : "✗") . " " . $section . "\n";
     }
-} else {
-    echo "\n✗ Shipping breakdown is NULL or empty\n";
-    echo "This is why courier breakdown doesn't show in email.\n";
+    
+    if (!$checks['Base Tariff']) {
+        echo "\n⚠️ Base Tariff not found in HTML - breakdown may not be rendering\n";
+        echo "Searching for 'From:' in HTML...\n";
+        if (strpos($html, 'From:') !== false) {
+            echo "  ✓ Found 'From:' - courier section exists\n";
+        } else {
+            echo "  ✗ 'From:' not found - courier section not rendering\n";
+        }
+    }
+    
+} catch (\Exception $e) {
+    echo "✗ Render error: " . $e->getMessage() . "\n";
+    exit(1);
 }
 
-echo "\n=== DATABASE RAW QUERY ===\n";
-$raw = \Illuminate\Support\Facades\DB::selectOne("SELECT id, invoice_number, shipping_cost, shipping_zone, shipping_breakdown FROM orders WHERE invoice_number = 'BH-20260603124736-353'");
-if ($raw) {
-    echo "Raw DB shipping_breakdown: " . $raw->shipping_breakdown . "\n";
-} else {
-    echo "Order not found in database\n";
+// Step 2: Send email
+echo "\nStep 2: Sending email...\n";
+try {
+    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderReceiptMail($order));
+    echo "✓ Email sent successfully to: " . $user->email . "\n";
+} catch (\Exception $e) {
+    echo "✗ Send error: " . $e->getMessage() . "\n";
+    exit(1);
 }
+
+echo "\n=== COMPLETE ===\n";
+echo "Email has been sent. Check Gmail inbox/spam folder.\n";
+echo "The breakdown should display if all checks above show ✓\n";
