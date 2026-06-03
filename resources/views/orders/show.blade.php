@@ -465,6 +465,16 @@
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 <!-- Axios is already loaded in base.blade.php, don't load it again -->
 <script>
+// Debug: Log current user and order info
+console.log('[ORDER PAGE DEBUG]', {
+    current_user_id: '{{ auth()->id() }}',
+    current_user_email: '{{ auth()->user()->email }}',
+    order_id_on_page: '{{ $order->id }}',
+    order_user_id: '{{ $order->user_id }}',
+    order_status: '{{ $order->status }}',
+    page_url: window.location.href,
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const payNowBtn = document.getElementById('payNowBtn');
     
