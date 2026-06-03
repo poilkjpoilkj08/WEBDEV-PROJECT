@@ -8,8 +8,8 @@ $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 $request = \Illuminate\Http\Request::create('/', 'GET');
 $response = $kernel->handle($request);
 
-// Find order and test email rendering
-echo "=== TESTING EMAIL RENDERING ===\n";
+// Find order and test email rendering with detailed error reporting
+echo "=== EMAIL DEBUGGING ===\n";
 $order = \App\Models\Order::where('invoice_number', 'BH-20260603124736-353')->first();
 
 if (!$order) {
@@ -18,46 +18,52 @@ if (!$order) {
 }
 
 $user = $order->user;
-echo "Testing email for Order: " . $order->invoice_number . "\n";
-echo "User: " . $user->email . "\n\n";
+echo "Order: " . $order->invoice_number . "\n";
+echo "User: " . $user->email . "\n";
+echo "User has google_id: " . ($user->google_id ? "YES" : "NO") . "\n\n";
 
-// Try to render the view
+// Step 1: Check if google_id exists (email only sends if it does)
+if (!$user->google_id) {
+    echo "✗ ERROR: User does NOT have google_id!\n";
+    echo "Email will NOT be sent - by design, only Google-logged users get emails.\n";
+    echo "User needs to log in with Google first.\n";
+    exit(0);
+}
+
+// Step 2: Try to render the view
+echo "Step 1: Rendering email template...\n";
 try {
-    $mailable = new \App\Mail\OrderReceiptMail($order);
-    $html = $mailable->render();
+    $view = \Illuminate\Support\Facades\View::make('emails.order-receipt', [
+        'order' => $order,
+        'user' => $user,
+        'orderDetails' => $order->order_details,
+    ]);
+    $html = $view->render();
     
-    if (strpos($html, 'error') !== false || strpos($html, 'Error') !== false) {
-        echo "✗ View contains error text:\n";
-        echo substr($html, 0, 500) . "\n";
-    } else {
-        echo "✓ View rendered successfully\n";
-        echo "Size: " . strlen($html) . " bytes\n";
-        
-        // Check for key elements
-        if (strpos($html, 'Rp') === false) {
-            echo "⚠️ WARNING: No 'Rp' currency found in email!\n";
-        } else {
-            echo "✓ Currency formatting found\n";
-        }
-        
-        if (strpos($html, 'google.com/maps') === false) {
-            echo "⚠️ WARNING: No Google Maps link found!\n";
-        } else {
-            echo "✓ Google Maps link found\n";
-        }
+    if (empty($html)) {
+        echo "✗ View rendered but is EMPTY!\n";
+        exit(1);
     }
+    
+    echo "✓ View rendered successfully (" . strlen($html) . " bytes)\n";
 } catch (\Exception $e) {
-    echo "✗ Error rendering email:\n";
+    echo "✗ ERROR rendering view:\n";
+    echo "  " . $e->getMessage() . "\n";
+    echo "  File: " . $e->getFile() . "\n";
+    echo "  Line: " . $e->getLine() . "\n";
+    exit(1);
+}
+
+// Step 3: Try sending
+echo "\nStep 2: Sending email...\n";
+try {
+    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderReceiptMail($order));
+    echo "✓ Email sent successfully!\n";
+} catch (\Exception $e) {
+    echo "✗ ERROR sending email:\n";
     echo "  " . $e->getMessage() . "\n";
     echo "  File: " . $e->getFile() . "\n";
     echo "  Line: " . $e->getLine() . "\n";
 }
 
-// Now try sending
-echo "\n=== ATTEMPTING TO SEND ===\n";
-try {
-    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderReceiptMail($order));
-    echo "✓ Email sent\n";
-} catch (\Exception $e) {
-    echo "✗ Send error: " . $e->getMessage() . "\n";
-}
+echo "\nDone!\n";
