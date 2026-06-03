@@ -15,23 +15,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script>
         // Configure axios globally for CSRF token and credentials
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        
-        // Debug: Log CSRF token
-        console.log('[BOOTSTRAP] CSRF Token found:', !!csrfToken, csrfToken ? csrfToken.substring(0, 20) + '...' : 'NONE');
-        
-        // Set CSRF token on all requests
-        axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
-        axios.defaults.headers.post['X-CSRF-TOKEN'] = csrfToken;
-        
-        // CRITICAL: Send cookies with requests (enables session authentication)
-        axios.defaults.withCredentials = true;
-        
-        // Set response type for proper handling
-        axios.defaults.responseType = 'json';
-        
-        // Log axios requests in development
-        if (true) { // Always log for now
+        // Wait a moment to ensure axios is fully loaded
+        function configureAxios() {
+            if (typeof axios === 'undefined') {
+                console.warn('[BOOTSTRAP] Axios not loaded yet, retrying...');
+                setTimeout(configureAxios, 50);
+                return;
+            }
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            
+            // Debug: Log CSRF token
+            console.log('[BOOTSTRAP] CSRF Token found:', !!csrfToken, csrfToken ? csrfToken.substring(0, 20) + '...' : 'NONE');
+            
+            // Set CSRF token on all requests
+            axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+            axios.defaults.headers.post['X-CSRF-TOKEN'] = csrfToken;
+            
+            // CRITICAL: Send cookies with requests (enables session authentication)
+            axios.defaults.withCredentials = true;
+            
+            // Set response type for proper handling
+            axios.defaults.responseType = 'json';
+            
+            // Verify configuration was applied
+            console.log('[BOOTSTRAP] Axios Configured:', {
+                'withCredentials': axios.defaults.withCredentials,
+                'has_csrf_header': !!axios.defaults.headers.common['X-CSRF-TOKEN'],
+                'csrf_preview': axios.defaults.headers.common['X-CSRF-TOKEN']?.substring(0, 20) + '...'
+            });
+            
+            // Log axios requests in development
             axios.interceptors.request.use(config => {
                 console.log('[AXIOS REQUEST]', {
                     method: config.method,
@@ -62,6 +76,13 @@
                     return Promise.reject(error);
                 }
             );
+        }
+        
+        // Try to configure immediately, fallback to after DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', configureAxios);
+        } else {
+            configureAxios();
         }
     </script>
     <style>
