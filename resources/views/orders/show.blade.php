@@ -463,8 +463,18 @@
 </div>
 
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+<!-- Axios is already loaded in base.blade.php, don't load it again -->
 <script>
+// Debug: Log current user and order info
+console.log('[ORDER PAGE DEBUG]', {
+    current_user_id: '{{ auth()->id() }}',
+    current_user_email: '{{ auth()->user()->email }}',
+    order_id_on_page: '{{ $order->id }}',
+    order_user_id: '{{ $order->user_id }}',
+    order_status: '{{ $order->status }}',
+    page_url: window.location.href,
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const payNowBtn = document.getElementById('payNowBtn');
     
@@ -477,15 +487,13 @@ document.addEventListener('DOMContentLoaded', function() {
             this.disabled = true;
             this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading payment...';
             
-            // Request new payment token
+            // Request new payment token using axios with global CSRF config
+            console.log('Making request to:', '{{ route("checkout.generate-payment-token") }}');
+            console.log('Order ID:', parseInt(orderId));
+            console.log('CSRF Token exists:', !!document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
+            
             axios.post('{{ route("checkout.generate-payment-token") }}', {
                 order_id: parseInt(orderId)
-            }, {
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
             })
             .then(response => {
                 if (response.data.success && response.data.snapToken) {

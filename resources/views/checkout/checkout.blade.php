@@ -752,7 +752,7 @@
 </div>
 
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ $clientKey }}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+<!-- Axios is already loaded in base.blade.php, don't load it again -->
 <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places,geocoding&loading=async"></script>
 <script>
 const subtotal = {{ $total }};

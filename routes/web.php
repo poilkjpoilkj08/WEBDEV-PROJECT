@@ -100,7 +100,171 @@ Route::post('/register', [AuthController::class, 'register_store'])->name('regis
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('auth.google')->middleware('guest');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback')->middleware('guest');
 
-Route::middleware('auth')->group(function () {
+// Debug test routes
+Route::middleware('auth')->get('/test/auth-check', function () {
+    return response()->json([
+        'authenticated' => true,
+        'user_id' => auth()->id(),
+        'user_email' => auth()->user()->email,
+        'csrf_token_exists' => csrf_token() ? 'yes' : 'no',
+    ]);
+});
+
+Route::middleware('auth')->post('/test/echo-csrf', function () {
+    return response()->json([
+        'csrf_header_received' => request()->header('X-CSRF-TOKEN') ? 'yes' : 'no',
+        'csrf_token_correct' => csrf_token() === request()->header('X-CSRF-TOKEN') ? 'yes' : 'no',
+    ]);
+});
+
+// Diagnostic endpoint to trace the 403 error
+Route::middleware('auth')->post('/test/diagnose-payment-token', function (\Illuminate\Http\Request $request) {
+    $diagnosis = [
+        'timestamp' => now()->toIso8601String(),
+        'request' => [
+            'method' => $request->method(),
+            'path' => $request->path(),
+            'url' => $request->url(),
+            'origin' => $request->header('Origin'),
+        ],
+        'auth' => [
+            'authenticated' => auth()->check(),
+            'user_id' => auth()->id(),
+            'user_email' => auth()->user()?->email,
+        ],
+        'csrf' => [
+            'header_sent' => $request->header('X-CSRF-TOKEN') ? 'YES' : 'NO',
+            'header_value' => $request->header('X-CSRF-TOKEN') ? substr($request->header('X-CSRF-TOKEN'), 0, 20) . '...' : 'NONE',
+            'session_token' => csrf_token() ? substr(csrf_token(), 0, 20) . '...' : 'NONE',
+            'tokens_match' => ($request->header('X-CSRF-TOKEN') === csrf_token()) ? 'YES' : 'NO',
+        ],
+        'session' => [
+            'session_id' => session()->getId(),
+            'session_driver' => config('session.driver'),
+            'session_cookie_name' => config('session.cookie'),
+            'session_path' => config('session.path'),
+            'session_domain' => config('session.domain'),
+            'session_secure' => config('session.secure'),
+            'session_http_only' => config('session.http_only'),
+            'session_same_site' => config('session.same_site'),
+        ],
+        'cookies' => [
+            'received' => array_keys($_COOKIE),
+            'has_session_cookie' => isset($_COOKIE[config('session.cookie')]) ? 'YES' : 'NO',
+        ],
+        'headers' => [
+            'content_type' => $request->header('Content-Type'),
+            'accept' => $request->header('Accept'),
+            'user_agent' => $request->header('User-Agent'),
+        ],
+    ];
+
+    \Log::info('DIAGNOSIS - Payment Token Request', $diagnosis);
+    
+    return response()->json($diagnosis);
+});
+
+// Test endpoint WITHOUT CSRF validation to verify session cookie and credentials
+Route::middleware('auth')->post('/test/session-test', function (\Illuminate\Http\Request $request) {
+    $result = [
+        'status' => 'SESSION TEST - No CSRF validation',
+        'session_maintained' => session()->has('_token') ? 'YES' : 'NO',
+        'session_id' => session()->getId(),
+        'user_authenticated' => auth()->check() ? 'YES' : 'NO',
+        'user_id' => auth()->id(),
+        'timestamp' => now()->toIso8601String(),
+    ];
+    
+    \Log::info('SESSION TEST - Session is working', $result);
+    
+    return response()->json($result);
+});
+
+// Diagnostic endpoint to check order ownership
+Route::middleware('auth')->get('/test/check-orders', function () {
+    $user = auth()->user();
+    $orders = \App\Models\Order::where('user_id', $user->id)->get(['id', 'user_id', 'status', 'created_at']);
+    
+    $diagnosis = [
+        'authenticated_user_id' => $user->id,
+        'authenticated_user_email' => $user->email,
+        'orders_owned_by_user' => [
+            'count' => $orders->count(),
+            'orders' => $orders->map(fn($o) => [
+                'id' => $o->id,
+                'status' => $o->status,
+                'created_at' => $o->created_at->toIso8601String(),
+            ])->toArray(),
+        ],
+        'google_id' => $user->google_id,
+        'timestamp' => now()->toIso8601String(),
+    ];
+    
+    \Log::info('ORDER DIAGNOSIS - User Orders', $diagnosis);
+    
+    return response()->json($diagnosis);
+});
+
+// Endpoint to check specific order ownership (debug)
+Route::middleware('auth')->post('/test/check-order-ownership', function (\Illuminate\Http\Request $request) {
+    $user = auth()->user();
+    $order_id = $request->input('order_id');
+    
+    if (!$order_id) {
+        return response()->json(['error' => 'Missing order_id'], 400);
+    }
+    
+    $order = \App\Models\Order::find($order_id);
+    
+    if (!$order) {
+        return response()->json([
+            'error' => 'Order not found',
+            'order_id_requested' => $order_id,
+        ], 404);
+    }
+    
+    $diagnosis = [
+        'request' => [
+            'authenticated_user_id' => $user->id,
+            'authenticated_user_email' => $user->email,
+            'requested_order_id' => $order_id,
+        ],
+        'order' => [
+            'id' => $order->id,
+            'user_id' => $order->user_id,
+            'status' => $order->status,
+            'created_at' => $order->created_at->toIso8601String(),
+        ],
+        'ownership' => [
+            'user_id_match' => $user->id === $order->user_id,
+            'error' => $user->id !== $order->user_id ? 'Order does not belong to user' : null,
+        ],
+        'timestamp' => now()->toIso8601String(),
+    ];
+    
+    \Log::info('ORDER OWNERSHIP DEBUG', $diagnosis);
+    
+    return response()->json($diagnosis);
+});
+
+Route::middleware('auth')->get('/test/send-email', function () {
+    $user = auth()->user();
+    $order = $user->orders()->latest()->first();
+    
+    if (!$order) {
+        return response()->json(['error' => 'No orders found'], 404);
+    }
+    
+    try {
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderReceiptMail($order));
+        return response()->json(['success' => 'Email sent to ' . $user->email]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+
+Route::middleware('auth')
+->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
