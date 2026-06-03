@@ -14,33 +14,28 @@ $order = \App\Models\Order::where('invoice_number', 'BH-20260603124736-353')->fi
 
 if (!$order) {
     echo "Order with invoice BH-20260603124736-353 not found!\n";
-    $allOrders = \App\Models\Order::orderByDesc('id')->limit(5)->get();
-    if ($allOrders->isEmpty()) {
-        echo "No orders in local database.\n";
-    } else {
-        echo "Recent orders in local database:\n";
-        foreach ($allOrders as $o) {
-            echo "  Order #" . $o->id . " - Invoice: " . $o->invoice_number . " - User: " . $o->user_id . "\n";
-        }
-    }
     exit(0);
 }
 
 $user = $order->user;
-echo "=== ORDER FOUND ===\n";
-echo "Order ID: " . $order->id . "\n";
-echo "Invoice: " . $order->invoice_number . "\n";
-echo "User ID: " . $order->user_id . "\n";
-echo "User Email: " . $user->email . "\n";
-echo "User Name: " . $user->name . "\n";
-echo "User Google ID: " . ($user->google_id ?: "NULL - Did NOT login via Google") . "\n";
-echo "Order Status: " . $order->status . "\n";
-echo "Payment Processed: " . ($order->payment_processed ? "YES" : "NO") . "\n";
-echo "\n=== EMAIL SENDING DECISION ===\n";
-if ($user->google_id) {
-    echo "✓ User HAS google_id - Email SHOULD be sent\n";
-} else {
-    echo "✗ User does NOT have google_id - Email is NOT sent (by design)\n";
-    echo "  User logged in with: email/password\n";
-    echo "  Emails only sent to Google-logged users\n";
+echo "✓ Order found!\n";
+echo "  User Email: " . $user->email . "\n";
+echo "  Google ID: " . $user->google_id . "\n";
+
+echo "\n=== TESTING EMAIL SENDING ===\n";
+echo "Mail driver: " . config('mail.mailer') . "\n";
+echo "SMTP Host: " . config('mail.mailers.smtp.host') . "\n";
+echo "SMTP Port: " . config('mail.mailers.smtp.port') . "\n";
+
+try {
+    echo "\nAttempting to send test email...\n";
+    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderReceiptMail($order));
+    echo "✓ Email sent successfully!\n";
+    echo "\nCheck logs for confirmation:\n";
+    echo "  tail -50 storage/logs/laravel.log | grep -i receipt\n";
+} catch (\Exception $e) {
+    echo "✗ Error sending email:\n";
+    echo "  " . $e->getMessage() . "\n";
+    echo "\nFull error:\n";
+    echo $e . "\n";
 }
