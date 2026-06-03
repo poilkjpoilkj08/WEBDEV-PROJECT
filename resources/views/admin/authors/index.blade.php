@@ -42,9 +42,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($authors as $author)
+                            @foreach($authors as $index => $author)
                             <tr>
-                                <td class="text-muted">{{ $author->id }}</td>
+                                <td class="text-muted">{{ $authors->firstItem() + $index }}</td>
                                 <td>
                                     @if($author->photo_url)
                                         <img src="{{ $author->photo_url }}" alt="{{ $author->name }}"

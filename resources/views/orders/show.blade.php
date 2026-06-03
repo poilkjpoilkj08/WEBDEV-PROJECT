@@ -10,12 +10,14 @@
             @php
                 $statusColor = match($order->status) {
                     'paid'       => 'success',
+                    'refunded'   => 'danger',
                     'pending'    => 'warning text-dark',
                     'cancelled'  => 'danger',
                     default      => 'secondary',
                 };
                 $statusLabel = match($order->status) {
                     'paid'       => 'Paid',
+                    'refunded'   => 'Refunded',
                     'pending'    => 'Pending Payment',
                     'cancelled'  => 'Cancelled',
                     default      => ucfirst($order->status),
@@ -229,7 +231,7 @@
     </div>
 
     {{-- Delivery Confirmation Section --}}
-    @if($order->shipping_status === 'shipped' && !$order->delivery_confirmed_by_user)
+    @if($order->shipping_status === 'delivered' && !$order->delivery_confirmed_by_user)
     <div class="row g-4 mt-4">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0 border-warning">
@@ -312,6 +314,40 @@
                 </div>
             </div>
         </div>
+        @else
+        {{-- Show message if refund already exists --}}
+        <div class="row g-4 mt-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 border-warning">
+                    <div class="card-header bg-warning bg-opacity-10 fw-bold py-3">
+                        <i class="fas fa-circle-info me-2 text-warning"></i>Refund Status
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $existingRefund = $order->refunds()->first();
+                            $statusMsg = match($existingRefund?->status) {
+                                'pending' => 'Your refund request is pending review by our admin team. We will respond within 24-48 hours.',
+                                'approved' => 'Your refund request has been approved. The refund will be processed shortly.',
+                                'completed' => 'Your refund has been completed. The amount has been transferred back to your original payment method.',
+                                'rejected' => 'Your refund request was rejected. Please contact our support team if you have any questions.',
+                                default => 'A refund request already exists for this order.'
+                            };
+                            $statusIcon = match($existingRefund?->status) {
+                                'pending' => 'hourglass-half text-warning',
+                                'approved' => 'check-circle text-info',
+                                'completed' => 'check-double text-success',
+                                'rejected' => 'times-circle text-danger',
+                                default => 'circle-info'
+                            };
+                        @endphp
+                        <p class="mb-0">
+                            <i class="fas fa-{{ $statusIcon }} me-2"></i>{{ $statusMsg }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <!-- Request Refund Modal -->
         <div class="modal fade" id="requestRefundModal" tabindex="-1">
@@ -321,13 +357,28 @@
                         <h5 class="modal-title">Request Refund</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <form method="POST" action="{{ route('orders.request-refund', $order->id) }}">
+                    <form id="refundForm" enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="order_id" value="{{ $order->id }}">
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="refundReason" class="form-label">Reason for Refund</label>
-                                <textarea class="form-control" id="refundReason" name="reason" rows="4" required placeholder="Please describe why you'd like to request a refund..."></textarea>
+                                <label for="refundReason" class="form-label">Reason for Refund <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="refundReason" name="reason" rows="4" required placeholder="Please describe why you'd like to request a refund (10-500 characters)..." minlength="10" maxlength="500"></textarea>
                                 <small class="text-muted">Provide a clear reason so our team can process your request quickly</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="refundImage" class="form-label">Upload Evidence (Optional)</label>
+                                <div id="refundUploadArea" style="border: 2px dashed #dee2e6; border-radius: 0.25rem; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s;" class="mb-2">
+                                    <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2 d-block"></i>
+                                    <p class="mb-1"><strong>Drag & drop your image here</strong></p>
+                                    <p class="text-muted small mb-0">or click to select (Max 5MB, JPG/PNG/GIF)</p>
+                                </div>
+                                <input type="file" id="refundImage" name="image" accept="image/jpeg,image/png,image/gif" style="display: none;">
+                                <div id="refundFilePreview" style="display: none;" class="mt-2">
+                                    <div class="alert alert-success" role="alert">
+                                        <i class="fas fa-check-circle me-2"></i><span id="refundFileName">File selected</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="alert alert-info mb-0">
                                 <i class="fas fa-info-circle me-2"></i>
@@ -336,43 +387,73 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-danger">Submit Refund Request</button>
+                            <button type="submit" class="btn btn-danger" id="submitRefundBtn">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Refund Request
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        @endif
-    @endif {{-- end user-only refund request button --}}
+    @endif {{-- end user-only refund request section --}}
 
     {{-- Refund Status Section (visible to everyone, when a refund exists) --}}
-    @if($order->refund_status && $order->refund_status !== 'none')
+    @if($order->refunds()->exists())
+    @php
+        $refund = $order->refunds()->first();
+    @endphp
     <div class="row g-4 mt-4">
         <div class="col-lg-8">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-light fw-bold py-3">
-                    <i class="fas fa-receipt me-2"></i>Refund Status
+            <div class="card shadow-sm border-0 border-{{ $refund->status === 'approved' ? 'success' : ($refund->status === 'rejected' ? 'danger' : 'warning') }}">
+                <div class="card-header bg-{{ $refund->status === 'approved' ? 'success' : ($refund->status === 'rejected' ? 'danger' : 'warning') }} bg-opacity-10 fw-bold py-3">
+                    <i class="fas fa-{{ $refund->status === 'approved' ? 'undo' : ($refund->status === 'rejected' ? 'times-circle' : 'hourglass-half') }} me-2 text-{{ $refund->status === 'approved' ? 'success' : ($refund->status === 'rejected' ? 'danger' : 'warning') }}"></i>
+                    Refund Request
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <p class="text-muted small mb-1">Status</p>
-                        <span class="badge bg-{{ $order->refund_status === 'approved' ? 'success' : ($order->refund_status === 'rejected' ? 'danger' : ($order->refund_status === 'completed' ? 'secondary' : 'warning')) }}">
-                            {{ ucfirst($order->refund_status) }}
-                        </span>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Payment Status</p>
+                            <span class="badge bg-{{ $refund->status === 'approved' ? 'danger' : ($refund->status === 'rejected' ? 'secondary' : 'warning') }} py-2 px-3">
+                                {{ $refund->status === 'approved' ? 'Refunded' : ($refund->status === 'rejected' ? 'Refund Rejected' : 'Pending') }}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Request Status</p>
+                            <span class="badge bg-{{ $refund->status === 'approved' ? 'success' : ($refund->status === 'rejected' ? 'danger' : 'warning') }} py-2 px-3">
+                                {{ ucfirst($refund->status) }}
+                            </span>
+                        </div>
+                        @if($refund->reason)
+                        <div class="col-12">
+                            <p class="text-muted small mb-1">{{ in_array('admin', $userRoles) || in_array('owner', $userRoles) ? 'Customer Reason' : 'Your Reason' }}</p>
+                            <p class="mb-0">{{ $refund->reason }}</p>
+                        </div>
+                        @endif
+                        @if($refund->amount)
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Refund Amount</p>
+                            <p class="mb-0 fw-semibold text-danger">Rp {{ number_format($refund->amount, 0, ',', '.') }}</p>
+                        </div>
+                        @endif
+                        @if($refund->created_at)
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Requested On</p>
+                            <p class="mb-0">{{ $refund->created_at->format('d M Y') }}</p>
+                        </div>
+                        @endif
+                        @if($refund->approved_at)
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1">Approved On</p>
+                            <p class="mb-0 text-success fw-semibold">{{ $refund->approved_at->format('d M Y') }}</p>
+                        </div>
+                        @endif
+                        @if($refund->admin_notes)
+                        <div class="col-12">
+                            <p class="text-muted small mb-1">Admin Notes</p>
+                            <div class="alert alert-info small mb-0">{{ $refund->admin_notes }}</div>
+                        </div>
+                        @endif
                     </div>
-                    @if($order->refund_reason)
-                    <div class="mb-3">
-                        <p class="text-muted small mb-1">{{ in_array('admin', $userRoles) || in_array('owner', $userRoles) ? 'Customer Reason' : 'Your Reason' }}</p>
-                        <p class="mb-0">{{ $order->refund_reason }}</p>
-                    </div>
-                    @endif
-                    @if($order->refund_amount)
-                    <div class="mb-3">
-                        <p class="text-muted small mb-1">Refund Amount</p>
-                        <p class="mb-0 fw-semibold text-success">Rp {{ number_format($order->refund_amount, 0, ',', '.') }}</p>
-                    </div>
-                    @endif
-
                 </div>
             </div>
         </div>
@@ -398,8 +479,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Request new payment token
             axios.post('{{ route("checkout.generate-payment-token") }}', {
-                order_id: orderId,
-                _token: '{{ csrf_token() }}'
+                order_id: parseInt(orderId)
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
             })
             .then(response => {
                 if (response.data.success && response.data.snapToken) {
@@ -441,8 +527,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                const errorMsg = error.response?.data?.message || error.message || 'Failed to process payment';
+                console.error('Full Error:', error);
+                console.error('Response Status:', error.response?.status);
+                console.error('Response Data:', error.response?.data);
+                
+                let errorMsg = 'Failed to process payment';
+                if (error.response?.data?.message) {
+                    errorMsg = error.response.data.message;
+                } else if (error.response?.data?.error) {
+                    errorMsg = error.response.data.error;
+                } else if (error.response?.status === 403) {
+                    errorMsg = 'Access denied. You may not have permission to pay this order. Please ensure you are logged in.';
+                } else if (error.response?.status === 422) {
+                    errorMsg = 'Cannot pay this order. ' + (error.response?.data?.message || 'Order may not be in pending status.');
+                } else if (error.message) {
+                    errorMsg = error.message;
+                }
+                
                 alert('Error: ' + errorMsg);
                 resetPayBtn();
             });
@@ -450,6 +551,136 @@ document.addEventListener('DOMContentLoaded', function() {
             function resetPayBtn() {
                 payNowBtn.disabled = false;
                 payNowBtn.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Refund form handlers
+    const refundForm = document.getElementById('refundForm');
+    const refundImage = document.getElementById('refundImage');
+    const uploadArea = document.getElementById('refundUploadArea');
+    const filePreview = document.getElementById('refundFilePreview');
+    const fileName = document.getElementById('refundFileName');
+    let selectedFile = null;
+
+    if (refundForm) {
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#0d6efd';
+            uploadArea.style.backgroundColor = 'rgba(13, 110, 253, 0.05)';
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#dee2e6';
+            uploadArea.style.backgroundColor = '#f8f9fa';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#dee2e6';
+            uploadArea.style.backgroundColor = '#f8f9fa';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                refundImage.files = files;
+                const event = new Event('change', { bubbles: true });
+                refundImage.dispatchEvent(event);
+            }
+        });
+
+        // Click to select file
+        uploadArea.addEventListener('click', () => {
+            refundImage.click();
+        });
+
+        // File selection handler
+        refundImage.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const maxSize = 5120 * 1024; // 5MB in bytes
+
+                // Validate file size
+                if (file.size > maxSize) {
+                    alert('File size exceeds 5MB limit');
+                    refundImage.value = '';
+                    selectedFile = null;
+                    filePreview.style.display = 'none';
+                    return;
+                }
+
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Please upload a valid image file (JPG, PNG, or GIF)');
+                    refundImage.value = '';
+                    selectedFile = null;
+                    filePreview.style.display = 'none';
+                    return;
+                }
+
+                selectedFile = file;
+                fileName.textContent = file.name;
+                filePreview.style.display = 'block';
+            }
+        });
+
+        // Form submission
+        refundForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const orderId = document.querySelector('input[name="order_id"]').value;
+            const reason = document.getElementById('refundReason').value.trim();
+
+            if (!reason || reason.length < 10) {
+                alert('Please provide a reason (minimum 10 characters)');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('order_id', orderId);
+            formData.append('reason', reason);
+            if (selectedFile) {
+                formData.append('image', selectedFile);
+            }
+
+            // Get CSRF token
+            const csrfToken = document.querySelector('input[name="_token"]').value;
+
+            try {
+                const response = await fetch('{{ route("refunds.request") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    console.error('Refund submission error:', data);
+                    if (data.errors) {
+                        const errorMessages = Object.values(data.errors).flat().join('\n');
+                        alert('Validation Error:\n' + errorMessages);
+                    } else {
+                        alert(data.message || 'Failed to submit refund request');
+                    }
+                    return;
+                }
+
+                // Success
+                alert(data.message || 'Refund request submitted successfully!');
+                document.getElementById('requestRefundModal').querySelector('.btn-close').click();
+                refundForm.reset();
+                filePreview.style.display = 'none';
+                selectedFile = null;
+                setTimeout(() => location.reload(), 1000);
+
+            } catch (error) {
+                console.error('Refund submission error:', error);
+                alert('An error occurred while submitting your refund request. Please try again.');
             }
         });
     }

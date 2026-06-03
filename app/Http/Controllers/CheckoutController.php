@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderReceiptMail;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -352,8 +354,31 @@ class CheckoutController extends Controller
                         ],
                     ];
 
-                    $snapToken = Snap::getSnapToken($transaction);
-                    \Log::info('Snap token created successfully', ['invoice' => $invoiceNumber]);
+                    // Retry Snap token generation up to 3 times with delays
+                    $snapToken = null;
+                    $attempts = 0;
+                    $maxAttempts = 3;
+                    
+                    while ($snapToken === null && $attempts < $maxAttempts) {
+                        try {
+                            $snapToken = Snap::getSnapToken($transaction);
+                            \Log::info('Snap token created successfully', ['invoice' => $invoiceNumber, 'attempt' => $attempts + 1]);
+                            break;
+                        } catch (\Exception $retryE) {
+                            $attempts++;
+                            \Log::warning('Snap token retry', [
+                                'attempt' => $attempts,
+                                'error' => $retryE->getMessage(),
+                            ]);
+                            
+                            if ($attempts < $maxAttempts) {
+                                // Wait before retrying (exponential backoff)
+                                sleep(1 * $attempts);
+                            } else {
+                                throw $retryE;
+                            }
+                        }
+                    }
                 } catch (\Exception $e) {
                     \Log::error('Midtrans Snap Token Error', [
                         'message' => $e->getMessage(),
@@ -361,9 +386,17 @@ class CheckoutController extends Controller
                         'file' => $e->getFile(),
                         'line' => $e->getLine(),
                     ]);
+                    
+                    // Return user-friendly error message
+                    $errorMsg = $e->getMessage();
+                    if (strpos($errorMsg, 'Could not resolve host') !== false) {
+                        $errorMsg = 'Payment gateway temporarily unavailable. Please try again in a moment.';
+                    }
+                    
                     return response()->json([
                         'error' => 'Failed to create payment token',
-                        'details' => 'Error: ' . $e->getMessage()
+                        'details' => $errorMsg,
+                        'debug_message' => 'Error: ' . $e->getMessage()
                     ], 500);
                 }
 
@@ -470,6 +503,25 @@ class CheckoutController extends Controller
                     }
                 }
                 
+                // Send receipt email if user logged in via Google
+                if ($user->google_id) {
+                    try {
+                        Mail::to($user->email)->send(new OrderReceiptMail($order));
+                        \Log::info('Receipt email sent', [
+                            'user_id' => $user->id,
+                            'order_id' => $order->id,
+                            'email' => $user->email,
+                        ]);
+                    } catch (\Exception $emailError) {
+                        \Log::warning('Failed to send receipt email', [
+                            'user_id' => $user->id,
+                            'order_id' => $order->id,
+                            'error' => $emailError->getMessage(),
+                        ]);
+                        // Don't fail the payment if email fails to send
+                    }
+                }
+                
                 return response()->json(['success' => true, 'message' => 'Payment marked complete']);
             }, 5);  // Maximum 5 transaction retries
             
@@ -489,18 +541,39 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
+            \Log::warning('generatePaymentToken: User not authenticated');
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $request->validate([
-            'order_id' => 'required|integer|exists:orders,id',
-        ]);
+        try {
+            $request->validate([
+                'order_id' => 'required|integer|exists:orders,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('generatePaymentToken: Validation failed', [
+                'errors' => $e->errors(),
+                'order_id' => $request->order_id,
+            ]);
+            throw $e;
+        }
 
         try {
             $order = Order::findOrFail($request->order_id);
 
+            \Log::info('generatePaymentToken: Order found', [
+                'order_id' => $order->id,
+                'user_id' => $user->id,
+                'order_user_id' => $order->user_id,
+                'status' => $order->status,
+            ]);
+
             // Verify order belongs to authenticated user
             if ($order->user_id !== $user->id) {
+                \Log::warning('generatePaymentToken: User not authorized for order', [
+                    'user_id' => $user->id,
+                    'order_user_id' => $order->user_id,
+                    'order_id' => $order->id,
+                ]);
                 return response()->json(['error' => 'Unauthorized - Order does not belong to user'], 403);
             }
 
@@ -577,7 +650,31 @@ class CheckoutController extends Controller
                         ],
                     ];
 
-                    $snapToken = Snap::getSnapToken($transaction);
+                    // Retry Snap token generation up to 3 times with delays
+                    $snapToken = null;
+                    $attempts = 0;
+                    $maxAttempts = 3;
+                    
+                    while ($snapToken === null && $attempts < $maxAttempts) {
+                        try {
+                            $snapToken = Snap::getSnapToken($transaction);
+                            \Log::info('Payment token created successfully', ['order_id' => $order->id, 'attempt' => $attempts + 1]);
+                            break;
+                        } catch (\Exception $retryE) {
+                            $attempts++;
+                            \Log::warning('Payment token retry', [
+                                'order_id' => $order->id,
+                                'attempt' => $attempts,
+                                'error' => $retryE->getMessage(),
+                            ]);
+                            
+                            if ($attempts < $maxAttempts) {
+                                sleep(1 * $attempts);
+                            } else {
+                                throw $retryE;
+                            }
+                        }
+                    }
 
                     return response()->json([
                         'success'   => true,

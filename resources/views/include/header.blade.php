@@ -1,16 +1,16 @@
 <!-- Base Navigation Wrapper Structure -->
-<nav class="navbar navbar-expand-lg navbar-dark py-2 px-md-4 shadow-sm {{ Route::is('home') ? 'navbar-home-transparent' : '' }}" 
+<nav class="navbar navbar-expand-lg navbar-dark py-3 px-md-4 shadow-sm {{ Route::is('home') ? 'navbar-home-transparent' : '' }}" 
      style="{{ Route::is('home') ? 'background: rgba(43, 24, 12, 0.15) !important;' : 'background: linear-gradient(135deg, #c25e25, #a64f1e) !important;' }}">
     <div class="container-fluid">
-        <!-- Brand Identity -->
-        <a class="navbar-brand fw-bold fs-5 text-white d-flex align-items-center" 
+        <!-- Brand Identity with Smooth Animated Image Configuration -->
+        <a class="navbar-brand fw-bold fs-4 tracking-tight text-white d-flex align-items-center brand-transition" 
            href="{{ route('home') }}" 
            style="text-decoration: none !important; box-shadow: none !important; outline: none !important;">
             <img src="{{ asset('images/logo.png') }}" 
                  alt="BookHive Logo" 
-                 height="32"
-                 class="me-2 d-inline-block align-top"
-                 style="object-fit: contain;">
+                 height="45"
+                 class="me-2 d-inline-block align-top logo-smooth"
+                 style="object-fit: contain; filter: none !important;">
             BookHive
         </a>
         
@@ -19,7 +19,7 @@
         </button>
         
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 mt-2 mt-lg-0">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('home') ? 'active' : '' }}" href="{{ route('home') }}">{{ __('messages.home') }}</a>
                 </li>
@@ -29,15 +29,29 @@
                 <li class="nav-item">
                     <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('about') ? 'active' : '' }}" href="{{ route('about') }}">{{ __('messages.about') }}</a>
                 </li>
+                {{-- FAQ & Roulette Text Links - Visible strictly to buyers/customers --}}
+                @auth
+                    @if(!auth()->user()->hasRole(['admin', 'owner']))
+                    <li class="nav-item">
+                        <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('faq') ? 'active' : '' }}" href="{{ route('faq') }}">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('books.roulette') ? 'active' : '' }}" href="{{ route('books.roulette') }}">Confused?</a>
+                    </li>
+                    @endif
+                @endauth
                 @auth
                     @if(auth()->user()->hasRole(['admin', 'owner']))
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-smooth dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {{ __('messages.admin_panel') }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg animate slideIn" aria-labelledby="adminDropdown" style="background-color: #a64f1e;">
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark border-0 shadow-lg animate slideIn" aria-labelledby="adminDropdown" style="background-color: #a64f1e;">
                             <li><h6 class="dropdown-header">Books</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.books.index') }}"><i class="fas fa-list fa-fw me-2 text-white-50"></i>Manage Books</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Authors</h6></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.authors.index') }}"><i class="fas fa-list fa-fw me-2 text-white-50"></i>Manage Authors</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">Stores</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.stores.index') }}"><i class="fas fa-store fa-fw me-2 text-white-50"></i>Manage Store Locations</a></li>
@@ -51,30 +65,39 @@
             </ul>
         </div>
 
-        <!-- REARRANGED ACTION HUB: Orders -> User Console (Cart & Wishlist removed, Language removed) -->
-        <div class="d-flex text-white align-items-center gap-1 gap-md-2 ms-auto ms-lg-0">
+        <!-- REARRANGED ACTION HUB: Action Links (Cart, Wishlist, Orders restricted to customer role) -> User Profile -->
+        <div class="d-flex text-white align-items-center gap-2 gap-md-3 ms-auto ms-lg-0">
             
             @guest
                 <a href="{{ route('login.show') }}" class="btn btn-light btn-sm px-4 fw-bold rounded-pill shadow-sm btn-smooth" style="color: #c25e25;">{{ __('messages.login') }}</a>
             @else
+                <!-- Core Action Hub Restricted Strictly to Buyers/Customers (Hidden for admin/owners) -->
                 @if(!auth()->user()->hasRole(['admin', 'owner']))
-                <!-- Cart Button -->
-                <a href="{{ route('cart.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm btn-smooth px-3" title="Cart">
-                    <i class="fas fa-shopping-cart fs-5"></i>
-                </a>
+                    @php 
+                        // Dynamically tallies up the physical integers inside the quantity field instead of array row counting
+                        $cartCount = collect(session('cart', []))->sum('quantity'); 
+                    @endphp
+                    
+                    <!-- [1] Dynamic Checkout History Receipts (Orders Icon Button) -->
+                    <a href="{{ route('orders.index') }}" class="btn btn-link btn-minimal-circle text-white text-decoration-none" title="View Orders">
+                        <i class="fas fa-receipt"></i>
+                    </a>
+                    
+                    <!-- [2] Active Cart Button Context (Borderless Minimal Circle Style with Absolute Sum Count Badge) -->
+                    <a href="{{ route('cart.index') }}" class="btn btn-link btn-minimal-circle position-relative text-white text-decoration-none" title="View Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        @if($cartCount > 0)
+                            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill" style="font-size: 0.6rem; padding: 0.25em 0.4em;">{{ $cartCount }}</span>
+                        @endif
+                    </a>
 
-                <!-- Wishlist Button -->
-                <a href="{{ route('wishlist.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm btn-smooth px-3" title="Wishlist">
-                    <i class="fas fa-heart fs-5"></i>
-                </a>
-                
-                <!-- Orders Button -->
-                <a href="{{ route('orders.index') }}" class="btn btn-outline-light btn-sm d-flex align-items-center rounded-pill shadow-sm btn-smooth px-3" title="Orders">
-                    <i class="fas fa-receipt fs-5"></i>
-                </a>
+                    <!-- [3] Standalone Curated Wishlist Button (Borderless Bookmark Aesthetic Icon) -->
+                    <a href="{{ route('wishlist.index') }}" class="btn btn-link btn-minimal-circle text-white text-decoration-none" title="View Wishlist">
+                        <i class="fas fa-bookmark"></i>
+                    </a>
                 @endif
                 
-                <!-- [2] Custom Context Profile Console Dropdown -->
+                <!-- [4] Custom Context Profile Console Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-light btn-sm px-3 px-sm-4 fw-bold rounded-pill d-flex align-items-center shadow-sm btn-smooth" type="button" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: #c25e25;">
                         <i class="fas fa-user-circle me-2 fs-5"></i>
@@ -136,17 +159,18 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Mobile responsiveness */
+    /* Mobile responsiveness markup logic modifications */
     @media (max-width: 991.98px) {
         .navbar .d-flex.text-white {
-            gap: 0.25rem !important;
+            gap: 0.35rem !important;
         }
-        .navbar .btn-outline-light.btn-sm {
-            padding: 0.25rem 0.5rem !important;
-            font-size: 0.8rem !important;
+        .navbar .btn-minimal-circle {
+            width: 34px !important;
+            height: 34px !important;
+            font-size: 0.9rem !important;
         }
         .navbar .btn-light.btn-sm {
-            padding: 0.25rem 0.5rem !important;
+            padding: 0.25rem 0.6rem !important;
             font-size: 0.8rem !important;
         }
         .navbar-collapse .navbar-nav .nav-link {

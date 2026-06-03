@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\LanguageController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\RefundController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
@@ -91,6 +93,13 @@ Route::get('/debug/shipping-test', function () {
 Route::get('/login', [AuthController::class, 'show_login'])->name('login.show')->middleware('guest');
 Route::post('/login_auth', [AuthController::class, 'login_auth'])->name('login.auth')->middleware('guest');
 
+Route::get('/register', [AuthController::class, 'show_register'])->name('register.show')->middleware('guest');
+Route::post('/register', [AuthController::class, 'register_store'])->name('register.store')->middleware('guest');
+
+// Google OAuth Routes
+Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('auth.google')->middleware('guest');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback')->middleware('guest');
+
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -119,6 +128,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/save-address', [CheckoutController::class, 'saveAddress'])->name('checkout.save-address');
 
     Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('books.reviews.store');
+
+    // Refund routes
+    Route::post('/refunds/request', [RefundController::class, 'request'])->name('refunds.request');
 
     Route::middleware(['role:admin,owner'])->group(function () {
 
@@ -151,9 +163,20 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/orders/{order_id}', [OrderController::class, 'update'])->name('admin.orders.update');
         
         // Admin refund management
-        Route::get('/admin/refunds', [OrderController::class, 'adminRefundsIndex'])->name('admin.refunds.index');
-        Route::post('/admin/refunds/{refund_id}/approve', [OrderController::class, 'approveRefund'])->name('admin.refunds.approve');
-        Route::post('/admin/refunds/{refund_id}/reject', [OrderController::class, 'rejectRefund'])->name('admin.refunds.reject');
-        Route::post('/admin/refunds/{refund_id}/complete', [OrderController::class, 'completeRefund'])->name('admin.refunds.complete');
+        Route::get('/admin/refunds', [RefundController::class, 'index'])->name('admin.refunds.index');
+        Route::post('/admin/refunds/{refund}/approve', [RefundController::class, 'approve'])->name('admin.refunds.approve');
+        Route::post('/admin/refunds/{refund}/reject', [RefundController::class, 'reject'])->name('admin.refunds.reject');
     });
 });
+
+// --- FAQ Terminal ---
+Route::get('/faq', function () {
+    // Optional array payload configuration matching your template manifest properties
+    $indonesianLocations = \App\Http\Controllers\CheckoutController::indonesianLocations() ?? [];
+    return view('faq.faq', compact('indonesianLocations'));
+})->name('faq');
+
+// --- Recommendation Roulette ---
+    Route::get('/roulette', function () {
+        return view('roulette.roulette');
+    })->name('books.roulette');

@@ -8,13 +8,9 @@
     }
 
     body {
-        background-image: url("{{ asset('images/bg1.jpg') }}") !important;
-        background-repeat: no-repeat !important;
-        background-attachment: fixed !important; 
-        background-position: center center !important; 
-        background-size: cover !important; 
+        background-color: #ffffff; /* Overriding global master background image to pure clean white */
         min-height: 100vh;
-        padding-top: 100px;
+        padding-top: 40px;
     }
 
     /* Fixed Header Logic Compatibility */
@@ -26,104 +22,74 @@
         backdrop-filter: blur(8px);
     }
 
-    /* GLASS BOX FOR HEADERS */
-    .glass-header-box {
-        background: rgba(255, 255, 255, 0.45); 
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        padding: 10px 28px;
-        border-radius: 50px;
-        display: inline-block;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    /* Modern scannable card layout adjustments */
+    .checkout-card {
+        border: 1px solid #eef0f2 !important;
+        background-color: #ffffff;
     }
 
-    /* Remove core white background wrapper to let background image shine */
-    .content-wrapper {
-        background-color: transparent !important;
-        backdrop-filter: none !important;
-        box-shadow: none !important;
-    }
-
-    /* Card lift hover animations */
-    .hover-lift:hover {
-        transform: translateY(-4px);
-        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
-    .hover-lift {
-        transition: transform 0.2s ease;
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        background-color: #f8f9fa !important;
     }
     
     .max-width-fit {
         width: fit-content;
     }
     
-    /* Store Selection Styling */
-    .store-card {
-        transition: all 0.3s ease;
-        background: white;
+    /* Store Selection Card Styling */
+    .item-store-select {
+        border-color: #ced4da !important;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .item-store-select:focus {
+        border-color: #c25e25 !important;
+        box-shadow: 0 0 0 0.2rem rgba(194, 94, 37, 0.15) !important;
     }
     
-    .store-card:hover {
-        border-color: #0d6efd !important;
-        background: #f8f9ff;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15) !important;
-    }
-    
-    input[type="radio"].store-radio:checked + div .store-card {
-        border-color: #0d6efd !important;
-        background: #e7f1ff;
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
-    }
-    
-    /* Shipping Option Styling */
+    /* Shipping Option Styling Custom Sync */
     .shipping-option {
-        transition: all 0.2s ease;
-        background: white;
+        transition: all 0.25s ease;
+        background: #ffffff;
+        border: 1px solid #eef0f2 !important;
+        border-left: 4px solid #ced4da !important;
     }
     
     .shipping-option:hover {
         background: #f8f9fa;
-        border-left: 3px solid #ccc;
-    }
-    
-    input[type="radio"].shipping-radio:checked + div + span,
-    input[type="radio"].shipping-radio:checked ~ .shipping-cost {
-        color: #28a745 !important;
-        font-weight: 700;
+        border-left-color: #a64f1e !important;
     }
     
     input[type="radio"].shipping-radio:checked ~ .shipping-option,
     .shipping-option:has(input[type="radio"].shipping-radio:checked) {
-        background: #f0f8f5;
-        border-left: 4px solid #28a745;
+        background: #fdf6f0 !important;
+        border-color: #fbd3bc !important;
+        border-left: 4px solid #c25e25 !important;
+    }
+
+    input[type="radio"].shipping-radio:checked + div .fw-bold {
+        color: #c25e25 !important;
     }
     
     /* Form Validation Highlighting */
     .form-control.is-invalid,
-    .form-select.is-invalid {
-        border-color: #dc3545;
-        background-color: #fff5f5;
-    }
-    
-    .form-control.is-invalid:focus,
-    .form-select.is-invalid:focus {
-        border-color: #dc3545;
-        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-    }
-    
+    .form-select.is-invalid,
     .field-error-highlight {
+        border-color: #dc3545 !important;
         background-color: #fff5f5 !important;
-        border: 2px solid #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15) !important;
     }
     
-    /* Order Summary Prominence */
+    /* Order Summary Prominence Layouts */
     #shippingDisplay {
         font-size: 1.1rem !important;
         font-weight: bold !important;
-        color: #198754 !important;
+        color: #c25e25 !important;
         display: block !important;
     }
     
@@ -133,9 +99,205 @@
         font-size: 0.9rem !important;
         margin-top: 4px;
     }
+    
+    /* Map Modal Styling - Ensure map is visible and responsive */
+    #mapPickerModal {
+        z-index: 9999 !important;
+    }
+    
+    #mapPickerModal .modal-dialog {
+        z-index: 9999 !important;
+    }
+    
+    #mapPickerModal .modal-content {
+        position: relative;
+        z-index: 10000;
+        background: white;
+    }
+    
+    #mapPickerContainer {
+        position: relative;
+        width: 100% !important;
+        height: 480px !important;
+        background: white !important;
+        z-index: 1052;
+        overflow: visible !important;
+        display: block !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    
+    #mapElement {
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 1052 !important;
+        background: white !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        display: block !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    
+    #mapElement > * {
+        pointer-events: auto !important;
+    }
+    
+    #mapElement img {
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    
+    #mapSearchBox {
+        pointer-events: auto !important;
+    }
+    
+    #mapSearchInput {
+        pointer-events: auto !important;
+    }
+    
+    /* Ensure modal backdrop is never visible */
+    .modal-backdrop {
+        display: none !important;
+        opacity: 0 !important;
+        z-index: -9999 !important;
+    }
+    
+    .modal-backdrop.show {
+        display: none !important;
+        opacity: 0 !important;
+        z-index: -9999 !important;
+    }
+    
+    .modal-backdrop.fade {
+        display: none !important;
+        opacity: 0 !important;
+    }
+    
+    /* Prevent any overlay effect */
+    body.modal-open {
+        overflow: auto !important;
+    }
+    
+    /* Map modal should be hidden and not blocking by default */
+    #mapPickerModal {
+        pointer-events: none !important;
+        z-index: 1050 !important;
+        position: fixed !important;
+        display: none !important;
+    }
+    
+    /* When shown, make modal overlay everything including navbar */
+    #mapPickerModal.show {
+        pointer-events: auto !important;
+        z-index: 9999 !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(0, 0, 0, 0.7) !important;
+        overflow-y: auto !important;
+    }
+    
+    #mapPickerModal .modal-dialog {
+        pointer-events: auto !important;
+        z-index: 10000 !important;
+        position: relative !important;
+        width: 95vw !important;
+        max-width: 1200px !important;
+        height: 85vh !important;
+        max-height: 850px !important;
+        margin: auto !important;
+        top: auto !important;
+        left: auto !important;
+    }
+    
+    #mapPickerModal .modal-content {
+        pointer-events: auto !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    #mapPickerModal .modal-body {
+        pointer-events: auto !important;
+        flex: 1 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+    }
+    
+    #mapPickerContainer {
+        pointer-events: auto !important;
+        width: 100% !important;
+        height: 100% !important;
+        position: relative !important;
+    }
+    
+    #mapElement {
+        pointer-events: auto !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 1052 !important;
+        background: white !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    #mapElement > * {
+        pointer-events: auto !important;
+    }
+    
+    #mapSearchBox {
+        pointer-events: auto !important;
+    }
+    
+    #mapSearchInput {
+        pointer-events: auto !important;
+    }
+    
+    .map-autocomplete-results {
+        position: absolute !important;
+        top: 50px !important;
+        left: 15px !important;
+        width: 320px !important;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1055 !important;
+        display: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        pointer-events: auto !important;
+    }
+    
+    .map-autocomplete-results.show {
+        display: block !important;
+    }
+    
+    .map-result-item {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        font-size: 0.85rem;
+        pointer-events: auto !important;
+    }
+    
+    .map-result-item:hover {
+        background-color: #f5f5f5;
+    }
+    }
 
     #grandTotalDisplay {
-        color: #198754 !important;
+        color: #c25e25 !important;
         font-weight: 700 !important;
     }
     
@@ -146,502 +308,444 @@
         margin-top: 0.25rem;
     }
     
-    .field-error-highlight ~ .error-message {
-        display: block;
-    }
-    
-    /* Street Autocomplete Styling */
-    .street-suggestions {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: white;
-        border: 1px solid #ddd;
-        border-top: none;
-        border-radius: 0 0 0.375rem 0.375rem;
-        max-height: 300px;
-        overflow-y: auto;
-        z-index: 1000;
-        display: none;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .street-suggestions.show {
-        display: block;
-    }
-    
-    .street-suggestion-item {
-        padding: 12px 16px;
-        border-bottom: 1px solid #f0f0f0;
-        cursor: pointer;
-        transition: background-color 0.15s;
-    }
-    
-    .street-suggestion-item:hover,
-    .street-suggestion-item.active {
-        background-color: #f8f9fa;
-    }
-    
-    .street-suggestion-item:last-child {
-        border-bottom: none;
-    }
-    
-    .street-input-wrapper {
-        position: relative;
-    }
-    
-    /* Location Search Styling */
-    .location-search-wrapper {
-        position: relative;
-    }
-    
-    .location-suggestions {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: white;
-        border: 1px solid #ddd;
-        border-top: none;
-        border-radius: 0 0 0.375rem 0.375rem;
-        max-height: 300px;
-        overflow-y: auto;
-        overflow-x: hidden;
-        z-index: 1000;
-        display: none;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .location-suggestions.show {
-        display: block;
-    }
-    
-    .location-suggestions::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .location-suggestions::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-    
-    .location-suggestions::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 3px;
-    }
-    
-    .location-suggestions::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-    
-    .location-suggestion-item {
-        padding: 12px 16px;
-        border-bottom: 1px solid #f0f0f0;
-        cursor: pointer;
-        transition: background-color 0.15s;
-    }
-    
-    .location-suggestion-item:hover,
-    .location-suggestion-item.active {
-        background-color: #f8f9fa;
-    }
-    
-    .location-suggestion-item:last-child {
-        border-bottom: none;
-    }
-    
-    .location-suggestion-label {
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: #333;
-    }
-    
-    .location-suggestion-desc {
-        font-size: 0.85rem;
-        color: #999;
-        margin-top: 2px;
-    }
-    
-    /* Map Picker Modal */
-    #mapPickerModal .modal-body {
-        padding: 0 !important;
-    }
-    
-    #mapSearchBox {
-        background: white;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-    
-    #mapSearchInput {
-        border: none;
-    }
-    
-    #mapSearchInput:focus {
-        border: none;
-        box-shadow: none;
-        outline: 1px solid #0d6efd;
-    }
-    
+    /* Location Search & Autocomplete Dropdowns */
+    .location-suggestions,
+    .street-suggestions,
     .map-autocomplete-results {
         position: absolute;
-        top: 45px;
-        left: 10px;
-        z-index: 11;
-        width: 280px;
+        top: 100%;
+        left: 0;
+        right: 0;
         background: white;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        max-height: 200px;
+        border: 1px solid #eef0f2;
+        border-top: none;
+        border-radius: 0 0 0.5rem 0.5rem;
+        max-height: 260px;
         overflow-y: auto;
+        z-index: 1050;
         display: none;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
     }
     
+    .location-suggestions.show,
+    .street-suggestions.show,
     .map-autocomplete-results.show {
         display: block;
     }
     
+    .location-suggestion-item,
+    .street-suggestion-item,
     .map-result-item {
-        padding: 10px 12px;
-        border-bottom: 1px solid #f0f0f0;
+        padding: 12px 16px;
+        border-bottom: 1px solid #f8f9fa;
         cursor: pointer;
-        font-size: 0.9rem;
+        transition: background-color 0.15s ease;
     }
     
+    .location-suggestion-item:hover,
+    .street-suggestion-item:hover,
     .map-result-item:hover {
         background-color: #f8f9fa;
     }
+
+    .location-suggestion-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #2d3748;
+    }
     
-    .map-result-item:last-child {
-        border-bottom: none;
+    .location-suggestion-desc {
+        font-size: 0.8rem;
+        color: #718096;
+        margin-top: 1px;
+    }
+
+    /* Unified Muted Soft Orange Buttons global style helper */
+    .btn-soft-orange {
+        background-color: #c25e25 !important;
+        border-color: #c25e25 !important;
+        color: #ffffff !important;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+    
+    .btn-soft-orange:hover, .btn-soft-orange:focus {
+        background-color: #a64f1e !important;
+        border-color: #a64f1e !important;
+        color: #ffffff !important;
+    }
+
+    .btn-outline-soft-orange {
+        background-color: transparent !important;
+        border: 2px solid #c25e25 !important;
+        color: #c25e25 !important;
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn-outline-soft-orange:hover, .btn-outline-soft-orange.active {
+        background-color: #c25e25 !important;
+        border-color: #c25e25 !important;
+        color: #ffffff !important;
+    }
+
+    #mapSearchBox {
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 </style>
 
-<div class="container py-5 content-wrapper">
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-5 gap-3">
-        <div>
-            <div class="glass-header-box mb-2">
-                <h1 class="h3 mb-0 fw-bold text-dark">Secure Checkout</h1>
+<div class="bg-white" style="position: relative; z-index: 4; padding-top: 40px;">
+    <div class="container py-5">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-5 gap-3">
+            <div>
+                <h1 class="h3 mb-1 fw-bold text-dark">Checkout</h1>
+                <p class="text-muted small mb-0">Review order details, pinpoint shipping data, and complete secure token execution payments.</p>
             </div>
-            <p class="text-white bg-dark bg-opacity-25 d-inline-block px-3 py-1 rounded-pill small ms-2 backdrop-blur mb-0">
-                Review your order details, select shipping, and execute payment safely.
-            </p>
+            <a href="{{ route('cart.index') }}" class="btn btn-outline-soft-orange btn-sm fw-bold px-4 rounded-pill shadow-sm">
+                <i class="fas fa-shopping-cart me-2"></i>Back to Cart
+            </a>
         </div>
-        <a href="{{ route('cart.index') }}" class="btn btn-warning btn-sm fw-bold px-4 rounded-pill shadow-sm">
-            <i class="fas fa-shopping-cart me-2"></i>Back to Cart
-        </a>
-    </div>
 
-    @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4"><i class="fas fa-check-circle me-2"></i>{{ session('success') }}</div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4"><i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}</div>
-    @endif
+        @if(session('success'))
+            <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4"><i class="fas fa-check-circle me-2"></i>{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4"><i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}</div>
+        @endif
 
-    <div class="row g-4 align-items-start">
-        {{-- LEFT: Order Summary + Shipping Form --}}
-        <div class="col-lg-7">
+        <div class="row g-4 align-items-start">
+            {{-- LEFT COLUMN: Orders Summary Array & Address Form Details --}}
+            <div class="col-lg-7">
 
-            {{-- Order summary with Store Selection Card --}}
-            <div class="card shadow-lg border-0 bg-white rounded-4 overflow-hidden mb-4">
-                <div class="card-body p-4 p-md-5">
-                    <h3 class="h5 fw-bold text-dark border-bottom pb-3 mb-4">
-                        <i class="fas fa-shopping-bag text-primary me-2"></i>Order Summary & Store Selection
-                        <span id="shippingCalculatedBadge" class="badge bg-success ms-2" style="display: none;">
-                            <i class="fas fa-check-circle me-1"></i>Shipping Calculated
-                        </span>
-                    </h3>
-                    
-                    <div class="pe-1 mb-4" style="max-height: 500px; overflow-y: auto;">
-                        @foreach($items as $item)
-                        <div class="py-3 border-bottom cart-item" 
-                             data-book-id="{{ $item['book']->id }}"
-                             data-weight-grams="{{ (int)($item['book']->weight_grams ?? 300) }}"
-                             data-quantity="{{ $item['quantity'] }}">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ $item['book']->cover_image_src }}" alt="{{ $item['book']->title }}"
-                                         style="width:40px;height:55px;object-fit:cover;border-radius:4px;" class="border shadow-sm">
-                                    <div>
-                                        <h4 class="h6 fw-bold text-dark mb-1 text-truncate" style="max-width: 280px;" title="{{ $item['book']->title }}">{{ $item['book']->title }}</h4>
-                                        <small class="text-muted font-monospace bg-light px-2 py-0.5 rounded border small">Qty: {{ $item['quantity'] }} × Rp {{ number_format($item['book']->price, 0, ',', '.') }} | Weight: {{ (int)($item['book']->weight_grams ?? 300) }}g</small>
+                {{-- Order Summary Block Layout Component --}}
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4 checkout-card">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="h5 fw-bold text-dark border-bottom pb-3 mb-4">
+                            <i class="fas fa-shopping-bag me-2" style="color: #c25e25;"></i>Order Summary & Inventory Selection
+                            <span id="shippingCalculatedBadge" class="badge bg-success ms-2 rounded-pill fw-medium small" style="display: none; font-size: 0.7rem; padding: 0.4em 0.8em;">
+                                <i class="fas fa-check-circle me-1"></i>Shipping Calculated
+                            </span>
+                        </h3>
+                        
+                        <div class="pe-1 mb-4" style="max-height: 500px; overflow-y: auto;">
+                            @foreach($items as $item)
+                            <div class="py-3 border-bottom cart-item" 
+                                 data-book-id="{{ $item['book']->id }}"
+                                 data-weight-grams="{{ (int)($item['book']->weight_grams ?? 300) }}"
+                                 data-quantity="{{ $item['quantity'] }}">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="{{ $item['book']->cover_image_src }}" alt="{{ $item['book']->title }}"
+                                             style="width:45px; height:60px; object-fit:contain; border-radius:4px; padding: 2px;" class="border shadow-sm bg-white">
+                                        <div>
+                                            <h4 class="h6 fw-bold text-dark mb-1 text-truncate" style="max-width: 280px;" title="{{ $item['book']->title }}">{{ $item['book']->title }}</h4>
+                                            <small class="text-muted font-monospace bg-light px-2 py-0.5 rounded border" style="font-size: 0.7rem;">Qty: {{ $item['quantity'] }} × Rp {{ number_format($item['book']->price, 0, ',', '.') }} | {{ (int)($item['book']->weight_grams ?? 300) }}g</small>
+                                        </div>
                                     </div>
+                                    <span class="fw-bold text-dark small">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</span>
                                 </div>
-                                <span class="fw-bold text-secondary">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</span>
+                                
+                                {{-- Store Selection configuration for matching inventory records --}}
+                                <div class="ms-5 ps-2 mb-2">
+                                    <label class="form-label fw-semibold text-dark small mb-1.5" style="font-size: 0.75rem;">
+                                        Fulfillment Location
+                                        <span class="item-store-required text-danger" style="display: @if(!$item['store_id']) inline @else none @endif;">*</span>
+                                    </label>
+                                    <select name="store_ids[{{ $item['book']->id }}]" form="paymentForm" 
+                                            class="form-select form-select-sm rounded-3 item-store-select fw-medium text-secondary" 
+                                            data-book-id="{{ $item['book']->id }}" 
+                                            @if(!$item['store_id']) required @endif>
+                                        <option value="">-- Select Store Location --</option>
+                                        @foreach($stores as $store)
+                                            @php
+                                                $storeBook = $item['book']->storeLocations()->where('store_location_id', $store->id)->first();
+                                                $storeStock = $storeBook ? $storeBook->pivot->stock : 0;
+                                                $isSelected = $item['store_id'] == $store->id;
+                                            @endphp
+                                            <option value="{{ $store->id }}" 
+                                                    {{ $isSelected ? 'selected' : '' }}
+                                                    data-stock="{{ $storeStock }}"
+                                                    data-lat="{{ $store->latitude }}"
+                                                    data-lng="{{ $store->longitude }}">
+                                                {{ $store->city }} (Stock: {{ $storeStock }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="item-store-message d-block mt-1" 
+                                           style="display: @if(!$item['store_id']) block @else none @endif; font-size: 0.7rem;">
+                                        <span class="text-danger" style="display: @if(!$item['store_id']) inline @else none @endif;"><i class="fas fa-exclamation-triangle me-1"></i>Store selection required</span>
+                                        <span class="text-success" style="display: @if($item['store_id']) inline @else none @endif;"><i class="fas fa-check me-1"></i>Store assigned successfully</span>
+                                    </small>
+                                </div>
                             </div>
-                            
-                            {{-- Store Selection for this item --}}
-                            <div class="ms-5 ps-2 mb-2">
-                                <label class="form-label fw-medium text-dark small mb-2">
-                                    Select Store for this item
-                                    <span class="item-store-required text-danger" style="display: @if(!$item['store_id']) inline @else none @endif;">*</span>
-                                </label>
-                                <select name="store_ids[{{ $item['book']->id }}]" form="paymentForm" 
-                                        class="form-select form-select-sm rounded-2 border-info fw-semibold item-store-select" 
-                                        data-book-id="{{ $item['book']->id }}" 
-                                        @if(!$item['store_id']) required @endif>
-                                    <option value="">-- Choose Store --</option>
-                                    @foreach($stores as $store)
-                                        @php
-                                            $storeBook = $item['book']->storeLocations()->where('store_location_id', $store->id)->first();
-                                            $storeStock = $storeBook ? $storeBook->pivot->stock : 0;
-                                            $isSelected = $item['store_id'] == $store->id;
-                                        @endphp
-                                        <option value="{{ $store->id }}" 
-                                                {{ $isSelected ? 'selected' : '' }}
-                                                data-stock="{{ $storeStock }}"
-                                                data-lat="{{ $store->latitude }}"
-                                                data-lng="{{ $store->longitude }}">
-                                            {{ $store->city }} (Stock: {{ $storeStock }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <small class="item-store-message d-block mt-1" 
-                                       style="display: @if(!$item['store_id']) block @else none @endif;">
-                                    <span class="text-danger" style="display: @if(!$item['store_id']) inline @else none @endif;">⚠️ Store selection required</span>
-                                    <span class="text-success" style="display: @if($item['store_id']) inline @else none @endif;">✓ Store selected</span>
-                                </small>
+                            @endforeach
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center pt-2">
+                            <span class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem;">Subtotal</span>
+                            <span class="fw-semibold text-dark" id="subtotalDisplay">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 mb-2">
+                            <span class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem;">Shipping Cost</span>
+                            <div class="text-end">
+                                <span id="shippingDisplay" class="d-block fw-bold text-dark" style="display: none; font-size: 1.1rem;">— awaiting details</span>
+                                <span id="shippingRate" class="d-block text-muted small" style="display: none; margin-top: 4px;"></span>
                             </div>
                         </div>
-                        @endforeach
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center pt-2">
-                        <span class="text-muted small text-uppercase fw-bold">Subtotal</span>
-                        <span class="fw-semibold text-dark" id="subtotalDisplay">Rp {{ number_format($total, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center pt-2 mb-2">
-                        <span class="text-muted small text-uppercase fw-bold">Shipping cost</span>
-                        <div class="text-end">
-                            <span id="shippingDisplay" class="d-block fw-bold text-success" style="display: none; font-size: 1.1rem;">— select method</span>
-                            <span id="shippingRate" class="d-block text-muted small" style="display: none; margin-top: 4px;"></span>
+                        <div class="d-flex justify-content-between align-items-center pt-2 mb-2">
+                            <span class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem;">Payment Method</span>
+                            <span class="text-muted small fw-semibold">Encrypted Midtrans Overlay</span>
                         </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center pt-2 mb-2">
-                        <span class="text-muted small text-uppercase fw-bold">Payment Method</span>
-                        <span class="text-muted small fw-semibold">— select at checkout</span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center pt-3 mt-2 border-top">
-                        <span class="text-muted small text-uppercase fw-bold tracking-wider">Grand Total Amount</span>
-                        <span class="h3 text-success fw-bold mb-0" id="grandTotalDisplay">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                        
+                        <div class="d-flex justify-content-between align-items-center pt-4 mt-3 border-top">
+                            <span class="text-muted small text-uppercase fw-bold tracking-wider" style="font-size: 0.75rem;">Grand Total</span>
+                            <span class="h3 fw-bold text-dark mb-0" id="grandTotalDisplay">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {{-- Shipping address form Card --}}
-            <div class="card shadow-lg border-0 bg-white rounded-4 overflow-hidden">
-                <div class="card-body p-4 p-md-5">
-                    <h3 class="h5 fw-bold text-dark border-bottom pb-3 mb-4">
-                        <i class="fas fa-map-marker-alt text-danger me-2"></i>Shipping Address
-                    </h3>
-                    
-                    <form id="paymentForm">
-                        @csrf
-                        <input type="hidden" name="customer_name" value="{{ auth()->user()->name }}">
-                        <input type="hidden" name="shipping_latitude" id="shipping_latitude" value="">
-                        <input type="hidden" name="shipping_longitude" id="shipping_longitude" value="">
-                        <input type="hidden" name="shipping_province" id="shipping_province" value="">
-                        <input type="hidden" name="shipping_city" id="shipping_city" value="">
-                        <input type="hidden" name="shipping_district" id="shipping_district" value="">
-                        <input type="hidden" name="shipping_street" id="shipping_street" value="">
+                {{-- Shipping Address Map Coordinates Card Layout --}}
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden checkout-card">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="h5 fw-bold text-dark border-bottom pb-3 mb-4">
+                            <i class="fas fa-map-marker-alt me-2" style="color: #c25e25;"></i>Shipping Delivery Address
+                        </h3>
+                        
+                        <form id="paymentForm">
+                            @csrf
+                            <input type="hidden" name="customer_name" value="{{ auth()->user()->name }}">
+                            <input type="hidden" name="shipping_latitude" id="shipping_latitude" value="">
+                            <input type="hidden" name="shipping_longitude" id="shipping_longitude" value="">
+                            <input type="hidden" name="shipping_province" id="shipping_province" value="">
+                            <input type="hidden" name="shipping_city" id="shipping_city" value="">
+                            <input type="hidden" name="shipping_district" id="shipping_district" value="">
+                            <input type="hidden" name="shipping_street" id="shipping_street" value="">
 
-                        <div class="row g-3">
-                            {{-- Saved Address Option --}}
-                            @if($savedAddress)
-                            <div class="col-12">
-                                <div class="alert alert-info bg-light border border-info rounded-3 p-3 mb-0">
+                            <div class="row g-3">
+                                {{-- Saved Profile Coordinates Verification --}}
+                                @if($savedAddress)
+                                <div class="col-12">
+                                    <div class="alert bg-light border rounded-4 p-3 mb-0" style="border-color: #eef0f2 !important;">
+                                        <div class="form-check m-0">
+                                            <input class="form-check-input" type="radio" id="useSavedAddress" name="addressChoice" value="saved" checked>
+                                            <label class="form-check-label ms-2" for="useSavedAddress">
+                                                <strong class="text-dark">Use Saved Default Address</strong>
+                                                <div class="small text-muted mt-1" style="font-size: 0.8rem; line-height: 1.4;">
+                                                    {{ $savedAddress['street'] }}, {{ $savedAddress['district'] }}, {{ $savedAddress['city'] }}, {{ $savedAddress['province'] }} {{ $savedAddress['postal_code'] }}
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-2">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" id="useSavedAddress" name="addressChoice" value="saved" checked>
-                                        <label class="form-check-label" for="useSavedAddress">
-                                            <strong>Use Saved Address</strong>
-                                            <div class="small text-muted mt-1">
-                                                {{ $savedAddress['street'] }}, {{ $savedAddress['district'] }}, {{ $savedAddress['city'] }}, {{ $savedAddress['province'] }} {{ $savedAddress['postal_code'] }}
-                                            </div>
+                                        <input class="form-check-input" type="radio" id="enterNewAddress" name="addressChoice" value="new">
+                                        <label class="form-check-label fw-bold text-dark small ms-2" for="enterNewAddress">
+                                            Enter New Destination Address
                                         </label>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" id="enterNewAddress" name="addressChoice" value="new">
-                                    <label class="form-check-label" for="enterNewAddress">
-                                        <strong>Enter New Address</strong>
-                                    </label>
-                                </div>
-                            </div>
-                            <div id="newAddressSection" style="display: none; width: 100%;"></div>
-                            @endif
+                                <div id="newAddressSection" style="display: none; width: 100%;"></div>
+                                @endif
 
-                            <div class="row g-3" id="addressFormFields">
-                            {{-- Full Name and Phone --}}
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium text-dark small">Full Name *</label>
-                                <input type="text" name="shipping_name" value="{{ old('shipping_name', auth()->user()->name) }}"
-                                       required class="form-control rounded-3 border-secondary bg-light" placeholder="Recipient name">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium text-dark small">Phone Number *</label>
-                                <input type="text" name="shipping_phone" required maxlength="50"
-                                       class="form-control rounded-3 border-secondary bg-light" placeholder="+62 81234567890">
-                            </div>
-
-                            {{-- Country Selection (Indonesia only) --}}
-                            <div class="col-12">
-                                <label class="form-label fw-medium text-dark small">Country *</label>
-                                <input type="text" name="shipping_country" value="Indonesia" readonly required class="form-control rounded-3 border-secondary bg-light" disabled>
-                                <input type="hidden" name="shipping_country" value="Indonesia">
-                            </div>
-
-                            {{-- Location Search (Single searchbox for Province/City/District) --}}
-                            <div class="col-12">
-                                <label class="form-label fw-medium text-dark small">Location (Province/City/District) *</label>
-                                <div class="location-search-wrapper position-relative">
-                                    <input type="text" id="location_search" placeholder="Start typing location (e.g. Jakarta Pusat, Menteng)..." 
-                                           class="form-control rounded-3 border-secondary bg-light" autocomplete="off">
-                                    <div id="locationSuggestions" class="location-suggestions"></div>
-                                </div>
-                                <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-info-circle"></i> Type to search for province, city, or district
-                                </small>
-                            </div>
-
-                            {{-- Postal Code (auto-populated from district) --}}
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium text-dark small">Postal Code *</label>
-                                <input type="text" id="shipping_postal_code_input" name="shipping_postal_code" required readonly
-                                       class="form-control rounded-3 border-secondary bg-light" placeholder="Auto-filled">
-                            </div>
-
-                            {{-- Titik Lokasi (Location Point Display & Edit) --}}
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium text-dark small d-block">Titik Lokasi (Pinpoint) *</label>
-                                <div class="d-flex gap-2">
-                                    <div class="flex-grow-1">
-                                        <textarea id="location_display" readonly
-                                               class="form-control rounded-3 border-secondary" 
-                                               placeholder="Select location first, then edit on map" rows="3" 
-                                               style="resize: none; font-size: 0.95rem; background-color: #fff; color: #333; min-height: 80px; overflow-y: auto; display: block !important; visibility: visible !important; opacity: 1 !important;"></textarea>
-                                        <small id="location_display_debug" class="text-muted d-block mt-1" style="max-height: 60px; overflow: auto; padding: 5px; background: #f5f5f5; border: 1px dashed #ccc; display: none;"></small>
+                                <div class="row g-3 m-0 p-0" id="addressFormFields">
+                                    {{-- Primary Form Fields --}}
+                                    <div class="col-md-6 mt-2">
+                                        <label class="form-label fw-semibold text-dark small">Recipient Full Name *</label>
+                                        <input type="text" name="shipping_name" value="{{ old('shipping_name', auth()->user()->name) }}"
+                                               required class="form-control rounded-3 text-dark border" style="border-color: #ced4da !important; font-size: 0.85rem;" placeholder="e.g. John Doe">
                                     </div>
-                                    <button type="button" id="mapPickerBtn" class="btn btn-outline-primary rounded-3 fw-bold px-4 text-nowrap shadow-sm" style="display: none;">
-                                        <i class="fas fa-edit me-2"></i>Edit
-                                    </button>
+                                    <div class="col-md-6 mt-2">
+                                        <label class="form-label fw-semibold text-dark small">Contact Phone Number *</label>
+                                        <input type="text" name="shipping_phone" required maxlength="50"
+                                               class="form-control rounded-3 text-dark border" style="border-color: #ced4da !important; font-size: 0.85rem;" placeholder="e.g. +62 812 3456 7890">
+                                    </div>
+
+                                    <div class="col-12 mt-3">
+                                        <label class="form-label fw-semibold text-dark small">Country *</label>
+                                        <input type="text" value="Indonesia" readonly class="form-control rounded-3 text-muted bg-light border mb-1" style="font-size: 0.85rem;" disabled>
+                                        <input type="hidden" name="shipping_country" value="Indonesia">
+                                    </div>
+
+                                    {{-- Hierarchical Input Auto-complete Box --}}
+                                    <div class="col-12 mt-3">
+                                        <label class="form-label fw-semibold text-dark small">Location Lookup (Province / City / District) *</label>
+                                        <div class="location-search-wrapper position-relative">
+                                            <input type="text" id="location_search" placeholder="Type location destination here (e.g. Surabaya, Menteng)..." 
+                                                   class="form-control rounded-3 text-dark border" style="border-color: #ced4da !important; font-size: 0.85rem;" autocomplete="off">
+                                            <div id="locationSuggestions" class="location-suggestions shadow-sm"></div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Postal Mapping Input Frame --}}
+                                    <div class="col-md-6 mt-3">
+                                        <label class="form-label fw-semibold text-dark small">Postal Code *</label>
+                                        <input type="text" id="shipping_postal_code_input" name="shipping_postal_code" required readonly
+                                               class="form-control rounded-3 text-muted bg-light border" style="font-size: 0.85rem;" placeholder="Auto-populated from lookup">
+                                    </div>
+
+                                    {{-- Reverse Geocoded Pinpoint Coordinates --}}
+                                    <div class="col-md-6 mt-3">
+                                        <label class="form-label fw-semibold text-dark small d-block">Coordinate Pinpoint Mapping *</label>
+                                        <div class="d-flex gap-2">
+                                            <div class="flex-grow-1">
+                                                <textarea id="location_display" readonly
+                                                       class="form-control rounded-3 text-secondary border" 
+                                                       placeholder="Select location above, then adjust pinpoint details on map" rows="3" 
+                                                       style="resize: none; font-size: 0.8rem; min-height: 80px; overflow-y: auto; background-color: #f8f9fa;"></textarea>
+                                                <small id="location_display_debug" class="text-muted d-none"></small>
+                                            </div>
+                                            <button type="button" id="mapPickerBtn" class="btn btn-outline-soft-orange btn-sm rounded-3 fw-bold px-3 text-nowrap shadow-sm align-self-start" style="display: none; height: 38px;">
+                                                <i class="fas fa-map-marked-alt me-1"></i>Adjust Map
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- Street Address Field --}}
+                                    <div class="col-12 mt-3">
+                                        <label class="form-label fw-semibold text-dark small">Detailed Street Address *</label>
+                                        <textarea name="shipping_address" id="shipping_address" required rows="3"
+                                                  class="form-control rounded-3 text-dark border" style="border-color: #ced4da !important; font-size: 0.85rem;" 
+                                                  placeholder="Enter complete building specs or block metrics (e.g. Jl. Raya Kertajaya No. 45, Cluster Emerald Block C-12)"></textarea>
+                                    </div>
                                 </div>
                             </div>
+                        </form>
+                    </div>
+                </div>
 
-                            {{-- Street Address --}}
-                            <div class="col-12">
-                                <label class="form-label fw-medium text-dark small">Street Address *</label>
-                                <textarea name="shipping_address" id="shipping_address" required rows="3"
-                                          class="form-control rounded-3 border-secondary bg-light" 
-                                          placeholder="Enter your complete street address (e.g., Jl. Ahmad Yani No. 123, RT 01/RW 02)"></textarea>
+                {{-- Map Picker Modal Container Engine --}}
+                <div class="modal fade" id="mapPickerModal" tabindex="-1" aria-labelledby="mapPickerModalLabel">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content border-0 rounded-4 overflow-hidden shadow-lg">
+                            <div class="modal-header border-bottom-0 py-3 px-4">
+                                <h5 class="modal-title fw-bold text-dark" id="mapPickerModalLabel">
+                                    <i class="fas fa-map-marker-alt text-danger me-2"></i>Pinpoint Shipping Delivery Point
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
+                            <div class="modal-body p-0">
+                                <div id="mapPickerContainer" style="width: 100%; height: 100%; position: relative;">
+                                    <div id="mapElement" style="width: 100%; height: 100%;"></div>
+                                    <div id="mapSearchBox" style="position: absolute; top: 15px; left: 15px; z-index: 10; width: 320px;">
+                                        <input type="text" id="mapSearchInput" class="form-control shadow-sm border rounded-3 py-2 px-3 text-dark" style="font-size: 0.85rem;" placeholder="Search location area or landmark..." />
+                                    </div>
+                                    <div style="position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(45, 55, 72, 0.95); color: white; padding: 10px 16px; border-radius: 30px; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                                        <i class="fas fa-mouse-pointer text-warning me-2"></i>Click anywhere on the map to re-adjust the delivery marker pin
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top-0 py-3 px-4 bg-light">
+                                <button type="button" class="btn btn-light fw-semibold rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" id="confirmMapLocation" class="btn btn-soft-orange fw-bold rounded-pill px-4 shadow-sm">Confirm Selection</button>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
 
-            {{-- Map Picker Modal --}}
-            <div class="modal fade" id="mapPickerModal" tabindex="-1" aria-labelledby="mapPickerModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="mapPickerModalLabel">
-                                <i class="fas fa-map-marker-alt text-danger me-2"></i>Pick Location on Map
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body p-0">
-                            <div id="mapPickerContainer" style="width: 100%; height: 500px; position: relative;">
-                                <div id="mapElement" style="width: 100%; height: 100%;"></div>
-                                <div id="mapSearchBox" style="position: absolute; top: 10px; left: 10px; z-index: 10; width: 300px;">
-                                    <input type="text" id="mapSearchInput" class="form-control" placeholder="Cari lokasi atau alamat..." />
-                                </div>
-                                <div style="position: absolute; bottom: 15px; left: 15px; z-index: 10; background: rgba(0,0,0,0.85); color: white; padding: 12px 16px; border-radius: 8px; font-size: 0.95rem; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-                                    <i class="fas fa-hand-pointer text-info me-2"></i>Ketuk pada peta untuk menempatkan penanda
+            {{-- RIGHT COLUMN: Courier Shipping Radio Methods & Midtrans Manifest --}}
+            <div class="col-lg-5">
+
+                {{-- Courier Method Card Components --}}
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4 checkout-card">
+                    <div class="card-header bg-light text-dark fw-bold py-3 border-bottom border-light">
+                        <i class="fas fa-truck me-2" style="color: #c25e25;"></i>Shipping Delivery Tier
+                    </div>
+                    <div class="card-body p-0">
+                        @php
+                            $shippingMethods = \App\Http\Controllers\CheckoutController::shippingMethods();
+                        @endphp
+                        @foreach($shippingMethods as $key => $method)
+                        <label class="d-flex align-items-center justify-content-between p-3 border-bottom shipping-option mb-0"
+                               style="cursor:pointer;" for="ship_{{ $key }}">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" name="shipping_method" id="ship_{{ $key }}"
+                                       value="{{ $key }}"
+                                       data-base-cost="{{ $method['base_cost'] }}"
+                                       form="paymentForm"
+                                       class="form-check-input shipping-radio mt-0"
+                                       {{ $loop->first ? 'required checked' : '' }} style="border-color: #ced4da !important;">
+                                <div>
+                                    <div class="fw-bold text-dark small">{{ $method['name'] }}</div>
                                 </div>
                             </div>
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Midtrans Secure Token Processing Manifest Card --}}
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden checkout-card">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="h5 fw-bold text-dark border-bottom pb-3 mb-4">
+                            <i class="fas fa-shield-alt me-2 text-muted"></i>Payment Manifest Console
+                        </h3>
+                        
+                        <div class="p-3 bg-light rounded-4 border-0 mb-4 shadow-sm">
+                            <span class="text-dark small text-uppercase fw-bold tracking-wider mb-2 d-block" style="font-size: 0.65rem; color: #4a5568 !important;">Supported Channels</span>
+                            <div class="d-flex flex-wrap gap-1.5 small text-secondary">
+                                <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5" style="font-size: 0.7rem;"><i class="fas fa-credit-card text-primary me-1"></i>Credit Card</span>
+                                <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5" style="font-size: 0.7rem;"><i class="fas fa-qrcode text-danger me-1"></i>QRIS Code</span>
+                                <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5" style="font-size: 0.7rem;"><i class="fas fa-university text-info me-1"></i>Virtual Acc.</span>
+                                <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5" style="font-size: 0.7rem;"><i class="fas fa-wallet text-warning me-1"></i>E-Wallets</span>
+                            </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" id="confirmMapLocation" class="btn btn-primary">Confirm Location</button>
+                        
+                        <div class="alert border-0 text-dark rounded-4 d-flex gap-2 p-3 mb-4" style="background-color: #fdf6f0 !important; border: 1px solid #fbd3bc !important;">
+                            <i class="fas fa-info-circle mt-0.5" style="color: #c25e25;"></i>
+                            <small class="lh-base text-secondary" style="font-size: 0.75rem;">An encrypted securely sandboxed Midtrans overlay modal token gateway will execute authorization parameters instantly.</small>
                         </div>
+                        
+                        <button type="button" id="payButton" class="btn btn-soft-orange w-100 fw-bold btn-lg rounded-3 py-2.5 text-uppercase" style="font-size: 0.85rem;">
+                            <span id="buttonText"><i class="fas fa-lock me-2"></i>Secure Payment</span>
+                            <span id="loadingSpinner" class="d-none">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Securing Session Parameters...
+                            </span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-
-        {{-- RIGHT: Shipping method + Payment --}}
-        <div class="col-lg-5">
-
-            {{-- Shipping method Selection Card --}}
-            <div class="card shadow-lg border-0 bg-white rounded-4 overflow-hidden mb-4">
-                <div class="card-header bg-white fw-bold py-3 border-bottom">
-                    <i class="fas fa-truck me-2 text-primary"></i>Shipping Method
+    </div>
+    
+    {{-- Refund Request Modal --}}
+    <div class="modal fade" id="refundRequestModal" tabindex="-1" aria-labelledby="refundRequestLabel">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-3 shadow-lg">
+                <div class="modal-header border-bottom-0 py-3 px-4 bg-light">
+                    <h5 class="modal-title fw-bold text-dark" id="refundRequestLabel">
+                        <i class="fas fa-undo-alt text-danger me-2"></i>Request Refund
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="card-body p-0">
-                    @php
-                        $shippingMethods = \App\Http\Controllers\CheckoutController::shippingMethods();
-                    @endphp
-                    @foreach($shippingMethods as $key => $method)
-                    <label class="d-flex align-items-center justify-content-between p-3 border-bottom shipping-option hover-lift mb-0"
-                           style="cursor:pointer;" for="ship_{{ $key }}">
-                        <div class="d-flex align-items-center gap-3">
-                            <input type="radio" name="shipping_method" id="ship_{{ $key }}"
-                                   value="{{ $key }}"
-                                   data-base-cost="{{ $method['base_cost'] }}"
-                                   form="paymentForm"
-                                   class="form-check-input shipping-radio mt-0"
-                                   {{ $loop->first ? 'required checked' : '' }}>
-                            <div>
-                                <div class="fw-bold text-dark">{{ $method['name'] }}</div>
+                <form id="refundForm">
+                    <div class="modal-body p-4">
+                        <input type="hidden" id="refundOrderId" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Reason for Refund</label>
+                            <textarea id="refundReason" class="form-control rounded-3" rows="3" placeholder="Please explain why you want to request a refund..." required></textarea>
+                            <small class="text-muted d-block mt-1">Max 500 characters</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Upload Supporting Photo (Optional)</label>
+                            <div class="upload-area border-2 border-dashed rounded-3 p-4 text-center" id="uploadArea" style="cursor: pointer; background-color: #f8f9fa; border-color: #dee2e6;">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #6c757d;"></i>
+                                <p class="mt-2 text-muted small">Drag and drop or click to select image</p>
+                                <input type="file" id="refundImage" accept="image/*" style="display: none;" />
+                                <small class="d-block text-muted" style="font-size: 0.7rem;">Max 5MB (JPG, PNG, GIF)</small>
                             </div>
-                        </div>
-                        <div></div>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- Payment Gateway Processor Card --}}
-            <div class="card shadow-lg border-0 bg-white rounded-4 overflow-hidden">
-                <div class="card-body p-4 p-md-5">
-                    <h3 class="h5 fw-bold text-dark border-bottom pb-3 mb-4">
-                        <i class="fas fa-shield-alt text-muted me-2"></i>Payment Manifest
-                    </h3>
-                    
-                    <div class="p-3 bg-light rounded-4 border-0 mb-4 shadow-sm">
-                        <span class="text-dark small text-uppercase fw-bold tracking-wider mb-2 d-block" style="font-size: 0.75rem;">Supported Channels</span>
-                        <div class="d-flex flex-wrap gap-1 small text-secondary">
-                            <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5"><i class="fas fa-credit-card text-primary me-1"></i>Cards</span>
-                            <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5"><i class="fas fa-qrcode text-danger me-1"></i>QRIS</span>
-                            <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5"><i class="fas fa-university text-info me-1"></i>Transfer</span>
-                            <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5"><i class="fas fa-wallet text-warning me-1"></i>Wallets</span>
-                            <span class="badge bg-white text-dark border rounded-pill px-2.5 py-1.5"><i class="fas fa-coins text-secondary me-1"></i>BNPL</span>
+                            <small id="imageFileName" class="d-block mt-2 text-success" style="display: none;"></small>
                         </div>
                     </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-medium text-muted small">Billing Email Address</label>
-                        <input type="email" class="form-control rounded-3 border-light bg-light text-muted" value="{{ auth()->user()->email }}" disabled />
+                    <div class="modal-footer border-top-0 py-3 px-4">
+                        <button type="button" class="btn btn-light fw-semibold rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger fw-bold rounded-pill px-4" id="submitRefundBtn">Submit Refund Request</button>
                     </div>
-                    
-                    <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-dark rounded-3 d-flex gap-2 p-3 mb-4">
-                        <i class="fas fa-info-circle text-warning mt-0.5"></i>
-                        <small class="lh-base" style="font-size: 0.8rem;">A secure, encrypted Midtrans payment window overlay will display to process token authorizations safely.</small>
-                    </div>
-                    
-                    <button type="button" id="payButton" class="btn btn-success w-100 fw-bold btn-lg rounded-pill shadow-sm py-2.5 text-uppercase fs-6">
-                        <span id="buttonText"><i class="fas fa-lock me-2"></i>Pay Now</span>
-                        <span id="loadingSpinner" class="d-none">
-                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            Securing Session...
-                        </span>
-                    </button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -649,30 +753,26 @@
 
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ $clientKey }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places,geocoding"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places,geocoding&loading=async"></script>
 <script>
 const subtotal = {{ $total }};
 let currentShippingCost = 0;
 const indonesianLocations = {!! json_encode($indonesianLocations) !!};
 let mapInstance, mapMarker, storeMarker, mapPickerModal, selectedMapLocation = null;
-let currentStoreLocation = null;  // Track selected store location
-let userSelectedLocation = null;  // Track user's manually selected location
-let locationSearchInput, locationSuggestions, postalCodeSelect;  // Will be initialized in DOMContentLoaded
+let currentStoreLocation = null;
+let userSelectedLocation = null;
+let locationSearchInput, locationSuggestions, postalCodeSelect;
 
-// Build flat location list for searching (3-level hierarchy: Province -> City -> District)
 function buildLocationsList() {
     const locations = [];
     for (const province in indonesianLocations) {
         for (const city in indonesianLocations[province]) {
             const cityData = indonesianLocations[province][city];
-            // Check if it's a district-level structure (has postal_code key)
             if (cityData.postal_code) {
-                // Single district (e.g., Gresik -> Gresik)
                 locations.push({
                     province, city, district: city, ...cityData
                 });
             } else {
-                // Multiple districts (e.g., Jakarta Pusat -> Menteng, Tanah Abang)
                 for (const district in cityData) {
                     const districtData = cityData[district];
                     locations.push({
@@ -691,17 +791,14 @@ function selectLocation(location) {
     locationSearchInput.value = `${location.district}, ${location.city}`;
     locationSuggestions.classList.remove('show');
     
-    // Update hidden fields
     document.getElementById('shipping_province').value = location.province;
     document.getElementById('shipping_city').value = location.city;
     document.getElementById('shipping_district').value = location.district;
     document.getElementById('shipping_latitude').value = location.lat;
     document.getElementById('shipping_longitude').value = location.lng;
     
-    // Set postal code directly (singular, readonly)
     document.getElementById('shipping_postal_code_input').value = location.postal_code;
     
-    // Update location display box with full address format (street, district, city, province)
     userSelectedLocation = { province: location.province, city: location.city, district: location.district, lat: location.lat, lng: location.lng };
     const streetName = location.streets && location.streets.length > 0 ? location.streets[0] : 'No street specified';
     document.getElementById('shipping_street').value = streetName;
@@ -717,19 +814,10 @@ function selectLocation(location) {
     displayElem.dispatchEvent(new Event('change', { bubbles: true }));
     displayElem.dispatchEvent(new Event('input', { bubbles: true }));
     
-    console.log('[SELECT-DEBUG] location_display setup:');
-    console.log('  - value:', displayElem.value);
-    console.log('  - computed style.display:', window.getComputedStyle(displayElem).display);
-    
     const searchElem = document.getElementById('location_search');
-    const searchValue = `${location.district}, ${location.city}, ${location.province}`;
-    searchElem.value = searchValue;
+    searchElem.value = `${location.district}, ${location.city}, ${location.province}`;
     searchElem.dispatchEvent(new Event('change', { bubbles: true }));
     
-    console.log('[SELECT] Location updated:', location.district, location.city, location.province);
-    console.log('[SELECT] Display:', displayValue);
-    
-    // Show the Edit button now that location is selected
     const editBtn = document.querySelector('#mapPickerBtn');
     if (editBtn) {
         editBtn.style.display = 'block';
@@ -738,25 +826,49 @@ function selectLocation(location) {
     calculateShippingCost();
 }
 
-// Map Picker Implementation
 function initMapPicker() {
     const mapElement = document.getElementById('mapElement');
     
-    // Get store location from selected radio button
-    const storeRadio = document.querySelector('.store-radio:checked');
-    if (storeRadio) {
-        currentStoreLocation = {
-            lat: parseFloat(storeRadio.dataset.lat),
-            lng: parseFloat(storeRadio.dataset.lng)
-        };
+    if (!mapElement) {
+        console.error('Map element not found');
+        return;
     }
     
-    // Get user location if already selected
+    // Ensure map element is visible and sized properly with proper pointer events
+    mapElement.style.width = '100%';
+    mapElement.style.height = '100%';
+    mapElement.style.display = 'block';
+    mapElement.style.visibility = 'visible';
+    mapElement.style.opacity = '1';
+    mapElement.style.background = 'white';
+    mapElement.style.pointerEvents = 'auto';
+    
+    const storeSelects = document.querySelectorAll('.item-store-select');
+    let storeLocation = null;
+    
+    if (storeSelects.length > 0) {
+        // Get first selected store's location
+        for (let select of storeSelects) {
+            if (select.value) {
+                const selectedOption = select.querySelector(`option[value="${select.value}"]`);
+                if (selectedOption) {
+                    const lat = parseFloat(selectedOption.dataset.lat);
+                    const lng = parseFloat(selectedOption.dataset.lng);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        storeLocation = { lat, lng };
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    currentStoreLocation = storeLocation;
+    
     const userLat = parseFloat(document.getElementById('shipping_latitude').value);
     const userLng = parseFloat(document.getElementById('shipping_longitude').value);
     const hasUserLocation = !isNaN(userLat) && !isNaN(userLng);
     
-    // Determine center: use user location, or store location, or Jakarta default
     let center = { lat: -6.2088, lng: 106.8456 };
     if (hasUserLocation) {
         center = { lat: userLat, lng: userLng };
@@ -767,10 +879,10 @@ function initMapPicker() {
     mapInstance = new google.maps.Map(mapElement, {
         zoom: 15,
         center: center,
-        streetViewControl: false
+        streetViewControl: false,
+        backgroundColor: '#ffffff'
     });
     
-    // Add store marker with label
     if (currentStoreLocation) {
         storeMarker = new google.maps.Marker({
             position: currentStoreLocation,
@@ -785,12 +897,11 @@ function initMapPicker() {
         });
     }
     
-    // Add user location marker (tap to move)
     const userMarkerPosition = hasUserLocation ? { lat: userLat, lng: userLng } : center;
     mapMarker = new google.maps.Marker({
         position: userMarkerPosition,
         map: mapInstance,
-        title: 'Lokasi Anda (Tap map to move)',
+        title: 'Your Location (Tap map to move)',
         label: {
             text: 'Anda',
             fontSize: '12px',
@@ -800,15 +911,12 @@ function initMapPicker() {
     
     selectedMapLocation = userMarkerPosition;
     
-    // Add map click listener to place marker on tap
     mapInstance.addListener('click', function(event) {
         const clickedLocation = event.latLng;
         selectedMapLocation = clickedLocation;
         mapMarker.setPosition(clickedLocation);
-        console.log('[MAP] Marker placed at:', clickedLocation.lat(), clickedLocation.lng());
     });
     
-    // Map search functionality
     const mapSearchInput = document.getElementById('mapSearchInput');
     const autocompleteService = new google.maps.places.AutocompleteService();
     const geocoder = new google.maps.Geocoder();
@@ -857,29 +965,118 @@ function initMapPicker() {
     });
 }
 
-// Map Picker Button
+// Set up persistent modal cleanup handler (attach once globally)
+const mapModal = document.getElementById('mapPickerModal');
+if (mapModal) {
+    mapModal.addEventListener('hidden.bs.modal', function() {
+        // Aggressive cleanup of ALL modal elements - runs after Bootstrap hides modal
+        setTimeout(() => {
+            // Step 1: Remove all modal backdrops completely
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Step 2: Remove modal-open class to restore scrolling
+            document.body.classList.remove('modal-open');
+            
+            // Step 3: Restore body styles
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            // Step 4: Force remove any remaining fade/show classes
+            document.querySelectorAll('.modal').forEach(m => {
+                m.classList.remove('show');
+                m.style.display = 'none';
+            });
+            
+            // Step 5: Double-check no backdrops are hiding
+            const anyBackdrops = document.querySelectorAll('.modal-backdrop, [class*="backdrop"]');
+            anyBackdrops.forEach(backdrop => {
+                if (backdrop.className.includes('backdrop')) {
+                    backdrop.remove();
+                }
+            });
+        }, 200);
+    });
+}
+
+// Map picker button handler with proper Bootstrap modal event handling
 document.getElementById('mapPickerBtn').addEventListener('click', function() {
-    mapPickerModal = new bootstrap.Modal(document.getElementById('mapPickerModal'));
-    mapPickerModal.show();
+    const mapModal = document.getElementById('mapPickerModal');
+    const mapElement = document.getElementById('mapElement');
     
-    // Always reinitialize map when modal is shown
-    setTimeout(function() {
-        mapInstance = null;  // Clear old instance
-        mapMarker = null;
-        selectedMapLocation = null;
-        initMapPicker();
-    }, 300);
+    // Reset map instance
+    mapInstance = null;
+    mapMarker = null;
+    selectedMapLocation = null;
+    
+    // Clear map container
+    if (mapElement) {
+        mapElement.innerHTML = '';
+    }
+    
+    // Handle modal shown event - initialize map when fully displayed
+    const handleModalShown = function() {
+        // Small delay to ensure DOM is ready
+        setTimeout(function() {
+            const mapEl = document.getElementById('mapElement');
+            if (mapEl) {
+                mapEl.style.width = '100%';
+                mapEl.style.height = '100%';
+                mapEl.style.display = 'block';
+                mapEl.style.visibility = 'visible';
+                mapEl.style.opacity = '1';
+            }
+            
+            // Initialize the map
+            initMapPicker();
+            
+            // Resize and center the map with more aggressive centering
+            if (mapInstance) {
+                // Trigger resize event
+                google.maps.event.trigger(mapInstance, 'resize');
+                
+                // Wait for resize to complete before setting center
+                setTimeout(function() {
+                    let centerLocation = null;
+                    
+                    // Priority: user selected location > store location > default Jakarta
+                    if (userSelectedLocation && userSelectedLocation.lat && userSelectedLocation.lng) {
+                        centerLocation = new google.maps.LatLng(userSelectedLocation.lat, userSelectedLocation.lng);
+                    } else if (currentStoreLocation && currentStoreLocation.lat && currentStoreLocation.lng) {
+                        centerLocation = new google.maps.LatLng(currentStoreLocation.lat, currentStoreLocation.lng);
+                    } else {
+                        centerLocation = new google.maps.LatLng(-6.2088, 106.8456); // Jakarta default
+                    }
+                    
+                    // Set zoom first, then center
+                    mapInstance.setZoom(15);
+                    mapInstance.setCenter(centerLocation);
+                    
+                    // Ensure proper positioning
+                    google.maps.event.trigger(mapInstance, 'resize');
+                }, 100);
+            }
+        }, 300);
+    };
+    
+    // Attach shown handler without once flag - persists across opens
+    mapModal.addEventListener('shown.bs.modal', handleModalShown);
+    
+    // Show the modal using Bootstrap API with backdrop disabled
+    // This prevents Bootstrap from creating the dark overlay entirely
+    const modal = new bootstrap.Modal(mapModal, { 
+        backdrop: false,  // Disable backdrop completely
+        keyboard: true    // Allow ESC to close
+    });
+    modal.show();
 });
 
-// Confirm Map Location
 let mapConfirmButton = document.getElementById('confirmMapLocation');
 if (mapConfirmButton) {
     mapConfirmButton.addEventListener('click', function(e) {
         e.preventDefault();
-        
-        // Get current marker position from map click or marker position
         let locToSave = null;
-        
         if (selectedMapLocation) {
             locToSave = selectedMapLocation;
         } else if (mapMarker) {
@@ -889,31 +1086,22 @@ if (mapConfirmButton) {
         }
         
         if (locToSave) {
-            // Ensure it's a LatLng object
             const lat = typeof locToSave.lat === 'function' ? locToSave.lat() : locToSave.lat;
             const lng = typeof locToSave.lng === 'function' ? locToSave.lng() : locToSave.lng;
             
-            console.log('[CONFIRM] Marker position - Lat:', lat, 'Lng:', lng);
-            
-            // ALWAYS save coordinates directly
             document.getElementById('shipping_latitude').value = lat;
             document.getElementById('shipping_longitude').value = lng;
             
-            // Use Reverse Geocoding to get address from coordinates
             const geocoder = new google.maps.Geocoder();
             geocoder.geocode({ location: { lat: lat, lng: lng } }, function(results, status) {
                 if (status === 'OK' && results[0]) {
                     const result = results[0];
-                    console.log('[GEOCODE] Address result:', result.formatted_address);
-                    
-                    // Extract address components
                     let province = '';
                     let city = '';
                     let district = '';
                     let postalCode = '';
                     let addressLine = '';
                     
-                    // Parse address components from Reverse Geocoding
                     result.address_components.forEach(component => {
                         if (component.types.includes('administrative_area_level_1')) {
                             province = component.long_name;
@@ -928,28 +1116,22 @@ if (mapConfirmButton) {
                         }
                     });
                     
-                    // Use formatted address as fallback
                     if (!addressLine) {
                         addressLine = result.formatted_address.split(',')[0];
                     }
                     
-                    console.log('[GEOCODE] Parsed - Province:', province, 'City:', city, 'District:', district, 'Address:', addressLine);
-                    
-                    // Update form fields
                     document.getElementById('shipping_province').value = province;
                     document.getElementById('shipping_city').value = city;
                     document.getElementById('shipping_district').value = district;
                     document.getElementById('shipping_postal_code_input').value = postalCode;
                     document.getElementById('shipping_street').value = addressLine || 'Lokasi dari peta';
                     
-                    // Update display element with address from Geocoding API
                     const displayElement = document.getElementById('location_display');
                     const displayText = `${addressLine || 'Lokasi dari peta'}\n${result.formatted_address}`;
                     displayElement.value = displayText;
                     displayElement.dispatchEvent(new Event('change', { bubbles: true }));
                     displayElement.dispatchEvent(new Event('input', { bubbles: true }));
                     
-                    // Force visibility
                     displayElement.style.display = 'block';
                     displayElement.style.visibility = 'visible';
                     displayElement.style.opacity = '1';
@@ -968,25 +1150,12 @@ if (mapConfirmButton) {
                         lng: lng,
                         address: result.formatted_address
                     };
-                    
-                    console.log('[CONFIRM] Location saved from Geocoding API:');
-                    console.log('  - Province:', province);
-                    console.log('  - City:', city);
-                    console.log('  - District:', district);
-                    console.log('  - Address:', addressLine);
-                    console.log('  - Coordinates: Lat', lat, 'Lng', lng);
-                    
                 } else {
-                    // Fallback if Geocoding fails - try database matching first
-                    console.log('[GEOCODE] Failed - Status:', status, '- Trying database matching...');
-                    
-                    // Try to find matching location from database using Haversine formula
                     let matchedLocation = null;
-                    let minDistance = Infinity; // Find closest location, no threshold
+                    let minDistance = Infinity;
                     
                     for (let loc of allLocations) {
-                        // Haversine distance calculation
-                        const R = 6371; // km
+                        const R = 6371;
                         const dLat = (loc.lat - lat) * Math.PI / 180;
                         const dLng = (loc.lng - lng) * Math.PI / 180;
                         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -1002,17 +1171,12 @@ if (mapConfirmButton) {
                     }
                     
                     if (matchedLocation) {
-                        console.log('[FALLBACK] Found database match within', minDistance.toFixed(2), 'km:', matchedLocation);
-                        
-                        // Use database location
                         document.getElementById('shipping_province').value = matchedLocation.province;
                         document.getElementById('shipping_city').value = matchedLocation.city;
                         document.getElementById('shipping_district').value = matchedLocation.district;
                         document.getElementById('shipping_postal_code_input').value = matchedLocation.postal_code;
                         
-                        const streetName = matchedLocation.streets && matchedLocation.streets.length > 0 
-                            ? matchedLocation.streets[0] 
-                            : 'Lokasi Terpilih';
+                        const streetName = matchedLocation.streets && matchedLocation.streets.length > 0 ? matchedLocation.streets[0] : 'Lokasi Terpilih';
                         document.getElementById('shipping_street').value = streetName;
                         
                         const displayText = `${streetName}\n${matchedLocation.district}, Kecamatan ${matchedLocation.district}, ${matchedLocation.city}, ${matchedLocation.province}`;
@@ -1033,14 +1197,8 @@ if (mapConfirmButton) {
                             lng: lng,
                             from: 'database_fallback'
                         };
-                        
-                        console.log('[FALLBACK] Location matched from database');
-                        
                     } else {
-                        // No database match - use coordinates only
-                        console.log('[FALLBACK] No database match - Using coordinates only');
-                        
-                        const fallbackText = `Lokasi Khusus\nLatitude: ${lat.toFixed(6)}\nLongitude: ${lng.toFixed(6)}`;
+                        const fallbackText = `Custom Point\nLatitude: ${lat.toFixed(6)}\nLongitude: ${lng.toFixed(6)}`;
                         const displayElement = document.getElementById('location_display');
                         displayElement.value = fallbackText;
                         displayElement.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1049,104 +1207,60 @@ if (mapConfirmButton) {
                         displayElement.style.display = 'block';
                         displayElement.style.visibility = 'visible';
                         displayElement.style.opacity = '1';
-                        displayElement.style.color = '#333';
-                        displayElement.style.backgroundColor = '#fff';
                         
                         const searchElement = document.getElementById('location_search');
                         searchElement.value = fallbackText;
                         searchElement.dispatchEvent(new Event('change', { bubbles: true }));
                         
                         userSelectedLocation = { lat: lat, lng: lng };
-                        console.log('[FALLBACK] Coordinates-only location set');
                     }
                 }
-            });  // Close geocoder.geocode callback
+            });
             
-            // Hide modal
             const modalElement = document.getElementById('mapPickerModal');
             const modal = bootstrap.Modal.getInstance(modalElement) || mapPickerModal;
             if (modal) {
                 modal.hide();
             }
             
-            // Verify fields were set correctly after modal close
+            // Aggressive backdrop cleanup after modal hide completes
             setTimeout(() => {
-                const verifyDisplayValue = document.getElementById('location_display').value;
-                const verifySearchValue = document.getElementById('location_search').value;
-                const verifyProvince = document.getElementById('shipping_province').value;
-                const verifyCity = document.getElementById('shipping_city').value;
-                const verifyDistrict = document.getElementById('shipping_district').value;
-                const verifyLat = document.getElementById('shipping_latitude').value;
-                const verifyLng = document.getElementById('shipping_longitude').value;
+                // Remove ALL modal backdrop elements from DOM
+                document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                    backdrop.remove();
+                });
                 
-                const locDisplay = document.getElementById('location_display');
-                const computedStyle = window.getComputedStyle(locDisplay);
+                // Remove modal-open from body
+                document.body.classList.remove('modal-open');
                 
-                console.log('[VERIFY] After modal close:');
-                console.log('  - location_display.value:', verifyDisplayValue);
-                console.log('  - location_search.value:', verifySearchValue);
-                console.log('  - Province:', verifyProvince);
-                console.log('  - City:', verifyCity);
-                console.log('  - District:', verifyDistrict);
-                console.log('  - Latitude:', verifyLat);
-                console.log('  - Longitude:', verifyLng);
-                console.log('[VERIFY] Computed Styles:');
-                console.log('  - display:', computedStyle.display);
-                console.log('  - visibility:', computedStyle.visibility);
-                console.log('  - opacity:', computedStyle.opacity);
-                console.log('  - color:', computedStyle.color);
-                console.log('  - backgroundColor:', computedStyle.backgroundColor);
-                console.log('  - height:', locDisplay.offsetHeight);
-                console.log('  - width:', locDisplay.offsetWidth);
+                // Force restore scroll  
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
                 
-                // Add visual indicator that location was updated
+                // Check again and remove any stuck backdrops
+                const backdrops = document.querySelectorAll('[class*="backdrop"]');
+                backdrops.forEach(el => {
+                    if (el.style.display !== 'block' || el.className.includes('modal-backdrop')) {
+                        el.remove();
+                    }
+                });
+            }, 400);
+            
+            setTimeout(() => {
                 const locationDisplayElem = document.getElementById('location_display');
-                const locationSearchElem = document.getElementById('location_search');
                 if (locationDisplayElem) {
-                    locationDisplayElem.classList.add('border-success');
-                    locationDisplayElem.style.borderColor = '#28a745';
-                    locationDisplayElem.style.borderWidth = '3px';
-                    locationDisplayElem.style.boxShadow = '0 0 10px rgba(40, 167, 69, 0.5)';
-                    console.log('[VISUAL] Applied success styling to location_display');
-                    
-                    // Remove styling after 3 seconds
+                    locationDisplayElem.style.borderColor = '#c25e25';
+                    locationDisplayElem.style.borderWidth = '2px';
                     setTimeout(() => {
-                        locationDisplayElem.classList.remove('border-success');
                         locationDisplayElem.style.borderColor = '';
                         locationDisplayElem.style.borderWidth = '';
-                        locationDisplayElem.style.boxShadow = '';
                     }, 3000);
                 }
-                if (locationSearchElem) {
-                    locationSearchElem.classList.add('border-success');
-                    locationSearchElem.style.borderColor = '#28a745';
-                    locationSearchElem.style.borderWidth = '3px';
-                    locationSearchElem.style.boxShadow = '0 0 10px rgba(40, 167, 69, 0.5)';
-                    
-                    setTimeout(() => {
-                        locationSearchElem.classList.remove('border-success');
-                        locationSearchElem.style.borderColor = '';
-                        locationSearchElem.style.borderWidth = '';
-                        locationSearchElem.style.boxShadow = '';
-                    }, 3000);
-                }
-                
-                // Auto-scroll to location fields to show user
-                const locationSection = document.getElementById('location_display');
-                if (locationSection) {
-                    locationSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    console.log('[SCROLL] Scrolled to location_display');
-                }
-                
-                // Calculate shipping cost after location confirmed
                 calculateShippingCost();
-                
             }, 500);
         }
     });
 }
-
-
 
 async function calculateShippingCost() {
     try {
@@ -1156,34 +1270,17 @@ async function calculateShippingCost() {
         const destinationCity = document.getElementById('shipping_city').value || null;
         const destinationProvince = document.getElementById('shipping_province').value || null;
 
-        console.log('[CALC] === SHIPPING COST CALCULATION START (Multi-Store) ===');
-        console.log('[CALC] method:', method);
-        console.log('[CALC] destination:', destinationCity, ',', destinationProvince);
-
-        // No method selected - hide shipping
-        if (!method) {
-            console.log('[CALC] ❌ No shipping method selected');
+        if (!method || !lat || !lng || !destinationCity) {
             hideShippingCost();
             return;
         }
 
-        // Address NOT filled - hide shipping
-        if (!lat || !lng || !destinationCity) {
-            console.log('[CALC] ⚠️ Address incomplete - hiding shipping');
-            hideShippingCost();
-            return;
-        }
-
-        // GROUP ITEMS BY STORE
         const storeGroups = {};
         document.querySelectorAll('.cart-item').forEach(item => {
             const select = item.querySelector('.item-store-select');
             const storeId = select?.value;
             
-            if (!storeId) {
-                console.warn('[CALC] ⚠️ Item has no store selected:', item.dataset.bookId);
-                return;
-            }
+            if (!storeId) return;
             
             if (!storeGroups[storeId]) {
                 storeGroups[storeId] = {
@@ -1203,24 +1300,15 @@ async function calculateShippingCost() {
                 qty: quantity,
                 total: itemTotal
             });
-            console.log(`[CALC] Book #${item.dataset.bookId}: ${weightGrams}g × ${quantity} = ${itemTotal}g`);
         });
 
         const storeIds = Object.keys(storeGroups);
-        console.log('[CALC] Grouped into', storeIds.length, 'store(s):', storeIds);
-        storeIds.forEach(sid => {
-            console.log(`[CALC] Store #${sid}: Total Weight = ${storeGroups[sid].weight_grams}g = ${(storeGroups[sid].weight_grams/1000).toFixed(3)}kg`);
-        });
-        
         if (storeIds.length === 0) {
-            console.log('[CALC] ❌ No items with selected stores');
             hideShippingCost();
             return;
         }
 
-        // CALCULATE SHIPPING FOR EACH STORE
         let totalShippingCost = 0;
-        // Make shippingByStore global so form submission can access it for breakdown data
         window.shippingByStore = {};
         
         for (const storeId of storeIds) {
@@ -1235,116 +1323,67 @@ async function calculateShippingCost() {
                 destination_province: destinationProvince
             };
             
-            console.log(`[CALC] API Request Store #${storeId}:`, {
-                weight_grams_raw: group.weight_grams,
-                weight_grams_sent: payload.weight_grams,
-                weight_kg: (payload.weight_grams / 1000).toFixed(3),
-                items_count: group.items.length,
-                items: group.items
-            });
-            
             const response = await axios.post('{{ route("checkout.calculate-shipping") }}', payload, {
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content }
             });
 
             if (response.data.success) {
                 const cost = response.data.cost;
-                const breakdown = response.data.breakdown || {};
-                
-                console.log(`[CALC] API Response Store #${storeId}:`, {
-                    cost: response.data.cost,
-                    zone: response.data.zone,
-                    breakdown: breakdown
-                });
-                
                 window.shippingByStore[storeId] = {
                     cost: cost,
                     display: response.data.display,
                     zone: response.data.zone,
-                    breakdown: breakdown,
+                    breakdown: response.data.breakdown || {},
                     note: response.data.note,
                     origin_province: response.data.origin_province,
                     destination_province: response.data.destination_province
                 };
-                
                 totalShippingCost += cost;
-                
-                console.log(`[CALC] ✓ Store #${storeId}: ${response.data.display} (Zone ${breakdown.zone}) | ${response.data.origin_province} → ${response.data.destination_province}`);
             } else {
-                console.error(`[CALC] ❌ Store #${storeId} failed:`, response.data.error);
                 hideShippingCost();
                 return;
             }
         }
 
-        console.log('[CALC] ✓ All stores calculated - Total:', 'Rp ' + totalShippingCost.toLocaleString('id-ID'));
-        console.log('[CALC] Per-store breakdown:', window.shippingByStore);
-        
-        // Update display with per-store breakdown
         updateTotalsDisplay(totalShippingCost, 'Rp ' + totalShippingCost.toLocaleString('id-ID'), window.shippingByStore);
-        
-        // Also display detailed per-store breakdown below subtotal
         displayPerStoreShippingBreakdown(window.shippingByStore);
-        
-        console.log('[CALC] === SHIPPING COST CALCULATION END ===');
     } catch (error) {
-        console.error('[CALC] ❌ ERROR:', error.message);
-        console.error('[CALC] Response:', error.response?.data);
+        console.error('[CALC] Error:', error.message);
         hideShippingCost();
     }
 }
 
 function displayPerStoreShippingBreakdown(shippingByStore) {
-    // Find or create the breakdown container - insert after shipping cost section
     let breakdownContainer = document.getElementById('perStoreShippingBreakdown');
     
     if (!breakdownContainer) {
         breakdownContainer = document.createElement('div');
         breakdownContainer.id = 'perStoreShippingBreakdown';
-        
-        // Find the shipping cost div and insert after it
         const shippingDisplay = document.getElementById('shippingDisplay');
         if (shippingDisplay && shippingDisplay.parentElement) {
             shippingDisplay.parentElement.parentElement.insertAdjacentElement('afterend', breakdownContainer);
         } else {
-            // Fallback: insert before grand total
             const grandTotal = document.getElementById('grandTotalDisplay');
-            if (grandTotal) {
-                grandTotal.closest('.d-flex').insertAdjacentElement('beforebegin', breakdownContainer);
-            } else {
-                console.error('[DISPLAY] Could not find insertion point for breakdown');
-                return;
-            }
+            if (grandTotal) grandTotal.closest('.d-flex').insertAdjacentElement('beforebegin', breakdownContainer);
         }
     }
 
-    // Zone category labels
     const zoneLabels = {
-        'A': 'Same Province',
-        'B': 'Same Province, Different City',
-        'C': 'Same Island, Different Province',
-        'D': 'Different Main Islands',
-        'E': 'Remote Area'
+        'A': 'Same Province', 'B': 'Same Province, Different City', 'C': 'Same Island, Different Province', 'D': 'Different Main Islands', 'E': 'Remote Area'
     };
 
-    // Build HTML for each store
-    let html = '<div class="p-3 my-3 rounded-2" style="background: #f0f8f5; border-left: 4px solid #198754;"><p class="mb-2 text-muted small fw-bold">SHIPPING BREAKDOWN PER STORE</p>';
+    let html = '<div class="p-3 my-3 rounded-4" style="background: #fdf6f0; border: 1px solid #fbd3bc; border-left: 4px solid #c25e25 !important;"><p class="mb-2 text-dark small fw-bold text-uppercase tracking-wider" style="font-size: 0.65rem;">Courier Breakdown Logistics</p>';
     
-    // Build a map of store IDs to store names and books
     const storeInfo = {};
     document.querySelectorAll('.item-store-select').forEach(select => {
         const storeId = parseInt(select.value);
-        const bookTitle = select.closest('.cart-item').dataset.bookTitle || select.closest('.cart-item').querySelector('h6')?.textContent || 'Unknown';
+        const bookTitle = select.closest('.cart-item').querySelector('h4')?.textContent || 'Unknown';
         const selectedOption = select.options[select.selectedIndex];
         const storeName = selectedOption?.textContent?.split('(')[0]?.trim() || 'Unknown Store';
         
         if (storeId && shippingByStore[storeId]) {
-            if (!storeInfo[storeId]) {
-                storeInfo[storeId] = { name: storeName, books: [] };
-            }
-            if (!storeInfo[storeId].books.includes(bookTitle)) {
-                storeInfo[storeId].books.push(bookTitle);
-            }
+            if (!storeInfo[storeId]) storeInfo[storeId] = { name: storeName, books: [] };
+            if (!storeInfo[storeId].books.includes(bookTitle)) storeInfo[storeId].books.push(bookTitle);
         }
     });
     
@@ -1356,55 +1395,35 @@ function displayPerStoreShippingBreakdown(shippingByStore) {
         const storeName = storeInfo[storeId]?.name || `Store #${storeId}`;
         const books = storeInfo[storeId]?.books || [];
         
-        console.log(`[DISPLAY] Store #${storeId} breakdown:`, {weight_kg: b.weight_kg, extra_kg: b.extra_kg, weight_fee: b.weight_fee, zone_base: b.zone_base, service_surcharge: b.service_surcharge});
-        
-        // Build weight display: show total, then clarify if there's extra above 1kg
         let weightDisplay = `${totalWeight}kg`;
-        if (extraWeight > 0) {
-            weightDisplay += ` (above 1kg: ${extraWeight}kg)`;
-        }
-        
-        // Build books list HTML
-        let booksHtml = books.length > 0 ? books.map(b => `<div class="ps-2 small text-muted">• ${b}</div>`).join('') : '';
+        if (extraWeight > 0) weightDisplay += ` (above 1kg: ${extraWeight}kg)`;
+        let booksHtml = books.length > 0 ? books.map(b => `<div class="ps-2 small text-muted text-truncate" style="font-size: 0.75rem;">• ${b}</div>`).join('') : '';
         
         html += `
-        <div class="mb-2 p-2" style="background: white; border-left: 3px solid #198754; border-radius: 3px;">
+        <div class="mb-2 p-3 bg-white border rounded-3" style="border-color: #eef0f2 !important;">
             <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
-                    <strong>Store: ${storeName}</strong>
+                    <strong class="text-dark small">From: ${storeName}</strong>
                     ${booksHtml}
-                    <small class="d-block text-muted mt-1">Zone <strong style="color: #198754;">${b.zone}</strong> (${zoneCategory})</small>
+                    <small class="d-block text-muted mt-1" style="font-size: 0.7rem;">Zone <strong>${b.zone}</strong> (${zoneCategory})</small>
                 </div>
-                <strong style="color: #198754; font-size: 1rem;">${data.display}</strong>
+                <strong style="color: #c25e25; font-size: 0.9rem;">${data.display}</strong>
             </div>
-            <small class="d-block text-muted mb-2">Weight: ${weightDisplay}</small>
-            <div class="ps-2" style="font-size: 0.8rem; color: #666;">
-                <div class="d-flex justify-content-between mb-1">
-                    <span>• Base:</span>
-                    <span>Rp ${(b.zone_base || 0).toLocaleString('id-ID')}</span>
-                </div>
-                <div class="d-flex justify-content-between mb-1">
-                    <span>• Weight Fee:</span>
-                    <span>Rp ${(b.weight_fee || 0).toLocaleString('id-ID')}</span>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <span>• Service (${b.service_level || 'N/A'}):</span>
-                    <span>Rp ${(b.service_surcharge || 0).toLocaleString('id-ID')}</span>
-                </div>
+            <small class="d-block text-muted mb-2" style="font-size: 0.7rem;">Combined Weight: ${weightDisplay}</small>
+            <div class="ps-1 text-secondary" style="font-size: 0.75rem;">
+                <div class="d-flex justify-content-between mb-0.5"><span>Base Tariff:</span><span>Rp ${(b.zone_base || 0).toLocaleString('id-ID')}</span></div>
+                <div class="d-flex justify-content-between mb-0.5"><span>Weight Fee:</span><span>Rp ${(b.weight_fee || 0).toLocaleString('id-ID')}</span></div>
+                <div class="d-flex justify-content-between;"><span>Service (${b.service_level || 'N/A'}):</span><span>Rp ${(b.service_surcharge || 0).toLocaleString('id-ID')}</span></div>
             </div>
-        </div>
-        `;
+        </div>`;
     }
     
     html += '</div>';
     breakdownContainer.innerHTML = html;
     breakdownContainer.style.display = 'block';
-    
-    console.log('[DISPLAY] ✓ Per-store breakdown displayed with', Object.keys(shippingByStore).length, 'store(s)');
 }
 
 function hideShippingCost() {
-    console.log('[HIDE] hideShippingCost called');
     const shippingDisplay = document.getElementById('shippingDisplay');
     const shippingRate = document.getElementById('shippingRate');
     const perStoreBreakdown = document.getElementById('perStoreShippingBreakdown');
@@ -1417,11 +1436,8 @@ function hideShippingCost() {
         shippingRate.style.display = 'none';
         shippingRate.textContent = '';
     }
-    if (perStoreBreakdown) {
-        perStoreBreakdown.style.display = 'none';
-    }
+    if (perStoreBreakdown) perStoreBreakdown.style.display = 'none';
     
-    // Show only subtotal without shipping
     const grandTotalDisplay = document.getElementById('grandTotalDisplay');
     if (grandTotalDisplay) {
         grandTotalDisplay.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
@@ -1431,87 +1447,61 @@ function hideShippingCost() {
 }
 
 function showBaseCost(baseCost) {
-    console.log('[BASE] showBaseCost called with:', baseCost);
     currentShippingCost = baseCost;
-    
     const shippingDisplay = document.getElementById('shippingDisplay');
     const shippingRate = document.getElementById('shippingRate');
     
     if (shippingDisplay) {
         shippingDisplay.style.cssText = 'display: block !important; visibility: visible !important; font-size: 1.1rem; font-weight: bold; color: #6c757d;';
         shippingDisplay.textContent = baseCost === 0 ? 'FREE' : 'Rp ' + baseCost.toLocaleString('id-ID');
-        shippingDisplay.title = '(base cost only - enter full address for distance-based calculation)';
-        console.log('[BASE] shippingDisplay updated with base cost:', shippingDisplay.textContent);
     }
-    
     if (shippingRate) {
         shippingRate.style.cssText = 'display: block !important; visibility: visible !important;';
-        shippingRate.textContent = '(awaiting address...)';
+        shippingRate.textContent = '(awaiting delivery address lookup...)';
         shippingRate.style.color = '#999';
     }
     
-    // Update grand total with base cost
     const grand = subtotal + baseCost;
     const grandTotalDisplay = document.getElementById('grandTotalDisplay');
-    if (grandTotalDisplay) {
-        grandTotalDisplay.textContent = 'Rp ' + grand.toLocaleString('id-ID');
-        console.log('[BASE] Grand total updated to:', grand);
-    }
+    if (grandTotalDisplay) grandTotalDisplay.textContent = 'Rp ' + grand.toLocaleString('id-ID');
 }
 
 function updateTotalsDisplay(totalCost, totalDisplay, shippingByStore) {
-    console.log('[UPDATE] Updating totals - total cost:', totalCost, 'per-store breakdown:', shippingByStore);
-    
     currentShippingCost = totalCost;
     const grand = subtotal + totalCost;
     
-    // Show success badge
     const badge = document.getElementById('shippingCalculatedBadge');
-    if (badge) {
-        badge.style.display = 'inline-block';
-        console.log('[UPDATE] ✓ Showing shipping calculated badge');
-    }
+    if (badge) badge.style.display = 'inline-block';
     
-    // Update main shipping cost display (total)
     const shippingDisplay = document.getElementById('shippingDisplay');
     const shippingRate = document.getElementById('shippingRate');
     
     if (shippingDisplay) {
-        shippingDisplay.style.cssText = 'display: block !important; visibility: visible !important; font-size: 1.1rem; font-weight: bold; color: #198754;';
+        shippingDisplay.style.cssText = 'display: block !important; visibility: visible !important; font-size: 1.1rem; font-weight: bold; color: #c25e25;';
         shippingDisplay.textContent = totalCost === 0 ? 'FREE' : totalDisplay;
-        shippingDisplay.title = `Total shipping for ${Object.keys(shippingByStore).length} store(s)`;
-        console.log('[UPDATE] ✓ Total shipping cost displayed:', shippingDisplay.textContent);
     }
-    
     if (shippingRate) {
         const numStores = Object.keys(shippingByStore).length;
         shippingRate.style.cssText = 'display: block !important; visibility: visible !important;';
-        shippingRate.textContent = `${numStores} store${numStores > 1 ? 's' : ''} (see breakdown below)`;
+        shippingRate.textContent = `${numStores} dispatch point${numStores > 1 ? 's' : ''} active`;
         shippingRate.style.color = '#666';
-        shippingRate.style.fontSize = '0.9rem';
-        console.log('[UPDATE] ✓ Number of stores displayed:', shippingRate.textContent);
+        shippingRate.style.fontSize = '0.85rem';
     }
     
-    // Update grand total
     const grandTotalDisplay = document.getElementById('grandTotalDisplay');
     if (grandTotalDisplay) {
         grandTotalDisplay.textContent = 'Rp ' + grand.toLocaleString('id-ID');
-        grandTotalDisplay.style.color = '#198754';
-        console.log('[UPDATE] ✓ Grand total:', grandTotalDisplay.textContent);
+        grandTotalDisplay.style.color = '#c25e25';
     }
-    
-    console.log('[UPDATE] === TOTALS UPDATE COMPLETE ===');
 }
 
-// Form validation
 function validateCheckoutForm() {
     const requiredFields = [
         { id: 'shipping_name', type: 'text', name: 'Recipient Name' },
         { id: 'shipping_phone', type: 'tel', name: 'Phone Number' },
         { id: 'location_search', type: 'text', name: 'Location' },
         { id: 'shipping_postal_code_input', type: 'select', name: 'Postal Code' },
-        { id: 'shipping_address', type: 'textarea', name: 'Street Address' },
-        { id: 'shipping-method-0', type: 'radio', name: 'Shipping Method' }
+        { id: 'shipping_address', type: 'textarea', name: 'Street Address' }
     ];
     
     let isValid = true;
@@ -1532,78 +1522,50 @@ function validateCheckoutForm() {
         }
     });
     
-    // Validate all books have store selections
     const storeSelects = document.querySelectorAll('.item-store-select');
     storeSelects.forEach(select => {
         if (!select.value) {
             select.classList.add('field-error-highlight');
-            emptyFields.push('Store location for ' + select.dataset.bookId);
+            emptyFields.push('Fulfillment Location Selection');
             isValid = false;
         } else {
             select.classList.remove('field-error-highlight');
-            
-            // CRITICAL: Validate quantity does not exceed store stock
             const cartItem = select.closest('.cart-item');
             const quantity = parseInt(cartItem.dataset.quantity || 1);
             const selectedOption = select.options[select.selectedIndex];
             const stock = parseInt(selectedOption.dataset.stock || 0);
             
             if (quantity > stock) {
-                stockErrors.push(`"${cartItem.dataset.bookTitle}" - Need ${quantity} but only ${stock} available at selected store`);
+                stockErrors.push(`Inventory Shortage on item row: allocation triggers exceeded.`);
                 isValid = false;
             }
         }
     });
     
     if (!isValid) {
-        let message = 'Please fix the following errors:\n\n';
-        if (emptyFields.length > 0) {
-            message += 'Required fields:\n' + emptyFields.map(f => '• ' + f).join('\n');
-        }
-        if (stockErrors.length > 0) {
-            if (emptyFields.length > 0) message += '\n\n';
-            message += 'Inventory issues:\n' + stockErrors.map(f => '• ' + f).join('\n');
-        }
+        let message = 'Validation alert processing failed:\n\n';
+        if (emptyFields.length > 0) message += 'Missing inputs:\n' + emptyFields.map(f => '• ' + f).join('\n');
+        if (stockErrors.length > 0) message += '\n\nStock faults:\n' + stockErrors.map(f => '• ' + f).join('\n');
         alert(message);
     }
-    
     return isValid;
 }
 
-
-// Real-time validation
 ['shipping_name', 'shipping_phone', 'location_search', 'shipping_postal_code_input', 'shipping_address'].forEach(fieldId => {
     const field = document.getElementById(fieldId);
     if (field) {
-        field.addEventListener('input', function() {
-            if (this.value.trim()) {
-                this.classList.remove('field-error-highlight');
-            }
-        });
-        field.addEventListener('change', function() {
-            if (this.value.trim()) {
-                this.classList.remove('field-error-highlight');
-            }
-        });
+        field.addEventListener('input', function() { if (this.value.trim()) this.classList.remove('field-error-highlight'); });
+        field.addEventListener('change', function() { if (this.value.trim()) this.classList.remove('field-error-highlight'); });
     }
 });
 
-// Validate store selection on change
 document.querySelectorAll('.item-store-select').forEach(select => {
-    select.addEventListener('change', function() {
-        if (this.value) {
-            this.classList.remove('field-error-highlight');
-        }
-    });
+    select.addEventListener('change', function() { if (this.value) this.classList.remove('field-error-highlight'); });
 });
 
-// Pay button
 document.getElementById('payButton').addEventListener('click', function(e) {
     e.preventDefault();
-    
-    if (!validateCheckoutForm()) {
-        return;
-    }
+    if (!validateCheckoutForm()) return;
     
     const payButton = this;
     payButton.disabled = true;
@@ -1613,69 +1575,55 @@ document.getElementById('payButton').addEventListener('click', function(e) {
     const formData = new FormData(document.getElementById('paymentForm'));
     formData.append('shipping_cost', currentShippingCost);
     
-    // CRITICAL: Send zone-based shipping breakdown for database storage
-    // This allows order display to show detailed breakdown instead of just recalculating
     if (window.shippingByStore && Object.keys(window.shippingByStore).length > 0) {
-        // Get the first store's breakdown as the "primary" breakdown
         const firstStoreId = Object.keys(window.shippingByStore)[0];
         const firstStoreData = window.shippingByStore[firstStoreId];
-        
         if (firstStoreData && firstStoreData.breakdown) {
             formData.append('shipping_zone', firstStoreData.breakdown.zone || 'C');
             formData.append('shipping_breakdown', JSON.stringify(firstStoreData.breakdown));
-            console.log('[SUBMIT] Including shipping breakdown:', firstStoreData.breakdown);
         }
     }
 
     fetch('{{ route("checkout.process") }}', {
         method: 'POST',
         body: formData,
-        headers: { 
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
     })
     .then(r => {
-        if (!r.ok && r.status === 422) {
-            return r.json().then(data => {
-                const errorMessages = [];
-                if (data.errors) {
-                    Object.keys(data.errors).forEach(field => {
-                        errorMessages.push(`${field}: ${data.errors[field].join(', ')}`);
-                    });
-                }
-                throw new Error(errorMessages.join('\n') || 'Validation failed');
-            });
+        if (!r.ok) {
+            if (r.status === 422) {
+                return r.json().then(data => {
+                    const errorMessages = [];
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => { errorMessages.push(`${field}: ${data.errors[field].join(', ')}`); });
+                    }
+                    throw new Error(errorMessages.join('\n') || 'Validation failed');
+                });
+            } else if (r.status >= 500) {
+                return r.json().then(data => {
+                    throw new Error(data.details || data.error || `Server error: ${r.status}`);
+                }).catch(e => {
+                    throw new Error(`Server error: ${r.status}`);
+                });
+            }
+            throw new Error(`HTTP ${r.status}: ${r.statusText}`);
         }
         return r.json();
     })
     .then(data => {
+        console.log('Checkout response:', data);
         if (data.success && data.snapToken) {
             snap.pay(data.snapToken, {
                 onSuccess: function(result) {
-                    console.log('[PAYMENT] Success callback triggered', result);
-                    
-                    // Mark payment as complete on backend, passing payment_type from Midtrans result
                     fetch('{{ route("checkout.mark-payment-complete") }}', {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json'
                         },
                         body: JSON.stringify({ payment_type: result.payment_type || null })
                     })
-                    .then(response => {
-                        console.log('[PAYMENT] markPaymentComplete response status:', response.status);
-                        if (!response.ok) {
-                            throw new Error(`Payment complete call failed: ${response.status} ${response.statusText}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('[PAYMENT] markPaymentComplete success:', data);
-                        
-                        // Save address to user record
+                    .then(response => { if (!response.ok) throw new Error(); return response.json(); })
+                    .then(() => {
                         const addressData = {
                             latitude: parseFloat(document.getElementById('shipping_latitude').value),
                             longitude: parseFloat(document.getElementById('shipping_longitude').value),
@@ -1685,61 +1633,45 @@ document.getElementById('payButton').addEventListener('click', function(e) {
                             city: document.getElementById('shipping_city').value,
                             district: document.getElementById('shipping_district').value,
                         };
-                        
                         return fetch('{{ route("checkout.save-address") }}', {
                             method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
+                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
                             body: JSON.stringify(addressData)
                         });
                     })
-                    .then(response => {
-                        console.log('[PAYMENT] saveAddress response:', response.status);
-                        return response.json();
-                    })
                     .then(() => {
-                        // Clear cart
                         return fetch('{{ route("cart.clear") }}', {
                             method: 'POST',
                             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
                         });
                     })
-                    .then(() => {
-                        console.log('[PAYMENT] Cart cleared:', response.status);
-                        // Force refresh to bypass cache
-                        window.location.href = '{{ route("orders.index") }}?success=true&t=' + Date.now();
-                    })
-                    .catch(error => {
-                        console.error('[PAYMENT] Error during post-payment operations:', error);
-                        // Payment already succeeded and order status updated, just redirect
-                        // Errors here are non-critical (address save or cart clear failures)
-                        window.location.href = '{{ route("orders.index") }}?success=true&t=' + Date.now();
-                    });
+                    .then(() => { window.location.href = '{{ route("orders.index") }}?success=true&t=' + Date.now(); })
+                    .catch(() => { window.location.href = '{{ route("orders.index") }}?success=true&t=' + Date.now(); });
                 },
-                onPending: function() {
-                    alert('Payment is being processed. Your order is pending until payment is confirmed. Please check your orders page for updates.');
-                    resetBtn();
-                },
-                onError: function() {
-                    alert('Payment authentication failed. Your order remains pending. You can retry payment from your orders page.');
-                    resetBtn();
-                },
+                onPending: function() { alert('Transaction processing status: Pending.'); resetBtn(); },
+                onError: function() { alert('Transaction authentication signature failed.'); resetBtn(); },
                 onClose: function() { 
-                    alert('You closed the payment window. Your order remains pending. Complete payment from your orders page or retry checkout.');
-                    resetBtn(); 
+                    // Clear cart on payment cancellation
+                    fetch('{{ route("cart.clear") }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                    }).then(() => {
+                        window.location.href = '{{ route("orders.index") }}?cancelled=true&t=' + Date.now();
+                    }).catch(() => {
+                        window.location.href = '{{ route("orders.index") }}?cancelled=true&t=' + Date.now();
+                    });
                 }
             });
         } else {
-            alert('Error: ' + (data.error || data.message || 'Failed to initiate payment.'));
+            const errorMsg = data.message || data.error || data.details || 'Payment engine execution error.';
+            console.error('Checkout error:', data);
+            alert('Error: ' + errorMsg);
             resetBtn();
         }
     })
     .catch(err => { 
-        alert('Checkout Error:\n\n' + (err.message || 'An unexpected error occurred. Please try again.'));
-        console.error('Checkout error:', err);
+        console.error('Checkout exception:', err);
+        alert('Checkout Fault:\n\n' + (err.message || 'An operational error has occurred. Retrying validation recommended.'));
         resetBtn();
     });
 
@@ -1750,45 +1682,30 @@ document.getElementById('payButton').addEventListener('click', function(e) {
     }
 });
 
-// Initialize on load
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('[INIT] DOMContentLoaded fired');
-    
-    // Initialize location search elements NOW that DOM is loaded
     locationSearchInput = document.getElementById('location_search');
     locationSuggestions = document.getElementById('locationSuggestions');
     postalCodeSelect = document.getElementById('shipping_postal_code_input');
     
-    console.log('[INIT] Location search input:', !!locationSearchInput);
-    console.log('[INIT] Location suggestions:', !!locationSuggestions);
-    
-    // Setup location search functionality
     if (locationSearchInput) {
         locationSearchInput.addEventListener('input', function() {
             const query = this.value.trim().toLowerCase();
             locationSuggestions.innerHTML = '';
-            
             if (!query || query.length < 2) {
                 locationSuggestions.classList.remove('show');
                 return;
             }
-            
             const filtered = allLocations.filter(loc => {
-                const searchText = `${loc.district} ${loc.city} ${loc.province}`.toLowerCase();
-                return searchText.includes(query);
+                return `${loc.district} ${loc.city} ${loc.province}`.toLowerCase().includes(query);
             });
-            
             if (filtered.length > 0) {
                 filtered.forEach(loc => {
                     const div = document.createElement('div');
                     div.className = 'location-suggestion-item';
                     div.innerHTML = `
                         <div class="location-suggestion-label">${loc.district}</div>
-                        <div class="location-suggestion-desc">${loc.city}, ${loc.province} - ${loc.postal_code}</div>
-                    `;
-                    div.addEventListener('click', function() {
-                        selectLocation(loc);
-                    });
+                        <div class="location-suggestion-desc">${loc.city}, ${loc.province} - ${loc.postal_code}</div>`;
+                    div.addEventListener('click', function() { selectLocation(loc); });
                     locationSuggestions.appendChild(div);
                 });
                 locationSuggestions.classList.add('show');
@@ -1796,68 +1713,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 locationSuggestions.classList.remove('show');
             }
         });
-        
-        locationSearchInput.addEventListener('blur', function() {
-            setTimeout(() => {
-                locationSuggestions.classList.remove('show');
-            }, 200);
-        });
-        
-        console.log('[INIT] Location search event listeners attached');
-    } else {
-        console.error('[INIT] locationSearchInput not found!');
+        locationSearchInput.addEventListener('blur', function() { setTimeout(() => { locationSuggestions.classList.remove('show'); }, 200); });
     }
     
     const selectedStore = document.querySelector('.store-radio:checked');
     const selectedMethod = document.querySelector('.shipping-radio:checked');
-    
-    console.log('[INIT] Store selected:', !!selectedStore, 'Method selected:', !!selectedMethod);
-    
     if (selectedStore && selectedMethod) {
-        // IMPORTANT: Do NOT fill shipping coordinates with store coordinates
-        // Only show base shipping cost until user enters their delivery address
-        const baseCost = parseInt(selectedMethod.dataset.baseCost || 0);
-        console.log('[INIT] Showing base cost:', baseCost);
-        showBaseCost(baseCost);
+        showBaseCost(parseInt(selectedMethod.dataset.baseCost || 0));
     }
     
-    // Initialize per-km rates for all methods with base costs
-    console.log('[INIT] Initializing per-km rates for all shipping methods');
     document.querySelectorAll('.shipping-radio').forEach(radio => {
         const methodCode = radio.value;
         const baseCost = parseInt(radio.dataset.baseCost || 0);
         const rateDisplay = document.querySelector(`.shipping-rate[data-method="${methodCode}"]`);
-        
         if (rateDisplay && baseCost > 0) {
-            // Show base rate as estimate
             rateDisplay.style.cssText = 'display: block !important; color: #999; font-size: 0.85rem;';
             rateDisplay.textContent = `(loading rates...)`;
-            console.log(`[INIT] Method ${methodCode} rate display initialized`);
         }
     });
     
-    // Trigger calculation if everything is already filled (e.g., from saved address)
     const userLat = document.getElementById('shipping_latitude').value;
     const userLng = document.getElementById('shipping_longitude').value;
     const userCity = document.getElementById('shipping_city').value;
-    if (userLat && userLng && userCity && selectedStore && selectedMethod) {
-        console.log('[INIT] Auto-calculating with pre-filled address');
+    if (userLat && userLng && userCity && selectedMethod) {
         setTimeout(() => calculateShippingCost(), 100);
     }
     
-
-    
-    // Handle saved address toggle
     @if($savedAddress)
     const useSavedBtn = document.getElementById('useSavedAddress');
     const enterNewBtn = document.getElementById('enterNewAddress');
-    const newAddressSection = document.getElementById('newAddressSection');
-    const addressFormFields = document.getElementById('addressFormFields');
     
     if (useSavedBtn && enterNewBtn) {
         useSavedBtn.addEventListener('change', function() {
             if (this.checked) {
-                // Pre-fill form with saved address
                 document.getElementById('shipping_latitude').value = {{ json_encode($savedAddress['latitude']) }};
                 document.getElementById('shipping_longitude').value = {{ json_encode($savedAddress['longitude']) }};
                 document.getElementById('shipping_street').value = '{{ $savedAddress['street'] }}';
@@ -1865,25 +1753,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('shipping_province').value = '{{ $savedAddress['province'] }}';
                 document.getElementById('shipping_city').value = '{{ $savedAddress['city'] }}';
                 document.getElementById('shipping_district').value = '{{ $savedAddress['district'] }}';
+                document.getElementById('location_display').value = '{{ $savedAddress['district'] }}, {{ $savedAddress['city'] }}, {{ $savedAddress['province'] }}';
                 
-                // Display the saved address in the location display
-                let displayText = '{{ $savedAddress['district'] }}, {{ $savedAddress['city'] }}, {{ $savedAddress['province'] }}';
-                document.getElementById('location_display').value = displayText;
-                
-                // Show the edit map button
                 const editBtn = document.getElementById('mapPickerBtn');
-                if (editBtn) {
-                    editBtn.style.display = 'block';
-                }
-                
-                // Recalculate shipping with saved address
+                if (editBtn) editBtn.style.display = 'block';
                 calculateShippingCost();
             }
         });
         
         enterNewBtn.addEventListener('change', function() {
             if (this.checked) {
-                // Clear form fields to allow new entry
                 document.getElementById('shipping_latitude').value = '';
                 document.getElementById('shipping_longitude').value = '';
                 document.getElementById('shipping_street').value = '';
@@ -1894,39 +1773,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('location_search').value = '';
                 document.getElementById('location_display').value = '';
                 
-                // Hide the edit map button
                 const editBtn = document.getElementById('mapPickerBtn');
-                if (editBtn) {
-                    editBtn.style.display = 'none';
-                }
-                
-                // Hide shipping cost until new address is entered
+                if (editBtn) editBtn.style.display = 'none';
                 hideShippingCost();
             }
         });
     }
     @endif
     
-    // CRITICAL: Debounce function to prevent API call spam on rapid address changes
-    function debounce(func, wait) {
+    function sampleDebounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
+            const later = () => { clearTimeout(timeout); func(...args); };
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
     }
-
-    // Create debounced shipping calculation (500ms delay)
-    const debouncedCalculateShipping = debounce(calculateShippingCost, 500);
+    const debouncedCalculateShipping = sampleDebounce(calculateShippingCost, 500);
     
-    // Store selection changes - validate and update location
     document.querySelectorAll('.item-store-select').forEach(function(select) {
         select.addEventListener('change', function() {
-            const bookId = this.dataset.bookId;
             const selectedOption = this.options[this.selectedIndex];
             const storeStock = parseInt(selectedOption.dataset.stock || 0);
             const cartItem = this.closest('.cart-item');
@@ -1935,29 +1801,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const requiredBadge = this.closest('div').querySelector('.item-store-required');
             
             if (!this.value) {
-                // No store selected - show error, add required attribute
                 this.setAttribute('required', 'required');
                 if (requiredBadge) requiredBadge.style.display = 'inline';
-                if (messageEl) {
-                    const errSpan = messageEl.querySelector('.text-danger');
-                    const okSpan = messageEl.querySelector('.text-success');
-                    if (errSpan) errSpan.style.display = 'inline';
-                    if (okSpan) okSpan.style.display = 'none';
-                    messageEl.style.display = 'block';
-                }
                 return;
             }
             
-            // Store selected - remove required attribute, show success
             this.removeAttribute('required');
             if (requiredBadge) requiredBadge.style.display = 'none';
-            if (messageEl) {
-                const errSpan = messageEl.querySelector('.text-danger');
-                const okSpan = messageEl.querySelector('.text-success');
-                if (errSpan) errSpan.style.display = 'none';
-                if (okSpan) okSpan.style.display = 'inline';
-                messageEl.style.display = 'block';
-            }
+            if (messageEl) messageEl.style.display = 'block';
             
             if (storeStock <= 0) {
                 alert('⚠️ Selected store has no stock for this book');
@@ -1966,80 +1817,150 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Check if quantity exceeds store stock
             if (currentQuantity > storeStock) {
-                alert(`⚠️ Selected store only has ${storeStock} stock but your quantity is ${currentQuantity}.\n\nPlease go back to cart and adjust quantity to max ${storeStock}.`);
-                console.log(`[STORE] Stock mismatch: Qty ${currentQuantity} > Stock ${storeStock}`);
+                alert(`⚠️ Selected store only has ${storeStock} stock but your quantity is ${currentQuantity}.`);
             }
             
-            // If we have location data already, recalculate shipping with first selected store
             const userLat = document.getElementById('shipping_latitude').value;
             const userLng = document.getElementById('shipping_longitude').value;
-            
             if (userLat && userLng) {
-                // Update current store location to first selected store
                 let firstSelect = null;
-                document.querySelectorAll('.item-store-select').forEach(select => {
-                    if (!firstSelect && select.value) {
-                        firstSelect = select;
-                    }
+                document.querySelectorAll('.item-store-select').forEach(sel => {
+                    if (!firstSelect && sel.value) firstSelect = sel;
                 });
-                
                 if (firstSelect) {
-                    const selectedOption = firstSelect.options[firstSelect.selectedIndex];
-                    currentStoreLocation = {
-                        lat: parseFloat(selectedOption.dataset.lat),
-                        lng: parseFloat(selectedOption.dataset.lng)
-                    };
+                    const opt = firstSelect.options[firstSelect.selectedIndex];
+                    currentStoreLocation = { lat: parseFloat(opt.dataset.lat), lng: parseFloat(opt.dataset.lng) };
                     calculateShippingCost();
                 }
             }
         });
     });
 
-    // Shipping method changes
     document.querySelectorAll('.shipping-radio').forEach(function(radio) {
         radio.addEventListener('change', calculateShippingCost);
     });
     
-    // Watch for changes on ALL address/location fields that affect shipping
-    // CRITICAL: Use debounce to prevent API spam on rapid consecutive changes
     const addressFields = [
-        'shipping_latitude',
-        'shipping_longitude', 
-        'shipping_city',
-        'shipping_province',
-        'shipping_district',
-        'shipping_street',
-        'shipping_postal_code_input'
+        'shipping_latitude', 'shipping_longitude', 'shipping_city', 'shipping_province', 'shipping_district', 'shipping_street', 'shipping_postal_code_input'
     ];
-    
     addressFields.forEach(function(fieldId) {
         const field = document.getElementById(fieldId);
         if (field) {
-            field.addEventListener('change', function() {
-                console.log('[ADDRESS] Changed:', fieldId, '=', this.value);
-                debouncedCalculateShipping();
-            });
-            
-            // Also watch for input/blur to catch manual edits
-            field.addEventListener('blur', function() {
-                console.log('[ADDRESS] Blur on:', fieldId);
-                debouncedCalculateShipping();
-            });
+            field.addEventListener('change', function() { debouncedCalculateShipping(); });
+            field.addEventListener('blur', function() { debouncedCalculateShipping(); });
         }
     });
-    
-    // Watch for dropdown changes (province/city selects)
-    document.querySelectorAll('select[id*="shipping"]').forEach(function(select) {
-        select.addEventListener('change', function() {
-            if (!this.classList.contains('item-store-select')) {
-                console.log('[SELECT] Changed:', this.id, '=', this.value);
-                debouncedCalculateShipping();
+
+    // ===== Refund Modal Handler =====
+    const uploadArea = document.getElementById('uploadArea');
+    const refundImage = document.getElementById('refundImage');
+    const imageFileName = document.getElementById('imageFileName');
+    let selectedFile = null;
+
+    // File upload click handler
+    uploadArea.addEventListener('click', () => refundImage.click());
+
+    // File input change
+    refundImage.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                refundImage.value = '';
+                return;
             }
-        });
+            if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+                alert('Only JPG, PNG, and GIF formats are allowed');
+                refundImage.value = '';
+                return;
+            }
+            selectedFile = file;
+            imageFileName.textContent = '✓ ' + file.name;
+            imageFileName.style.display = 'block';
+            uploadArea.style.borderColor = '#28a745';
+            uploadArea.style.backgroundColor = '#f0fdf4';
+        }
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#c25e25';
+        uploadArea.style.backgroundColor = '#fff5f0';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '#dee2e6';
+        uploadArea.style.backgroundColor = '#f8f9fa';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#dee2e6';
+        uploadArea.style.backgroundColor = '#f8f9fa';
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            refundImage.files = files;
+            const event = new Event('change', { bubbles: true });
+            refundImage.dispatchEvent(event);
+        }
+    });
+
+    // Submit refund request
+    document.getElementById('submitRefundBtn').addEventListener('click', async function() {
+        const orderId = document.getElementById('refundOrderId').value;
+        const reason = document.getElementById('refundReason').value.trim();
+
+        if (!orderId) {
+            alert('Order ID not found');
+            return;
+        }
+
+        if (!reason || reason.length < 10) {
+            alert('Please provide a detailed reason (at least 10 characters)');
+            return;
+        }
+
+        if (reason.length > 500) {
+            alert('Reason must be less than 500 characters');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('order_id', orderId);
+        formData.append('reason', reason);
+        if (selectedFile) {
+            formData.append('image', selectedFile);
+        }
+
+        try {
+            const response = await fetch('{{ route("refunds.request") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                alert('✓ Refund request submitted successfully!');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('refundRequestModal'));
+                modal.hide();
+                document.getElementById('refundForm').reset();
+                selectedFile = null;
+                imageFileName.style.display = 'none';
+            } else {
+                alert('Error: ' + (data.message || 'Failed to submit refund request'));
+            }
+        } catch (err) {
+            console.error('Refund request error:', err);
+            alert('Failed to submit refund request. Please try again.');
+        }
     });
 });
 </script>
 @endsection
-

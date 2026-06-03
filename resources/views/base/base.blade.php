@@ -247,9 +247,12 @@
 <body>
     {{-- Toast Notification --}}
     <div id="toastNotification" class="toast-notification">
-        <i class="fas fa-check-circle toast-icon"></i>
-        <div class="toast-content">
-            <p class="toast-message" id="toastMessage">Added to cart!</p>
+        <div class="d-flex align-items-start w-100">
+            <i class="fas fa-check-circle toast-icon me-2"></i>
+            <div class="toast-content flex-grow-1">
+                <p class="toast-message mb-0" id="toastMessage">Added to cart!</p>
+            </div>
+            <button type="button" class="btn-close btn-sm" id="toastCloseBtn" style="margin-left: auto; margin-top: -2px;"></button>
         </div>
     </div>
 
@@ -269,26 +272,28 @@
 
             // Update UI to show selected language
             const dropdown = document.getElementById('languageDropdown');
-            const langText = dropdown.querySelector('.d-none.d-sm-inline');
-            if (langText) {
-                langText.textContent = lang.toUpperCase();
-            }
+            if (dropdown) {
+                const langText = dropdown.querySelector('.d-none.d-sm-inline');
+                if (langText) {
+                    langText.textContent = lang.toUpperCase();
+                }
 
-            // Update dropdown items
-            const items = document.querySelectorAll('#languageDropdown + .dropdown-menu .dropdown-item');
-            items.forEach(item => {
-                const checkIcon = item.querySelector('.fa-check');
-                const dotIcon = item.querySelector('.text-muted');
-                if (checkIcon) checkIcon.remove();
-                if (dotIcon) dotIcon.innerHTML = '○';
-            });
+                // Update dropdown items
+                const items = document.querySelectorAll('#languageDropdown + .dropdown-menu .dropdown-item');
+                items.forEach(item => {
+                    const checkIcon = item.querySelector('.fa-check');
+                    const dotIcon = item.querySelector('.text-muted');
+                    if (checkIcon) checkIcon.remove();
+                    if (dotIcon) dotIcon.innerHTML = '○';
+                });
 
-            // Mark selected language
-            const selectedItem = [...items].find(item => item.onclick && item.onclick.toString().includes(`'${lang}'`));
-            if (selectedItem) {
-                const dotSpan = selectedItem.querySelector('.text-muted');
-                if (dotSpan) {
-                    dotSpan.innerHTML = '<i class="fas fa-check text-success"></i>';
+                // Mark selected language
+                const selectedItem = [...items].find(item => item.onclick && item.onclick.toString().includes(`'${lang}'`));
+                if (selectedItem) {
+                    const dotSpan = selectedItem.querySelector('.text-muted');
+                    if (dotSpan) {
+                        dotSpan.innerHTML = '<i class="fas fa-check text-success"></i>';
+                    }
                 }
             }
 
@@ -362,10 +367,11 @@
 
         // Toast Notification Function
         let toastTimeout;
-        window.showToast = function(message = 'Added to cart!', type = 'success', duration = 5000) {
+        window.showToast = function(message = 'Added to cart!', type = 'success', duration = 2500) {
             const toast = document.getElementById('toastNotification');
             const toastMessage = document.getElementById('toastMessage');
             const toastIcon = toast.querySelector('.toast-icon');
+            const closeBtn = document.getElementById('toastCloseBtn');
             
             // Clear any existing timeout
             if (toastTimeout) clearTimeout(toastTimeout);
@@ -379,20 +385,26 @@
             
             // Update icon based on type
             if (type === 'success') {
-                toastIcon.className = 'fas fa-check-circle toast-icon';
+                toastIcon.className = 'fas fa-check-circle toast-icon me-2';
             } else if (type === 'error') {
-                toastIcon.className = 'fas fa-exclamation-circle toast-icon';
-            } else if (type === 'info') {
-                toastIcon.className = 'fas fa-info-circle toast-icon';
+                toastIcon.className = 'fas fa-exclamation-circle toast-icon me-2';
+            } else if (type === 'info' || type === 'warning') {
+                toastIcon.className = 'fas fa-info-circle toast-icon me-2';
             }
             
-            // Hide after duration
-            toastTimeout = setTimeout(() => {
+            // Close button handler
+            const closeToast = () => {
                 toast.classList.add('hide');
+                if (toastTimeout) clearTimeout(toastTimeout);
                 setTimeout(() => {
                     toast.classList.remove('show', 'hide');
                 }, 300);
-            }, duration);
+            };
+            
+            closeBtn.onclick = closeToast;
+            
+            // Hide after duration
+            toastTimeout = setTimeout(closeToast, duration);
         };
 
         // Clear toast on page navigation
