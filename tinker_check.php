@@ -8,8 +8,8 @@ $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 $request = \Illuminate\Http\Request::create('/', 'GET');
 $response = $kernel->handle($request);
 
-// Find order and test email rendering with detailed error reporting
-echo "=== EMAIL DEBUGGING ===\n";
+// Find order and check shipping breakdown data
+echo "=== CHECKING SHIPPING BREAKDOWN DATA ===\n";
 $order = \App\Models\Order::where('invoice_number', 'BH-20260603124736-353')->first();
 
 if (!$order) {
@@ -17,53 +17,40 @@ if (!$order) {
     exit(1);
 }
 
-$user = $order->user;
-echo "Order: " . $order->invoice_number . "\n";
-echo "User: " . $user->email . "\n";
-echo "User has google_id: " . ($user->google_id ? "YES" : "NO") . "\n\n";
+echo "Order ID: " . $order->id . "\n";
+echo "Invoice: " . $order->invoice_number . "\n";
+echo "Shipping Cost: " . $order->shipping_cost . "\n";
+echo "Shipping Zone: " . ($order->shipping_zone ?? 'NULL') . "\n";
+echo "Shipping Breakdown (raw): " . var_export($order->shipping_breakdown, true) . "\n";
 
-// Step 1: Check if google_id exists (email only sends if it does)
-if (!$user->google_id) {
-    echo "✗ ERROR: User does NOT have google_id!\n";
-    echo "Email will NOT be sent - by design, only Google-logged users get emails.\n";
-    echo "User needs to log in with Google first.\n";
-    exit(0);
-}
-
-// Step 2: Try to render the view
-echo "Step 1: Rendering email template...\n";
-try {
-    $view = \Illuminate\Support\Facades\View::make('emails.order-receipt', [
-        'order' => $order,
-        'user' => $user,
-        'orderDetails' => $order->order_details,
-    ]);
-    $html = $view->render();
+if ($order->shipping_breakdown) {
+    echo "\nBreakdown exists:\n";
     
-    if (empty($html)) {
-        echo "✗ View rendered but is EMPTY!\n";
-        exit(1);
+    // Try to decode if string
+    $breakdown = $order->shipping_breakdown;
+    if (is_string($breakdown)) {
+        echo "  Type: String (JSON)\n";
+        $decoded = json_decode($breakdown, true);
+        echo "  Decoded: " . var_export($decoded, true) . "\n";
+    } else if (is_array($breakdown)) {
+        echo "  Type: Array\n";
+        echo "  Count: " . count($breakdown) . "\n";
+        echo "  Content:\n";
+        foreach ($breakdown as $key => $value) {
+            echo "    [$key] => " . var_export($value, true) . "\n";
+        }
+    } else {
+        echo "  Type: " . gettype($breakdown) . "\n";
     }
-    
-    echo "✓ View rendered successfully (" . strlen($html) . " bytes)\n";
-} catch (\Exception $e) {
-    echo "✗ ERROR rendering view:\n";
-    echo "  " . $e->getMessage() . "\n";
-    echo "  File: " . $e->getFile() . "\n";
-    echo "  Line: " . $e->getLine() . "\n";
-    exit(1);
+} else {
+    echo "\n✗ Shipping breakdown is NULL or empty\n";
+    echo "This is why courier breakdown doesn't show in email.\n";
 }
 
-// Step 3: Try sending
-echo "\nStep 2: Sending email...\n";
-try {
-    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderReceiptMail($order));
-    echo "✓ Email sent successfully!\n";
-} catch (\Exception $e) {
-    echo "✗ ERROR sending email:\n";
-    echo "  " . $e->getMessage() . "\n";
-    echo "  File: " . $e->getFile() . "\n";
-    echo "  Line: " . $e->getLine() . "\n";
+echo "\n=== DATABASE RAW QUERY ===\n";
+$raw = \Illuminate\Support\Facades\DB::selectOne("SELECT id, invoice_number, shipping_cost, shipping_zone, shipping_breakdown FROM orders WHERE invoice_number = 'BH-20260603124736-353'");
+if ($raw) {
+    echo "Raw DB shipping_breakdown: " . $raw->shipping_breakdown . "\n";
+} else {
+    echo "Order not found in database\n";
 }
-
-echo "\nDone!\n";
