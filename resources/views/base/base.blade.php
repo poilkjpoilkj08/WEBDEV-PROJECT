@@ -14,10 +14,11 @@
     <!-- Axios for HTTP requests -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script>
-        // Configure axios globally for CSRF token
+        // Configure axios globally for CSRF token and credentials
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
         axios.defaults.headers.post['X-CSRF-TOKEN'] = csrfToken;
+        axios.defaults.withCredentials = true; // CRITICAL: Send cookies with requests
         
         // Log axios requests in development
         if (true) { // Always log for now
@@ -26,6 +27,7 @@
                     method: config.method,
                     url: config.url,
                     has_csrf: !!config.headers['X-CSRF-TOKEN'],
+                    withCredentials: config.withCredentials,
                     csrf_token: config.headers['X-CSRF-TOKEN']?.substring(0, 20) + '...',
                 });
                 return config;
@@ -44,6 +46,7 @@
                         config: {
                             url: error.config?.url,
                             method: error.config?.method,
+                            withCredentials: error.config?.withCredentials,
                         }
                     });
                     return Promise.reject(error);
