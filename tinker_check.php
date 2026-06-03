@@ -8,34 +8,35 @@ $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 $request = \Illuminate\Http\Request::create('/', 'GET');
 $response = $kernel->handle($request);
 
-// Now run queries
-echo "=== CHECKING LOCAL DATABASE ===\n";
-$order = \App\Models\Order::where('invoice_number', 'BH-20260603124736-353')->first();
+// Check logs
+echo "=== CHECKING LARAVEL LOGS ===\n";
+$logFile = __DIR__ . '/storage/logs/laravel.log';
 
-if (!$order) {
-    echo "Order with invoice BH-20260603124736-353 not found!\n";
-    exit(0);
+if (!file_exists($logFile)) {
+    echo "Log file not found: $logFile\n";
+    exit(1);
 }
 
-$user = $order->user;
-echo "✓ Order found!\n";
-echo "  User Email: " . $user->email . "\n";
-echo "  Google ID: " . $user->google_id . "\n";
+$lines = file($logFile);
+$recentLines = array_slice($lines, -100);
 
-echo "\n=== TESTING EMAIL SENDING ===\n";
-echo "Mail driver: " . config('mail.mailer') . "\n";
-echo "SMTP Host: " . config('mail.mailers.smtp.host') . "\n";
-echo "SMTP Port: " . config('mail.mailers.smtp.port') . "\n";
-
-try {
-    echo "\nAttempting to send test email...\n";
-    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderReceiptMail($order));
-    echo "✓ Email sent successfully!\n";
-    echo "\nCheck logs for confirmation:\n";
-    echo "  tail -50 storage/logs/laravel.log | grep -i receipt\n";
-} catch (\Exception $e) {
-    echo "✗ Error sending email:\n";
-    echo "  " . $e->getMessage() . "\n";
-    echo "\nFull error:\n";
-    echo $e . "\n";
+echo "Last 100 lines of laravel.log:\n";
+echo str_repeat("=", 80) . "\n";
+foreach ($recentLines as $line) {
+    echo $line;
 }
+echo str_repeat("=", 80) . "\n";
+
+// Check mail config
+echo "\n=== MAIL CONFIGURATION ===\n";
+echo "MAIL_MAILER: " . config('mail.mailer') . "\n";
+echo "MAIL_FROM_ADDRESS: " . config('mail.from.address') . "\n";
+echo "MAIL_FROM_NAME: " . config('mail.from.name') . "\n";
+echo "SMTP HOST: " . config('mail.mailers.smtp.host') . "\n";
+echo "SMTP PORT: " . config('mail.mailers.smtp.port') . "\n";
+echo "SMTP ENCRYPTION: " . config('mail.mailers.smtp.encryption') . "\n";
+echo "\n⚠️ Check your Gmail:\n";
+echo "  1. Spam/Junk folder\n";
+echo "  2. All Mail folder\n";
+echo "  3. Promotions tab\n";
+echo "  4. Other tabs at top of inbox\n";
