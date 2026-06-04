@@ -435,15 +435,32 @@ class CheckoutController extends Controller
         }
         
         try {
-            return DB::transaction(function () use ($user) {
-                // Find the most recent order that hasn't been marked as payment complete yet
-                $order = Order::where('user_id', $user->id)
+            return DB::transaction(function () use ($user, $request) {
+                // Prefer specific order_id if provided (Pay Now on order history page)
+                $orderId = $request->input('order_id');
+                
+                $query = Order::where('user_id', $user->id)
                     ->where('payment_processed', false)
-                    ->lockForUpdate()  // Pessimistic lock
-                    ->latest('created_at')
-                    ->first();
+                    ->lockForUpdate();  // Pessimistic lock
+                
+                if ($orderId) {
+                    $order = $query->where('id', (int)$orderId)->first();
+                } else {
+                    // Fallback: find most recent unprocessed order (checkout flow)
+                    $order = $query->latest('created_at')->first();
+                }
                 
                 if (!$order) {
+                    // Check if already processed (idempotency guard)
+                    if ($orderId) {
+                        $alreadyDone = Order::where('user_id', $user->id)
+                            ->where('id', (int)$orderId)
+                            ->where('payment_processed', true)
+                            ->first();
+                        if ($alreadyDone) {
+                            return response()->json(['success' => true, 'message' => 'Payment already processed', 'isRetry' => true]);
+                        }
+                    }
                     return response()->json(['error' => 'Order not found'], 404);
                 }
 

@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json'
                                 },
-                                body: JSON.stringify({ payment_type: result.payment_type || null })
+                                body: JSON.stringify({ order_id: parseInt(orderId), payment_type: result.payment_type || null })
                             }).then(() => {
                                 // Reload page to show updated status
                                 setTimeout(() => {

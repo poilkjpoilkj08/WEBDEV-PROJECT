@@ -155,18 +155,27 @@ class OrderController extends Controller
         $user = Auth::user();
 
         // Verify order belongs to user
-        if ($order->user_id !== $user->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ((int)$order->user_id !== (int)$user->id) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+            abort(403, 'Unauthorized');
         }
 
         // Can only confirm if order is delivered
         if ($order->shipping_status !== 'delivered') {
-            return response()->json(['error' => 'Order has not been delivered yet'], 400);
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Order has not been delivered yet'], 400);
+            }
+            return back()->with('error', 'Order has not been delivered yet.');
         }
 
         // Can only confirm within deadline
         if ($order->delivery_confirmation_deadline && now()->isAfter($order->delivery_confirmation_deadline)) {
-            return response()->json(['error' => 'Delivery confirmation deadline has passed'], 400);
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Delivery confirmation deadline has passed'], 400);
+            }
+            return back()->with('error', 'Delivery confirmation deadline has passed.');
         }
 
         $order->update([
@@ -192,7 +201,7 @@ class OrderController extends Controller
         $user = Auth::user();
 
         // Verify order belongs to user
-        if ($order->user_id !== $user->id) {
+        if ((int)$order->user_id !== (int)$user->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
