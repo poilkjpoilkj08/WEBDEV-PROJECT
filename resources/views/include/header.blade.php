@@ -29,12 +29,9 @@
                 <li class="nav-item">
                     <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('about') ? 'active' : '' }}" href="{{ route('about') }}">{{ __('messages.about') }}</a>
                 </li>
-                {{-- FAQ & Roulette Text Links - Visible strictly to buyers/customers --}}
+                {{-- Roulette Text Link - Visible strictly to buyers/customers --}}
                 @auth
                     @if(!auth()->user()->hasRole(['admin', 'owner']))
-                    <li class="nav-item">
-                        <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('faq') ? 'active' : '' }}" href="{{ route('faq') }}">FAQ</a>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('books.roulette') ? 'active' : '' }}" href="{{ route('books.roulette') }}">Confused?</a>
                     </li>
@@ -197,7 +194,7 @@
         border-bottom: none !important;
     }
 
-    /* --- EXPANDING UNTERLINE PLATFORM HOVER DESIGN --- */
+    /* --- EXPANDING UNDERLINE PLATFORM HOVER DESIGN --- */
     .nav-underline-lift {
         position: relative;
     }

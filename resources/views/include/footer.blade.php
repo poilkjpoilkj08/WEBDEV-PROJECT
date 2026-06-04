@@ -1,8 +1,8 @@
 <footer class="text-white py-4 mt-auto" style="background: linear-gradient(135deg, #c25e25, #a64f1e); backdrop-filter: blur(5px);">
     <div class="container-fluid px-4 px-md-5">
-        <div class="row align-items-start">
+        <div class="row align-items-start justify-content-between">
             <!-- Brand Column -->
-            <div class="col-md-4 mb-3 mb-md-0">
+            <div class="col-md-5 mb-4 mb-md-0">
                 <h5 class="fw-bold mb-2">
                     <a class="text-white d-flex align-items-center text-decoration-none" 
                        href="{{ route('home') }}" 
@@ -15,7 +15,7 @@
                         BookHive
                     </a>
                 </h5>
-                <p class="text-white-50 mb-3 small" style="line-height: 1.5; max-width: 300px;">
+                <p class="text-white-50 mb-3 small" style="line-height: 1.5; max-width: 350px;">
                     Your trusted source for quality books. We connect readers with amazing stories from talented authors.
                 </p>
                 <div class="d-flex gap-3">
@@ -26,30 +26,8 @@
                 </div>
             </div>
 
-            <!-- Quick Links Column -->
-            <div class="col-md-2 col-6 mb-3 mb-md-0">
-                <h6 class="fw-bold mb-2 text-uppercase tracking-wider extra-small" style="letter-spacing: 0.5px; font-size: 0.75rem;">Quick Links</h6>
-                <ul class="list-unstyled mb-0 small">
-                    <li class="mb-1"><a href="{{ route('home') }}" class="text-white-50 text-decoration-none hover-orange-cream">Home</a></li>
-                    <li class="mb-1"><a href="{{ route('books.listing') }}" class="text-white-50 text-decoration-none hover-orange-cream">Books</a></li>
-                    <li class="mb-1"><a href="{{ route('authors.index') }}" class="text-white-50 text-decoration-none hover-orange-cream">Authors</a></li>
-                    <li class="mb-1"><a href="{{ route('about') }}" class="text-white-50 text-decoration-none hover-orange-cream">About Us</a></li>
-                </ul>
-            </div>
-
-            <!-- Categories Column -->
-            <div class="col-md-3 col-6 mb-3 mb-md-0">
-                <h6 class="fw-bold mb-2 text-uppercase tracking-wider extra-small" style="letter-spacing: 0.5px; font-size: 0.75rem;">Categories</h6>
-                <ul class="list-unstyled mb-0 small">
-                    <li class="mb-1"><a href="#" class="text-white-50 text-decoration-none hover-orange-cream">Fiction</a></li>
-                    <li class="mb-1"><a href="#" class="text-white-50 text-decoration-none hover-orange-cream">Non-Fiction</a></li>
-                    <li class="mb-1"><a href="#" class="text-white-50 text-decoration-none hover-orange-cream">Science Fiction</a></li>
-                    <li class="mb-1"><a href="#" class="text-white-50 text-decoration-none hover-orange-cream">Mystery</a></li>
-                </ul>
-            </div>
-
             <!-- Contact Info Column -->
-            <div class="col-md-3 mb-0">
+            <div class="col-md-4 mb-0">
                 <h6 class="fw-bold mb-2 text-uppercase tracking-wider extra-small" style="letter-spacing: 0.5px; font-size: 0.75rem;">Contact Info</h6>
                 <ul class="list-unstyled text-white-50 mb-0 small">
                     <li class="mb-1 d-flex align-items-center"><i class="fas fa-phone me-2 text-white-50 icon-accent" style="font-size: 0.85rem;"></i><span>+1 (555) 123-4567</span></li>

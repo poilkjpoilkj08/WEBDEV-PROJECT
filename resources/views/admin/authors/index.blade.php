@@ -32,11 +32,8 @@
                         <thead class="table-light">
                             <tr>
                                 <th>ID</th>
-                                <th>Photo</th>
                                 <th>Name</th>
-                                <th>Email</th>
-                                <th>Publisher</th>
-                                <th>Books</th>
+                                <th>Books Published</th>
                                 <th>Status</th>
                                 <th class="text-end">Actions</th>
                             </tr>
@@ -45,20 +42,12 @@
                             @foreach($authors as $index => $author)
                             <tr>
                                 <td class="text-muted">{{ $author->id }}</td>
-                                <td>
-                                    @if($author->photo_url)
-                                        <img src="{{ $author->photo_url }}" alt="{{ $author->name }}"
-                                             style="width:40px;height:40px;object-fit:cover;border-radius:50%;">
-                                    @else
-                                        <div style="width:40px;height:40px;border-radius:50%;background:#e9ecef;display:flex;align-items:center;justify-content:center;">
-                                            <i class="fas fa-user text-muted"></i>
-                                        </div>
-                                    @endif
-                                </td>
                                 <td class="fw-semibold">{{ $author->name }}</td>
-                                <td class="text-muted small">{{ $author->email }}</td>
-                                <td class="text-muted">{{ $author->publisher ?? '—' }}</td>
-                                <td><span class="badge bg-light text-dark border">{{ $author->books_count ?? $author->books->count() }}</span></td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ $author->books_count ?? $author->books->count() }} books
+                                    </span>
+                                </td>
                                 <td>
                                     @if($author->is_active)
                                         <span class="badge bg-success">Active</span>
@@ -67,15 +56,20 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ route('authors.edit-form', $author->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                    <form action="{{ route('authors.destroy', $author->id) }}" method="POST" class="d-inline"onsubmit="return confirm('Delete {{ addslashes($author->name) }}?')">
-                                       @csrf @method('DELETE')
-                                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                         <i class="fas fa-trash"></i>
-                                         </button>
-                                    </form>
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a href="{{ route('authors.show', $author->id) }}" class="btn btn-sm btn-outline-secondary" title="View Profile">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{{ route('authors.edit-form', $author->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form action="{{ route('authors.destroy', $author->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete {{ addslashes($author->name) }}?')">
+                                           @csrf @method('DELETE')
+                                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                             </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach

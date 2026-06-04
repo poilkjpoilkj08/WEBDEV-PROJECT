@@ -10,7 +10,7 @@
         <span class="badge bg-primary rounded-pill fs-6">{{ $refunds->count() }} refunds</span>
     </div>
 
-    {{-- Status Filter Menu --}}
+    {{-- Status Filter --}}
     <div class="mb-4">
         <div class="btn-group" role="group">
             <a href="{{ route('admin.refunds.index') }}" class="btn btn-outline-primary {{ !request('status') ? 'active' : '' }}">
@@ -42,14 +42,15 @@
         </div>
     @else
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
                         <th>Refund ID</th>
                         <th>Order ID</th>
                         <th>Customer</th>
                         <th>Amount</th>
-                        <th>Reason</th>
+                        <th style="max-width:180px;">Reason</th>
+                        <th>Evidence</th>
                         <th>Status</th>
                         <th>Requested</th>
                         <th>Actions</th>
@@ -67,56 +68,163 @@
                             <td class="fw-semibold text-danger">
                                 Rp {{ number_format($refund->amount, 0, ',', '.') }}
                             </td>
-                            <td>
-                                <small>{{ \Str::limit($refund->reason, 50) }}</small>
+
+                            {{-- Reason: truncated with tooltip --}}
+                            <td style="max-width:180px;">
+                                <div style="max-width:180px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:13px;"
+                                     title="{{ $refund->reason }}">
+                                    {{ $refund->reason }}
+                                </div>
                             </td>
+
+                            {{-- Evidence thumbnail --}}
                             <td>
-                                <span class="badge bg-{{ $refund->status === 'pending' ? 'warning' : ($refund->status === 'approved' ? 'success' : ($refund->status === 'rejected' ? 'danger' : 'secondary')) }}">
+                                @if($refund->image_path)
+                                    <img src="{{ Storage::url($refund->image_path) }}"
+                                         alt="Evidence"
+                                         class="refund-thumb"
+                                         data-img="{{ Storage::url($refund->image_path) }}"
+                                         style="width:56px; height:56px; object-fit:cover; border-radius:6px; border:1px solid #dee2e6; cursor:zoom-in;"
+                                         title="Click to enlarge">
+                                @else
+                                    <span class="text-muted small">None</span>
+                                @endif
+                            </td>
+
+                            <td>
+                                <span class="badge bg-{{ $refund->status === 'pending' ? 'warning text-dark' : ($refund->status === 'approved' ? 'success' : ($refund->status === 'rejected' ? 'danger' : 'secondary')) }}">
                                     {{ ucfirst($refund->status) }}
                                 </span>
                             </td>
                             <td>
                                 <small class="text-muted">{{ $refund->created_at->format('M d, Y') }}</small>
                             </td>
+
+                            {{-- Actions --}}
                             <td>
                                 @if($refund->status === 'pending')
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveRefundModal{{ $refund->id }}">
-                                            <i class="fas fa-check"></i>Approve
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        {{-- View button --}}
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#viewRefundModal{{ $refund->id }}"
+                                                title="View Details">
+                                            <i class="fas fa-eye"></i>
                                         </button>
-                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectRefundModal{{ $refund->id }}">
-                                            <i class="fas fa-times"></i>Reject
+                                        <button type="button" class="btn btn-sm btn-success"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#approveRefundModal{{ $refund->id }}">
+                                            <i class="fas fa-check me-1"></i>Approve
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#rejectRefundModal{{ $refund->id }}">
+                                            <i class="fas fa-times me-1"></i>Reject
                                         </button>
                                     </div>
                                 @else
-                                    <a href="{{ route('orders.show', $refund->order_id) }}" class="btn btn-sm btn-outline-primary">View Order</a>
+                                    <div class="d-flex gap-1">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#viewRefundModal{{ $refund->id }}"
+                                                title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ route('orders.show', $refund->order_id) }}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Order
+                                        </a>
+                                    </div>
                                 @endif
                             </td>
                         </tr>
 
-                        <!-- Approve Refund Modal -->
+                        {{-- ── VIEW modal (read-only) ─────────────────────────────── --}}
+                        <div class="modal fade" id="viewRefundModal{{ $refund->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            <i class="fas fa-file-alt me-2 text-secondary"></i>
+                                            Refund #{{ $refund->id }} — Details
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row g-3">
+                                            <div class="col-sm-6">
+                                                <p class="text-muted small mb-1">Customer</p>
+                                                <p class="mb-0 fw-semibold">{{ $refund->user->name }}</p>
+                                                <p class="mb-0 small text-muted">{{ $refund->user->email }}</p>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <p class="text-muted small mb-1">Refund Amount</p>
+                                                <p class="mb-0 fw-bold text-danger fs-5">Rp {{ number_format($refund->amount, 0, ',', '.') }}</p>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <p class="text-muted small mb-1">Status</p>
+                                                <span class="badge bg-{{ $refund->status === 'pending' ? 'warning text-dark' : ($refund->status === 'approved' ? 'success' : ($refund->status === 'rejected' ? 'danger' : 'secondary')) }} fs-6">
+                                                    {{ ucfirst($refund->status) }}
+                                                </span>
+                                            </div>
+                                            <div class="col-12">
+                                                <p class="text-muted small mb-1">Reason for Refund</p>
+                                                <div class="p-3 bg-light rounded border" style="white-space:pre-wrap; word-break:break-word; max-height:200px; overflow-y:auto;">{{ $refund->reason }}</div>
+                                            </div>
+                                            @if($refund->image_path)
+                                            <div class="col-12">
+                                                <p class="text-muted small mb-2">Evidence Image</p>
+                                                <div class="text-center border rounded p-2 bg-light">
+                                                    <img src="{{ Storage::url($refund->image_path) }}"
+                                                         alt="Evidence"
+                                                         class="img-fluid rounded"
+                                                         style="max-height:400px; object-fit:contain; cursor:zoom-in;"
+                                                         onclick="window.open(this.src,'_blank')">
+                                                    <p class="text-muted small mt-2 mb-0">Click image to open full size</p>
+                                                </div>
+                                            </div>
+                                            @else
+                                            <div class="col-12">
+                                                <p class="text-muted small mb-1">Evidence Image</p>
+                                                <p class="text-muted fst-italic">No image provided</p>
+                                            </div>
+                                            @endif
+                                            @if($refund->admin_notes)
+                                            <div class="col-12">
+                                                <p class="text-muted small mb-1">Admin Notes</p>
+                                                <div class="alert alert-secondary mb-0">{{ $refund->admin_notes }}</div>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- ── APPROVE modal ─────────────────────────────────────── --}}
                         <div class="modal fade" id="approveRefundModal{{ $refund->id }}" tabindex="-1">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Approve Refund #{{ $refund->id }}</h5>
+                                        <h5 class="modal-title"><i class="fas fa-check-circle me-2 text-success"></i>Approve Refund #{{ $refund->id }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <form method="POST" action="{{ route('admin.refunds.approve', $refund->id) }}">
                                         @csrf
                                         <div class="modal-body">
                                             <div class="mb-3">
-                                                <p class="text-muted small">Refund Amount</p>
-                                                <p class="mb-0 fw-semibold text-success">Rp {{ number_format($refund->amount, 0, ',', '.') }}</p>
+                                                <p class="text-muted small mb-1">Refund Amount</p>
+                                                <p class="mb-0 fw-bold text-success fs-5">Rp {{ number_format($refund->amount, 0, ',', '.') }}</p>
                                             </div>
                                             <div class="mb-3">
-                                                <p class="text-muted small">Customer Reason</p>
-                                                <p class="mb-0">{{ $refund->reason }}</p>
+                                                <p class="text-muted small mb-1">Customer Reason</p>
+                                                <div class="p-2 bg-light rounded border" style="white-space:pre-wrap; word-break:break-word; max-height:120px; overflow-y:auto; font-size:14px;">{{ $refund->reason }}</div>
                                             </div>
                                             @if($refund->image_path)
                                             <div class="mb-3">
-                                                <p class="text-muted small">Evidence Image</p>
-                                                <img src="{{ Storage::url($refund->image_path) }}" alt="Refund evidence" class="img-fluid rounded border" style="max-height: 300px; object-fit: contain;">
+                                                <p class="text-muted small mb-1">Evidence Image</p>
+                                                <img src="{{ Storage::url($refund->image_path) }}" alt="Evidence" class="img-fluid rounded border" style="max-height:250px; object-fit:contain; cursor:zoom-in;" onclick="window.open(this.src,'_blank')">
                                             </div>
                                             @endif
                                             <div class="alert alert-info mb-0">
@@ -126,41 +234,79 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-success">Approve Refund</button>
+                                            <button type="submit" class="btn btn-success"><i class="fas fa-check me-1"></i>Approve Refund</button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Reject Refund Modal -->
+                        {{-- ── REJECT modal ──────────────────────────────────────── --}}
                         <div class="modal fade" id="rejectRefundModal{{ $refund->id }}" tabindex="-1">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Reject Refund #{{ $refund->id }}</h5>
+                                        <h5 class="modal-title"><i class="fas fa-times-circle me-2 text-danger"></i>Reject Refund #{{ $refund->id }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <form method="POST" action="{{ route('admin.refunds.reject', $refund->id) }}">
                                         @csrf
                                         <div class="modal-body">
                                             <div class="mb-3">
-                                                <p class="text-muted small">Admin Notes (Optional)</p>
+                                                <p class="text-muted small mb-1">Customer Reason</p>
+                                                <div class="p-2 bg-light rounded border" style="white-space:pre-wrap; word-break:break-word; max-height:120px; overflow-y:auto; font-size:14px;">{{ $refund->reason }}</div>
+                                            </div>
+                                            @if($refund->image_path)
+                                            <div class="mb-3">
+                                                <p class="text-muted small mb-1">Evidence Image</p>
+                                                <img src="{{ Storage::url($refund->image_path) }}" alt="Evidence" class="img-fluid rounded border" style="max-height:200px; object-fit:contain; cursor:zoom-in;" onclick="window.open(this.src,'_blank')">
+                                            </div>
+                                            @endif
+                                            <div class="mb-3">
+                                                <p class="text-muted small mb-1">Admin Notes (Optional)</p>
                                                 <textarea class="form-control" name="reason" rows="3" placeholder="Explain why this refund is being rejected..."></textarea>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-danger">Reject Refund</button>
+                                            <button type="submit" class="btn btn-danger"><i class="fas fa-times me-1"></i>Reject Refund</button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
+
                     @endforeach
                 </tbody>
             </table>
         </div>
+
+        {{-- ── Lightbox overlay for thumbnail clicks ─────────────────────── --}}
+        <div id="imgLightbox" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; cursor:zoom-out;"
+             onclick="this.style.display='none'">
+            <img id="imgLightboxSrc" src="" alt="Evidence full size"
+                 style="max-width:90vw; max-height:90vh; object-fit:contain; border-radius:8px; box-shadow:0 0 40px rgba(0,0,0,0.6);">
+            <span style="position:absolute; top:20px; right:28px; color:#fff; font-size:32px; cursor:pointer; line-height:1;"
+                  onclick="document.getElementById('imgLightbox').style.display='none'">&times;</span>
+        </div>
     @endif
 </div>
+
+<script>
+// Thumbnail lightbox
+document.querySelectorAll('.refund-thumb').forEach(img => {
+    img.addEventListener('click', function () {
+        document.getElementById('imgLightboxSrc').src = this.dataset.img;
+        const lb = document.getElementById('imgLightbox');
+        lb.style.display = 'flex';
+    });
+});
+
+// Close lightbox on Escape key
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        document.getElementById('imgLightbox').style.display = 'none';
+    }
+});
+</script>
 @endsection

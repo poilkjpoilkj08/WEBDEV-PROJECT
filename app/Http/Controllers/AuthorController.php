@@ -60,16 +60,19 @@ class AuthorController extends Controller
     {
         Gate::authorize('update-author');
         $author = Author::findOrFail($id);
+        
+        // Removed email, phone, and photo_url from requirements
         $validated = $request->validate([
             'name'      => 'required|string',
-            'email'     => 'required|email|unique:authors,email,' . $id,
-            'phone'     => 'nullable|string',
-            'bio'       => 'nullable|string',
-            'photo_url' => 'nullable|string',
             'publisher' => 'nullable|string',
-            'is_active' => 'nullable|boolean',
+            'bio'       => 'nullable|string',
         ]);
+
+        // Manually handle the checkbox state since unchecked boxes aren't sent in HTTP requests
+        $validated['is_active'] = $request->has('is_active') ? 1 : 0;
+
         $author->update($validated);
+        
         return redirect()->route('admin.authors.index')->with('success', 'Author updated successfully!');
     }
 
