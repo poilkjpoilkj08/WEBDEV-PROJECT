@@ -52,4 +52,14 @@ class User extends Authenticatable
 
         return $this->roles()->whereIn('role', $roles)->exists();
     }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
 }

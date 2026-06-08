@@ -59,7 +59,7 @@ class BookController extends Controller
 
     public function admin_index(): \Illuminate\View\View
     {
-        $books = Book::with(['author', 'category', 'storeLocations'])->oldest('id')->paginate(20);
+        $books = Book::with(['author', 'category','publishers', 'storeLocations'])->oldest('id')->paginate(20);
         return view('admin.books.index', compact('books'));
     }
 
@@ -85,13 +85,13 @@ class BookController extends Controller
             'pages'            => 'nullable|integer',
             'language'         => 'required|string',
             'publication_year' => 'nullable|integer',
-            'publisher_id'     => 'nullable|exists:publishers,id',
             'author_id'        => 'required|exists:authors,id',
             'category_id'      => 'required|exists:book_categories,id',
             'cover_image_file' => 'required|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'weight_grams'     => 'nullable|numeric',
             'is_featured'      => 'nullable|boolean',
             'status'           => 'required|in:available,out_of_stock',
+            'publisher_ids'    => 'nullable|string',
         ]);
         
         // Validate author is not "Unknown"
@@ -118,7 +118,20 @@ class BookController extends Controller
         }
 
         unset($validated['cover_image_file']);
+        
+        // Extract publisher_ids before creating book
+        $publisherIds = [];
+        if (!empty($validated['publisher_ids'])) {
+            $publisherIds = array_map('intval', array_filter(explode(',', $validated['publisher_ids'])));
+        }
+        unset($validated['publisher_ids']);
+        
         $book = Book::create($validated);
+
+        // Sync publishers
+        if (!empty($publisherIds)) {
+            $book->publishers()->sync($publisherIds);
+        }
 
         // Sync store stock
         $storeStock = collect($request->input('store_stock', []))
@@ -136,7 +149,7 @@ class BookController extends Controller
     {
         Gate::authorize('update-book');
         return view('books.edit-form', [
-            'book'            => Book::with(['storeLocations', 'publisher'])->findOrFail($id),
+            'book'            => Book::with(['storeLocations', 'publishers'])->findOrFail($id),
             'book_categories' => BookCategory::all(),
             'authors'         => Author::where('is_active', 1)->get(),
             'store_locations' => StoreLocation::orderBy('city')->get(),
@@ -156,11 +169,11 @@ class BookController extends Controller
             'pages'            => 'nullable|integer',
             'language'         => 'required|string',
             'publication_year' => 'nullable|integer',
-            'publisher_id'     => 'nullable|exists:publishers,id',
             'status'           => 'required|in:available,out_of_stock',
             'author_id'        => 'nullable|exists:authors,id',
             'category_id'      => 'required|exists:book_categories,id',
             'cover_image_file' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'publisher_ids'    => 'nullable|string',
         ]);
 
         if ($request->hasFile('cover_image_file')) {
@@ -176,7 +189,17 @@ class BookController extends Controller
 
         unset($validated['cover_image_file']);
         
+        // Extract publisher_ids before updating book
+        $publisherIds = [];
+        if (!empty($validated['publisher_ids'])) {
+            $publisherIds = array_map('intval', array_filter(explode(',', $validated['publisher_ids'])));
+        }
+        unset($validated['publisher_ids']);
+        
         $book->update($validated);
+
+        // Sync publishers
+        $book->publishers()->sync($publisherIds);
 
         // If status is out_of_stock, automatically set all store stocks to 0
         if ($validated['status'] === 'out_of_stock') {

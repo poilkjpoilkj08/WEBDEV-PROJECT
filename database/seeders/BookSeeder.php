@@ -23,7 +23,7 @@ class BookSeeder extends Seeder
                 'pages' => 180,
                 'language' => 'English',
                 'publication_year' => 1925,
-                'publisher_id' => $publishers['Charles Scribner\'s Sons']->id ?? null,
+                'publisher_name' => 'Charles Scribner\'s Sons',
                 'status' => 'available',
                 'author_id' => 4,
                 'category_id' => 1,
@@ -43,7 +43,7 @@ class BookSeeder extends Seeder
                 'pages' => 432,
                 'language' => 'English',
                 'publication_year' => 1813,
-                'publisher_id' => $publishers['Penguin Classics']->id ?? null,
+                'publisher_name' => 'Penguin Classics',
                 'status' => 'available',
                 'author_id' => 5,
                 'category_id' => 1,
@@ -63,7 +63,7 @@ class BookSeeder extends Seeder
                 'pages' => 505,
                 'language' => 'English',
                 'publication_year' => 2002,
-                'publisher_id' => $publishers['Knopf']->id ?? null,
+                'publisher_name' => 'Knopf',
                 'status' => 'available',
                 'author_id' => 6,
                 'category_id' => 1,
@@ -83,7 +83,7 @@ class BookSeeder extends Seeder
                 'pages' => 304,
                 'language' => 'English',
                 'publication_year' => 2020,
-                'publisher_id' => $publishers['Viking']->id ?? null,
+                'publisher_name' => 'Viking',
                 'status' => 'available',
                 'author_id' => 5,
                 'category_id' => 1,
@@ -105,7 +105,7 @@ class BookSeeder extends Seeder
                 'pages' => 256,
                 'language' => 'English',
                 'publication_year' => 2020,
-                'publisher_id' => $publishers['Harriman House']->id ?? null,
+                'publisher_name' => 'Harriman House',
                 'status' => 'available',
                 'author_id' => 14,
                 'category_id' => 2,
@@ -127,7 +127,7 @@ class BookSeeder extends Seeder
                 'pages' => 223,
                 'language' => 'English',
                 'publication_year' => 1997,
-                'publisher_id' => $publishers['Bloomsbury Publishing']->id ?? null,
+                'publisher_name' => 'Bloomsbury Publishing',
                 'status' => 'available',
                 'author_id' => 1,
                 'category_id' => 3,
@@ -147,7 +147,7 @@ class BookSeeder extends Seeder
                 'pages' => 688,
                 'language' => 'English',
                 'publication_year' => 1965,
-                'publisher_id' => $publishers['Ace Books']->id ?? null,
+                'publisher_name' => 'Ace Books',
                 'status' => 'available',
                 'author_id' => 7,
                 'category_id' => 3,
@@ -167,7 +167,7 @@ class BookSeeder extends Seeder
                 'pages' => 247,
                 'language' => 'English',
                 'publication_year' => 1951,
-                'publisher_id' => $publishers['Bantam Spectra']->id ?? null,
+                'publisher_name' => 'Bantam Spectra',
                 'status' => 'available',
                 'author_id' => 8,
                 'category_id' => 3,
@@ -187,7 +187,7 @@ class BookSeeder extends Seeder
                 'pages' => 395,
                 'language' => 'English',
                 'publication_year' => 1985,
-                'publisher_id' => $publishers['Houghton Mifflin']->id ?? null,
+                'publisher_name' => 'Houghton Mifflin',
                 'status' => 'available',
                 'author_id' => 11,
                 'category_id' => 3,
@@ -209,7 +209,7 @@ class BookSeeder extends Seeder
                 'pages' => 447,
                 'language' => 'English',
                 'publication_year' => 1977,
-                'publisher_id' => $publishers['Doubleday']->id ?? null,
+                'publisher_name' => 'Doubleday',
                 'status' => 'available',
                 'author_id' => 2,
                 'category_id' => 4,
@@ -229,7 +229,7 @@ class BookSeeder extends Seeder
                 'pages' => 256,
                 'language' => 'English',
                 'publication_year' => 1934,
-                'publisher_id' => $publishers['Collins Crime Club']->id ?? null,
+                'publisher_name' => 'Collins Crime Club',
                 'status' => 'available',
                 'author_id' => 3,
                 'category_id' => 4,
@@ -251,7 +251,7 @@ class BookSeeder extends Seeder
                 'pages' => 694,
                 'language' => 'English',
                 'publication_year' => 1996,
-                'publisher_id' => $publishers['Bantam Books']->id ?? null,
+                'publisher_name' => 'Bantam Books',
                 'status' => 'available',
                 'author_id' => 4,
                 'category_id' => 3,
@@ -273,7 +273,7 @@ class BookSeeder extends Seeder
                 'pages' => 352,
                 'language' => 'English',
                 'publication_year' => 2018,
-                'publisher_id' => $publishers['Random House']->id ?? null,
+                'publisher_name' => 'Random House',
                 'status' => 'available',
                 'author_id' => 9,
                 'category_id' => 6,
@@ -293,7 +293,7 @@ class BookSeeder extends Seeder
                 'pages' => 426,
                 'language' => 'English',
                 'publication_year' => 2018,
-                'publisher_id' => $publishers['Crown Publishing Group']->id ?? null,
+                'publisher_name' => 'Crown Publishing Group',
                 'status' => 'available',
                 'author_id' => 10,
                 'category_id' => 6,
@@ -315,7 +315,7 @@ class BookSeeder extends Seeder
                 'pages' => 500,
                 'language' => 'Spanish',
                 'publication_year' => 2014,
-                'publisher_id' => $publishers['Debate']->id ?? null,
+                'publisher_name' => 'Debate',
                 'status' => 'available',
                 'author_id' => 12,
                 'category_id' => 7,
@@ -337,7 +337,7 @@ class BookSeeder extends Seeder
                 'pages' => 320,
                 'language' => 'English',
                 'publication_year' => 2018,
-                'publisher_id' => $publishers['Avery']->id ?? null,
+                'publisher_name' => 'Avery',
                 'status' => 'available',
                 'author_id' => 13,
                 'category_id' => 8,
@@ -359,7 +359,7 @@ class BookSeeder extends Seeder
                 'pages' => 1216,
                 'language' => 'English',
                 'publication_year' => 1954,
-                'publisher_id' => $publishers['Allen & Unwin']->id ?? null,
+                'publisher_name' => 'Allen & Unwin',
                 'status' => 'available',
                 'author_id' => 17,
                 'category_id' => 9,
@@ -378,7 +378,7 @@ class BookSeeder extends Seeder
                 'pages' => 464,
                 'language' => 'German',
                 'publication_year' => 1959,
-                'publisher_id' => $publishers['Klett-Cotta']->id ?? null,
+                'publisher_name' => 'Klett-Cotta',
                 'status' => 'available',
                 'author_id' => 19,
                 'category_id' => 1,
@@ -397,7 +397,7 @@ class BookSeeder extends Seeder
                 'pages' => 635,
                 'language' => 'Italian',
                 'publication_year' => 1980,
-                'publisher_id' => $publishers['Bompiani']->id ?? null,
+                'publisher_name' => 'Bompiani',
                 'status' => 'available',
                 'author_id' => 18,
                 'category_id' => 1,
@@ -416,7 +416,7 @@ class BookSeeder extends Seeder
                 'pages' => 400,
                 'language' => 'Chinese',
                 'publication_year' => 2008,
-                'publisher_id' => $publishers['重庆出版社']->id ?? null,
+                'publisher_name' => '重庆出版社',
                 'status' => 'available',
                 'author_id' => 3,
                 'category_id' => 3,
@@ -436,7 +436,7 @@ class BookSeeder extends Seeder
                 'pages' => 426,
                 'language' => 'Japanese',
                 'publication_year' => 1987,
-                'publisher_id' => $publishers['新潮社']->id ?? null,
+                'publisher_name' => '新潮社',
                 'status' => 'available',
                 'author_id' => 6,
                 'category_id' => 5,
@@ -456,7 +456,7 @@ class BookSeeder extends Seeder
                 'pages' => 252,
                 'language' => 'Korean',
                 'publication_year' => 2020,
-                'publisher_id' => $publishers['민음사']->id ?? null,
+                'publisher_name' => '민음사',
                 'status' => 'available',
                 'author_id' => 7,
                 'category_id' => 1,
@@ -476,7 +476,7 @@ class BookSeeder extends Seeder
                 'pages' => 472,
                 'language' => 'Portuguese',
                 'publication_year' => 1999,
-                'publisher_id' => $publishers['Editorial Sudamericana']->id ?? null,
+                'publisher_name' => 'Editorial Sudamericana',
                 'status' => 'available',
                 'author_id' => 8,
                 'category_id' => 1,
@@ -490,11 +490,21 @@ class BookSeeder extends Seeder
             ],
         ];
 
-        foreach ($books as $book) {
-            Book::firstOrCreate(
-                ['isbn' => $book['isbn']],
-                $book
+        foreach ($books as $bookData) {
+            // Extract publisher_name before creating the book
+            $publisherName = $bookData['publisher_name'] ?? null;
+            unset($bookData['publisher_name']);
+            
+            // Create or retrieve the book
+            $book = Book::firstOrCreate(
+                ['isbn' => $bookData['isbn']],
+                $bookData
             );
+            
+            // Attach publisher if it exists
+            if ($publisherName && isset($publishers[$publisherName])) {
+                $book->publishers()->syncWithoutDetaching([$publishers[$publisherName]->id]);
+            }
         }
     }
 }

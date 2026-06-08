@@ -21,7 +21,6 @@ class Book extends Model
         'pages',
         'language',
         'publication_year',
-        'publisher_id',
         'cover_type',
         'status',
         'author_id',
@@ -51,9 +50,10 @@ class Book extends Model
         return $this->belongsTo(Author::class, 'author_id');
     }
 
-    public function publisher(): BelongsTo
+    public function publishers(): BelongsToMany
     {
-        return $this->belongsTo(Publisher::class, 'publisher_id');
+        return $this->belongsToMany(Publisher::class, 'book_publisher')
+                    ->withTimestamps();
     }
 
     public function storeLocations(): BelongsToMany

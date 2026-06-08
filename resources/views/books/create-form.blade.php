@@ -77,22 +77,6 @@
 
                         <div class="row g-3 mt-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Publisher</label>
-                                <div class="position-relative">
-                                    <div class="input-group">
-                                        <input type="text" id="publisherSearchInput" class="form-control @error('publisher_id') is-invalid @enderror" 
-                                               placeholder="Select or type a publisher name..." autocomplete="off">
-                                        <button class="btn btn-outline-secondary" type="button" id="addPublisherBtn" title="Create new publisher">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                    <input type="hidden" id="publisher_id" name="publisher_id" value="{{ old('publisher_id') }}">
-                                    <div id="publisherDropdown" class="list-group position-absolute w-100" style="max-height: 250px; overflow-y: auto; z-index: 1050; display: none; top: 100%; left: 0; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 0.375rem 0.375rem; background: white;"></div>
-                                </div>
-                                <small class="text-muted d-block mt-2">Select from existing publishers or create a new one</small>
-                                @error('publisher_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
                                 <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
                                 <select name="category_id" required class="form-select @error('category_id') is-invalid @enderror">
                                     <option value="">Select Category</option>
@@ -125,6 +109,33 @@
                                     <option value="out_of_stock" {{ old('status') == 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
                                 </select>
                                 @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Publishers</label>
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <div id="selectedPublishersContainer" class="mb-3">
+                                            <p class="text-muted small mb-2">No publishers selected yet.</p>
+                                        </div>
+                                        <hr>
+                                        <div class="row g-2">
+                                            <div class="col-md-10">
+                                                <select id="publisherSelect" class="form-select">
+                                                    <option value="">-- Select a publisher to add --</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" id="addPublisherBtn" class="btn btn-outline-primary w-100">
+                                                    <i class="fas fa-plus me-1"></i>Add
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="publisherIds" name="publisher_ids" value="">
                             </div>
                         </div>
 
@@ -175,120 +186,80 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('publisherSearchInput');
-    const publisherDropdown = document.getElementById('publisherDropdown');
-    const publisherIdInput = document.getElementById('publisher_id');
-    const addPublisherBtn = document.getElementById('addPublisherBtn');
-    
+    // Load publishers
     let allPublishers = [];
-    let selectedPublisher = null;
-
-    function loadPublishers(search = '') {
-        fetch(`{{ route('api.publishers.get-or-create') }}?search=${encodeURIComponent(search)}`)
-            .then(response => response.json())
-            .then(data => {
-                allPublishers = data;
-                renderDropdown(data);
-            })
-            .catch(error => console.error('Error loading publishers:', error));
-    }
-
-    function renderDropdown(publishers) {
-        publisherDropdown.innerHTML = '';
+    let selectedPublisherIds = new Set();
+    
+    fetch('{{ route('api.publishers.get-or-create') }}')
+        .then(response => response.json())
+        .then(data => {
+            allPublishers = data;
+            updatePublisherOptions();
+        })
+        .catch(error => console.error('Error loading publishers:', error));
+    
+    function updatePublisherOptions() {
+        const select = document.getElementById('publisherSelect');
+        const currentOptions = Array.from(select.options).slice(1); // Skip first option
+        currentOptions.forEach(option => option.remove());
         
-        if (publishers.length === 0) {
-            publisherDropdown.innerHTML = '<div class="list-group-item text-muted disabled" style="cursor: not-allowed;">No publishers found</div>';
-            publisherDropdown.style.display = 'block';
-            return;
-        }
-        
-        publishers.forEach(publisher => {
-            const item = document.createElement('button');
-            item.type = 'button';
-            item.className = 'list-group-item list-group-item-action';
-            item.style.border = 'none';
-            item.style.textAlign = 'left';
-            item.textContent = publisher.name;
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                selectPublisher(publisher);
-            });
-            item.addEventListener('mouseenter', () => {
-                item.style.backgroundColor = '#f8f9fa';
-            });
-            item.addEventListener('mouseleave', () => {
-                item.style.backgroundColor = 'white';
-            });
-            publisherDropdown.appendChild(item);
+        allPublishers.forEach(publisher => {
+            if (!selectedPublisherIds.has(publisher.id)) {
+                const option = document.createElement('option');
+                option.value = publisher.id;
+                option.text = publisher.name;
+                select.appendChild(option);
+            }
         });
-        
-        publisherDropdown.style.display = 'block';
     }
-
-    function selectPublisher(publisher) {
-        selectedPublisher = publisher;
-        searchInput.value = publisher.name;
-        publisherIdInput.value = publisher.id;
-        publisherDropdown.style.display = 'none';
-    }
-
-    searchInput.addEventListener('focus', () => {
-        loadPublishers(searchInput.value);
-    });
-
-    searchInput.addEventListener('click', () => {
-        loadPublishers(searchInput.value);
-    });
-
-    searchInput.addEventListener('input', () => {
-        const search = searchInput.value.trim();
+    
+    function renderSelectedPublishers() {
+        const container = document.getElementById('selectedPublishersContainer');
+        const publisherIds = document.getElementById('publisherIds');
         
-        // Clear publisher_id when user starts typing (they might change selection)
-        publisherIdInput.value = '';
-        selectedPublisher = null;
-        
-        if (search.length > 0) {
-            loadPublishers(search);
-        } else {
-            loadPublishers();
-        }
-    });
-
-    addPublisherBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const publisherName = searchInput.value.trim();
-        
-        if (!publisherName) {
-            alert('Please enter a publisher name');
+        if (selectedPublisherIds.size === 0) {
+            container.innerHTML = '<p class="text-muted small mb-2">No publishers selected yet.</p>';
+            publisherIds.value = '';
             return;
         }
         
-        // Auto-create publisher if it doesn't exist
-        fetch(`{{ route('api.publishers.get-or-create') }}?search=${encodeURIComponent(publisherName)}&auto_create=true`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.length > 0) {
-                    // Find exact match or use first result (newly created)
-                    const publisher = data.find(p => p.name.toLowerCase() === publisherName.toLowerCase()) || data[0];
-                    selectPublisher(publisher);
-                    showToast('Publisher created successfully!', 'success');
-                } else {
-                    alert('Failed to create publisher');
-                }
-            })
-            .catch(error => {
-                console.error('Error creating publisher:', error);
-                alert('Failed to create publisher');
+        const selectedPublishers = allPublishers.filter(p => selectedPublisherIds.has(p.id));
+        const html = '<h6 class="text-muted mb-2">Selected Publishers:</h6><div class="d-flex flex-wrap gap-2">' +
+            selectedPublishers.map(p => `
+                <span class="badge bg-primary d-flex align-items-center gap-2">
+                    ${p.name}
+                    <button type="button" class="btn-close btn-close-white remove-publisher" data-publisher-id="${p.id}" style="font-size: 0.7rem;"></button>
+                </span>
+            `).join('') + '</div>';
+        
+        container.innerHTML = html;
+        publisherIds.value = Array.from(selectedPublisherIds).join(',');
+        
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.remove-publisher').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const publisherId = parseInt(btn.getAttribute('data-publisher-id'));
+                selectedPublisherIds.delete(publisherId);
+                renderSelectedPublishers();
+                updatePublisherOptions();
             });
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#publisherSearchInput') && !e.target.closest('#publisherDropdown') && !e.target.closest('#addPublisherBtn')) {
-            publisherDropdown.style.display = 'none';
+        });
+    }
+    
+    document.getElementById('addPublisherBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        const select = document.getElementById('publisherSelect');
+        const publisherId = parseInt(select.value);
+        
+        if (publisherId) {
+            selectedPublisherIds.add(publisherId);
+            select.value = '';
+            renderSelectedPublishers();
+            updatePublisherOptions();
         }
     });
-
+    
     // Status change handler: disable stock inputs when out of stock
     const statusSelect = document.querySelector('select[name="status"]');
     const storeStockInputs = document.querySelectorAll('input[name^="store_stock"]');

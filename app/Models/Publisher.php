@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Publisher extends Model
 {
@@ -21,8 +21,9 @@ class Publisher extends Model
     /**
      * Get all books published by this publisher
      */
-    public function books(): HasMany
+    public function books(): BelongsToMany
     {
-        return $this->hasMany(Book::class, 'publisher_id');
+        return $this->belongsToMany(Book::class, 'book_publisher')
+                    ->withTimestamps();
     }
 }

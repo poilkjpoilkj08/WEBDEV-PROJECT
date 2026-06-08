@@ -95,6 +95,13 @@
                     </li>
                     @endif
                 @endauth
+
+                {{-- Mobile Login Button (shown only when not authenticated) --}}
+                @guest
+                <li class="nav-item bh-mobile-drawer-only-link d-lg-none mt-3 pt-2 border-top">
+                    <a href="{{ route('login.show') }}" class="btn btn-light btn-sm px-4 fw-bold rounded-pill shadow-sm w-100" style="color: #c25e25;">{{ __('messages.login') }}</a>
+                </li>
+                @endguest
             </ul>
         </div>
 

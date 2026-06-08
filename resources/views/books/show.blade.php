@@ -406,7 +406,13 @@
                             <div class="row g-2">
                                 <div class="col-sm-6 d-flex align-items-center">
                                     <span class="fw-bold text-dark me-2" style="min-width: 80px;"><i class="fas fa-building text-muted me-2"></i>Publisher</span>
-                                    <span class="text-truncate">: {{ $book->publisher ?: 'Unknown' }}</span>
+                                    <span class="text-truncate">
+                                        @if($book->publishers && $book->publishers->count() > 0)
+                                            : {{ $book->publishers->pluck('name')->join(', ') }}
+                                        @else
+                                            : Unknown
+                                        @endif
+                                    </span>
                                 </div>
                                 @if($book->cover_type)
                                 <div class="col-sm-6 d-flex align-items-center">

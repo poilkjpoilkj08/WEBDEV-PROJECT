@@ -14,6 +14,7 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\RefundController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
@@ -56,6 +57,10 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleC
 Route::middleware('auth')
 ->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
