@@ -15,6 +15,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\RefundController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SyncController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
@@ -36,6 +37,13 @@ Route::get('/unsubscribe/{token}', [SubscriptionController::class, 'unsubscribe'
 
 Route::get('/api/stores', [StoreLocationController::class, 'all'])->name('stores.all');
 Route::get('/api/stores/book/{bookId}', [StoreLocationController::class, 'forBook'])->name('stores.for-book');
+
+// Sync API endpoints - protected by SYNC_TOKEN
+Route::get('/api/sync/ping', [SyncController::class, 'ping'])->name('sync.ping');
+Route::get('/api/sync/books', [SyncController::class, 'books'])->name('sync.books');
+Route::get('/api/sync/authors', [SyncController::class, 'authors'])->name('sync.authors');
+Route::get('/api/sync/publishers', [SyncController::class, 'publishers'])->name('sync.publishers');
+Route::get('/api/sync/categories', [SyncController::class, 'categories'])->name('sync.categories');
 
 Route::post('/checkout/callback', [CheckoutController::class, 'callback'])->name('checkout.callback');
 Route::post('/checkout/calculate-shipping', [CheckoutController::class, 'calculateShipping'])->name('checkout.calculate-shipping');

@@ -1,0 +1,73 @@
+================================================================================
+    APPLICATION-LEVEL SYNC - WINDOWS TASK SCHEDULER SETUP
+================================================================================
+
+This guide explains how to deploy the 2-way sync architecture on a Windows 
+machine by replacing the macOS cron job with the Windows Task Scheduler.
+
+Phase 1: Configure the Local Windows Environment
+--------------------------------------------------------------------------------
+1. Open the .env file in your local Windows project folder:
+   Path: c:\Users\ASUS\Downloads\WEBDEV-PROJECT-main-5\.env
+
+2. Configure the synchronization identity and credentials:
+   SYNC_ROLE=local
+   SYNC_PEER_URL=https://new-website-domain.com
+   SYNC_TOKEN=YourSecureSharedToken123
+
+3. Pin the timezones to prevent timestamp drift during the data transfer:
+   APP_TIMEZONE=Asia/Jakarta
+   DB_TIMEZONE=+07:00
+
+Phase 2: Perform a Manual Health Check
+--------------------------------------------------------------------------------
+Always verify the connection manually before handing it over to the scheduler.
+
+1. Open PowerShell or Command Prompt.
+2. Navigate to your project directory:
+   cd c:\Users\ASUS\Downloads\WEBDEV-PROJECT-main-5
+3. Run the dry-run command to test the connection without writing any data:
+   php artisan sync:run --dry-run
+4. Check the output. If the connection is successful and the conflict logs 
+   read normally, proceed to automation.
+
+Phase 3: Verify the Executable Batch File
+--------------------------------------------------------------------------------
+A file named `run-sync.bat` has been created in your project root:
+c:\Users\ASUS\Downloads\WEBDEV-PROJECT-main-5\run-sync.bat
+
+* Note: By default, it uses the global `php` command. If your PHP executable 
+  is not registered in your Windows PATH variables, edit the .bat file and 
+  replace `php` with the full path to your PHP executable.
+
+Phase 4: Configure Windows Task Scheduler
+--------------------------------------------------------------------------------
+This step forces Windows to run your batch file every 60 seconds.
+
+1. Press the Windows Key, type "Task Scheduler", and press Enter.
+2. On the right-hand panel, click "Create Task..." (Do not use "Create Basic Task").
+3. General Tab:
+   - Name: Laravel Sync - WebDev Project
+   - Check "Hidden" (Prevents a command prompt window from flashing every minute).
+   - Select "Run whether user is logged on or not".
+4. Triggers Tab:
+   - Click "New..."
+   - Begin the task: "On a schedule"
+   - Under Advanced settings, check "Repeat task every:" and type in "1 minute".
+   - Change "for a duration of" to "Indefinitely".
+   - Click OK.
+5. Actions Tab:
+   - Click "New..."
+   - Action: "Start a program"
+   - Program/script: Browse and select your `run-sync.bat` file.
+   - Click OK.
+6. Conditions Tab:
+   - Uncheck "Start the task only if the computer is on AC power".
+7. Click OK to save the task. Enter your Windows password if prompted.
+
+Phase 5: Verification
+--------------------------------------------------------------------------------
+1. Wait approximately two minutes.
+2. Open the storage/logs/sync.log or sync-schedule.log file.
+3. Verify that a new block of PULL/PUSH results has been generated with a 
+   fresh timestamp.

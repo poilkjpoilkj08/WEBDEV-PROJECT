@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\ServiceProvider;
+use App\Console\Commands\SyncRunCommand;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +28,7 @@ class AppServiceProvider extends ServiceProvider
                 return $user->roles()->whereIn('role', ['admin', 'owner'])->exists();
             });
         }
+
+        Schedule::command('sync:run')->everyMinute();
     }
 }

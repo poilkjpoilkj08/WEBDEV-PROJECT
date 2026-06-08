@@ -484,18 +484,18 @@
         // --- DYNAMIC CARD-FLIP VARIATION ROTATOR MODULE ---
         // Complete clean image array referenced strictly from asset token filenames inside Screenshot 2026-05-31 at 20.21.16.png
         const coverAssets = [
-            "{{ asset('product_image/a-game-of-thrones-front.jpg') }}",
-            "{{ asset('product_image/atomic-habits-front.jpg') }}",
-            "{{ asset('product_image/becoming-front.jpg') }}",
-            "{{ asset('product_image/dune-front.jpg') }}",
-            "{{ asset('product_image/foundation-front.jpg') }}",
-            "{{ asset('product_image/harry-potter-and-the-philosopher-s-stone-front.jpg') }}",
-            "{{ asset('product_image/kafka-on-the-shore-front.jpg') }}",
-            "{{ asset('product_image/pride-and-prejudice-front.jpg') }}",
-            "{{ asset('product_image/sapiens-a-brief-history-of-humankind-front.jpg') }}",
-            "{{ asset('product_image/the-great-gatsby-front.jpg') }}",
-            "{{ asset('product_image/the-psychology-of-money-front.jpg') }}",
-            "{{ asset('product_image/the-shining-front.jpg') }}"
+            "{{ asset('product_image/front/a-game-of-thrones-front.jpg') }}",
+            "{{ asset('product_image/front/atomic-habits-front.jpg') }}",
+            "{{ asset('product_image/front/becoming-front.jpg') }}",
+            "{{ asset('product_image/front/dune-front.jpg') }}",
+            "{{ asset('product_image/front/foundation-front.jpg') }}",
+            "{{ asset('product_image/front/harry-potter-and-the-philosopher-s-stone-front.jpg') }}",
+            "{{ asset('product_image/front/kafka-on-the-shore-front.jpg') }}",
+            "{{ asset('product_image/front/pride-and-prejudice-front.jpg') }}",
+            "{{ asset('product_image/front/sapiens-a-brief-history-of-humankind-front.jpg') }}",
+            "{{ asset('product_image/front/the-great-gatsby-front.jpg') }}",
+            "{{ asset('product_image/front/the-psychology-of-money-front.jpg') }}",
+            "{{ asset('product_image/front/the-shining-front.jpg') }}"
         ];
 
         const flipper = document.getElementById('flipperInstance');
