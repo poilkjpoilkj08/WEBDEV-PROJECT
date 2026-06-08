@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         // Only redirect guests to login, don't redirect authenticated users away from login
-        $middleware->redirectGueststo(fn(Request $request) => route('login.show'));
+        $middleware->redirectGuestsTo(fn(Request $request) => route('login.show'));
         $middleware->web(HandleCorsRequests::class);
         $middleware->web(SetLocale::class);
         $middleware->alias([

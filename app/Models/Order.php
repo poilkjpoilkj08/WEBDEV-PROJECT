@@ -92,11 +92,11 @@ class Order extends Model
      * Calculate total weight of all items in order (in grams)
      */
     public function getTotalWeightAttribute()
-    {
-        return $this->order_details()->sum(function ($detail) {
-            return ($detail->weight_grams ?? 300) * $detail->quantity;
-        });
-    }
+{
+    return $this->order_details->sum(function ($detail) {
+        return ($detail->weight_grams ?? 300) * $detail->quantity;
+    });
+}
 
     /**
      * Calculate total weight in kg with 2 decimal places
