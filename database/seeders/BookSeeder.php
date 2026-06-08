@@ -480,7 +480,7 @@ class BookSeeder extends Seeder
                 'status' => 'available',
                 'author_id' => 8,
                 'category_id' => 1,
-                'cover_image_url' => 'product_image/front/Cem-Anos-de-Solidão.jpg',
+                'cover_image_url' => 'product_image/front/Cem Anos de Solidão.jpg',
                 'images' => json_encode([]),
                 'genres' => json_encode(['Literary', 'Magical Realism', 'Latin American']),
                 'weight_grams' => 520,
