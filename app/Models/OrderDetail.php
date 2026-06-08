@@ -14,11 +14,13 @@ class OrderDetail extends Model
         'quantity',
         'price',
         'subtotal',
+        'weight_grams',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'subtotal' => 'decimal:2',
+        'weight_grams' => 'decimal:2',
     ];
 
     public function book()

@@ -41,8 +41,20 @@ class CartController extends Controller
         $book = Book::findOrFail($validated['book_id']);
         $quantity = max(1, $validated['quantity'] ?? 1);
 
+        // Check book status - only 'available' books can be added to cart
         if ($book->status !== 'available') {
-            $message = 'This book is not available for purchase.';
+            $message = $book->status === 'out_of_stock' 
+                ? 'This book is currently out of stock and cannot be purchased.' 
+                : 'This book is not available for purchase.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message], 400);
+            }
+            return back()->with('error', $message);
+        }
+
+        // Check if book has stock > 0
+        if ($book->total_stock <= 0) {
+            $message = 'This book is out of stock.';
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => $message], 400);
             }

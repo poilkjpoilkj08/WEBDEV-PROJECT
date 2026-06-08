@@ -6,7 +6,6 @@ use App\Models\Order;
 use App\Models\Refund;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class RefundController extends Controller
 {
@@ -67,10 +66,20 @@ class RefundController extends Controller
                 ], 400);
             }
 
-            // Handle image upload
+            // Handle image upload - store directly in public/refunds folder
             $imagePath = null;
             if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('refunds', 'public');
+                // Ensure public/refunds directory exists
+                $uploadsDir = public_path('refunds');
+                if (!file_exists($uploadsDir)) {
+                    mkdir($uploadsDir, 0755, true);
+                }
+                
+                // Generate unique filename and store in public/refunds
+                $file = $request->file('image');
+                $filename = 'refund_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move($uploadsDir, $filename);
+                $imagePath = 'refunds/' . $filename; // Store relative path
             }
 
             // Create refund request
@@ -164,7 +173,9 @@ class RefundController extends Controller
         // Update order status to show refund was rejected
         $order = $refund->order;
         $order->update([
+            'status' => 'refund_rejected',
             'refund_status' => 'rejected',
+            'payment_status' => 'refund_rejected',
             'refund_requested_at' => now()
         ]);
 

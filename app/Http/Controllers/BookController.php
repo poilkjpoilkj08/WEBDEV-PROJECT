@@ -24,18 +24,20 @@ class BookController extends Controller
 
     public function listing(Request $request): \Illuminate\View\View
     {
-        $query = Book::where('status', 'available')->with(['author', 'category']);
+        // Include both available and out_of_stock books, but exclude discontinued
+        $query = Book::whereIn('status', ['available', 'out_of_stock'])->with(['author', 'category']);
         if ($request->filled('title'))       $query->where('title', 'like', '%' . $request->title . '%');
         if ($request->filled('author'))      $query->whereHas('author', fn($q) => $q->where('name', 'like', '%' . $request->author . '%'));
         if ($request->filled('min_price'))   $query->where('price', '>=', $request->min_price);
         if ($request->filled('max_price'))   $query->where('price', '<=', $request->max_price);
-        if ($request->filled('language'))    $query->where('language', $request->language);
-        if ($request->filled('category_id')) $query->where('category_id', $request->category_id);
+        if ($request->filled('language'))    $query->where('language', '=', $request->language);
+        if ($request->filled('category_id')) $query->where('category_id', '=', (int) $request->category_id);
+        
         return view('books.listing', [
             'books'           => $query->paginate(12),
             'book_categories' => BookCategory::all(),
-            'min_price'       => Book::where('status', 'available')->min('price'),
-            'max_price'       => Book::where('status', 'available')->max('price'),
+            'min_price'       => Book::whereIn('status', ['available', 'out_of_stock'])->min('price'),
+            'max_price'       => Book::whereIn('status', ['available', 'out_of_stock'])->max('price'),
         ]);
     }
 
@@ -57,14 +59,15 @@ class BookController extends Controller
 
     public function admin_index(): \Illuminate\View\View
     {
-        $books = Book::with(['author', 'category', 'storeLocations'])->orderByRaw('id DESC')->paginate(20);
+        $books = Book::with(['author', 'category','publishers', 'storeLocations'])->oldest('id')->paginate(20);
         return view('admin.books.index', compact('books'));
     }
 
     public function create_form(): \Illuminate\View\View
     {
+        Gate::authorize('insert-book');
         return view('books.create-form', [
-            'book_categories' => BookCategory::all(),
+            'categories'      => BookCategory::all(),
             'authors'         => Author::where('is_active', 1)->get(),
             'store_locations' => StoreLocation::orderBy('city')->get(),
         ]);
@@ -73,6 +76,7 @@ class BookController extends Controller
     public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         Gate::authorize('insert-book');
+        
         $validated = $request->validate([
             'title'            => 'required|string',
             'description'      => 'nullable|string',
@@ -81,14 +85,26 @@ class BookController extends Controller
             'pages'            => 'nullable|integer',
             'language'         => 'required|string',
             'publication_year' => 'nullable|integer',
-            'publisher'        => 'nullable|string',
-            'author_id'        => 'nullable|exists:authors,id',
+            'author_id'        => 'required|exists:authors,id',
             'category_id'      => 'required|exists:book_categories,id',
             'cover_image_file' => 'required|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'weight_grams'     => 'nullable|numeric',
             'is_featured'      => 'nullable|boolean',
-            'status'           => 'required|in:available,out_of_stock,discontinued',
+            'status'           => 'required|in:available,out_of_stock',
+            'publisher_ids'    => 'nullable|string',
         ]);
+        
+        // Validate author is not "Unknown"
+        $author = Author::find($validated['author_id']);
+        if ($author && $author->name === 'Unknown') {
+            return back()->with('error', 'Author cannot be "Unknown". Please select a valid author.')->withInput();
+        }
+
+        // Validate: if status is out_of_stock, total stock must be 0
+        $totalStock = collect($request->input('store_stock', []))->sum();
+        if ($validated['status'] === 'out_of_stock' && $totalStock > 0) {
+            return back()->with('error', 'Books marked as "Out of Stock" cannot have stock at any store. Please set all stock quantities to 0.')->withInput();
+        }
 
         if ($request->hasFile('cover_image_file')) {
             $cover = $request->file('cover_image_file');
@@ -102,7 +118,20 @@ class BookController extends Controller
         }
 
         unset($validated['cover_image_file']);
+        
+        // Extract publisher_ids before creating book
+        $publisherIds = [];
+        if (!empty($validated['publisher_ids'])) {
+            $publisherIds = array_map('intval', array_filter(explode(',', $validated['publisher_ids'])));
+        }
+        unset($validated['publisher_ids']);
+        
         $book = Book::create($validated);
+
+        // Sync publishers
+        if (!empty($publisherIds)) {
+            $book->publishers()->sync($publisherIds);
+        }
 
         // Sync store stock
         $storeStock = collect($request->input('store_stock', []))
@@ -118,8 +147,9 @@ class BookController extends Controller
 
     public function edit_form($id): \Illuminate\View\View
     {
+        Gate::authorize('update-book');
         return view('books.edit-form', [
-            'book'            => Book::with('storeLocations')->findOrFail($id),
+            'book'            => Book::with(['storeLocations', 'publishers'])->findOrFail($id),
             'book_categories' => BookCategory::all(),
             'authors'         => Author::where('is_active', 1)->get(),
             'store_locations' => StoreLocation::orderBy('city')->get(),
@@ -130,6 +160,7 @@ class BookController extends Controller
     {
         Gate::authorize('update-book');
         $book = Book::findOrFail($id);
+        
         $validated = $request->validate([
             'title'            => 'required|string',
             'description'      => 'nullable|string',
@@ -138,11 +169,11 @@ class BookController extends Controller
             'pages'            => 'nullable|integer',
             'language'         => 'required|string',
             'publication_year' => 'nullable|integer',
-            'publisher'        => 'nullable|string',
-            'status'           => 'required|in:available,out_of_stock,discontinued',
+            'status'           => 'required|in:available,out_of_stock',
             'author_id'        => 'nullable|exists:authors,id',
             'category_id'      => 'required|exists:book_categories,id',
             'cover_image_file' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'publisher_ids'    => 'nullable|string',
         ]);
 
         if ($request->hasFile('cover_image_file')) {
@@ -157,14 +188,30 @@ class BookController extends Controller
         }
 
         unset($validated['cover_image_file']);
+        
+        // Extract publisher_ids before updating book
+        $publisherIds = [];
+        if (!empty($validated['publisher_ids'])) {
+            $publisherIds = array_map('intval', array_filter(explode(',', $validated['publisher_ids'])));
+        }
+        unset($validated['publisher_ids']);
+        
         $book->update($validated);
 
-        // Sync store stock
-        $storeStock = collect($request->input('store_stock', []))
-            ->mapWithKeys(fn($qty, $id) => [$id => ['stock' => max(0, (int)$qty)]])
-            ->filter(fn($pivot) => $pivot['stock'] > 0)
-            ->toArray();
-        $book->storeLocations()->sync($storeStock);
+        // Sync publishers
+        $book->publishers()->sync($publisherIds);
+
+        // If status is out_of_stock, automatically set all store stocks to 0
+        if ($validated['status'] === 'out_of_stock') {
+            $book->storeLocations()->detach();
+        } else {
+            // Sync store stock only if status is available
+            $storeStock = collect($request->input('store_stock', []))
+                ->mapWithKeys(fn($qty, $id) => [$id => ['stock' => max(0, (int)$qty)]])
+                ->filter(fn($pivot) => $pivot['stock'] > 0)
+                ->toArray();
+            $book->storeLocations()->sync($storeStock);
+        }
 
         return redirect()->route('admin.books.index')->with('success', 'Book updated successfully!');
     }

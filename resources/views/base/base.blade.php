@@ -221,6 +221,38 @@
             .navbar-brand {
                 font-size: 1.25rem !important;
             }
+
+            /* Mobile navbar positioning */
+            .navbar-toggler {
+                position: fixed !important;
+                right: 1rem !important;
+                top: 1rem !important;
+                z-index: 1001;
+            }
+
+            .navbar-brand {
+                order: 1;
+                margin-right: auto !important;
+            }
+
+            /* Ensure action hub appears on right but doesn't overlap hamburger */
+            .navbar .d-flex {
+                position: fixed !important;
+                right: 0.5rem !important;
+                top: 1rem !important;
+                z-index: 1000;
+            }
+
+            /* Collapse menu should stack below on mobile */
+            .navbar-collapse {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: inherit;
+                width: 100%;
+                border-radius: 0 0 8px 8px;
+            }
         }
 
         /* Toast Notification Styles */
@@ -314,6 +346,221 @@
                 min-width: 280px;
                 right: 10px;
                 left: 10px;
+            }
+        }
+
+        /* ===== RESPONSIVE MODALS ===== */
+        @media (max-width: 576px) {
+            /* Make modals full-height on mobile */
+            .modal-dialog {
+                margin: 0.5rem;
+                min-height: auto;
+            }
+
+            /* Adjust modal sizes for mobile */
+            .modal-dialog.modal-lg {
+                max-width: 95% !important;
+            }
+
+            .modal-dialog.modal-sm {
+                max-width: 90% !important;
+            }
+
+            /* Default modal takes up most of screen */
+            .modal-dialog {
+                max-width: 95% !important;
+            }
+
+            /* Make modal body scrollable and not overflow */
+            .modal-body {
+                max-height: calc(100vh - 200px);
+                overflow-y: auto;
+            }
+
+            /* Improve button sizing in modals on mobile */
+            .modal-footer .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            /* Make form labels and inputs full width */
+            .modal .form-label {
+                font-size: 0.95rem;
+            }
+
+            .modal .form-control,
+            .modal .form-select {
+                font-size: 1rem;
+                padding: 0.65rem 0.75rem;
+            }
+
+            /* Textarea in modals */
+            .modal textarea.form-control {
+                min-height: 100px;
+                resize: vertical;
+            }
+        }
+
+        /* Tablet responsiveness */
+        @media (max-width: 768px) and (min-width: 577px) {
+            .modal-dialog.modal-lg {
+                max-width: 80%;
+            }
+
+            .modal-dialog {
+                max-width: 85%;
+            }
+        }
+
+        /* Image preview in modals */
+        .modal .refund-thumb {
+            cursor: zoom-in;
+            transition: transform 0.3s ease;
+        }
+
+        .modal .refund-thumb:hover {
+            transform: scale(1.05);
+        }
+
+        /* Evidence images in modals should be responsive */
+        .modal-body img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Fix pagination SVG sizing - override global display:block */
+        nav[role="navigation"] svg,
+        nav[aria-label="Pagination Navigation"] svg,
+        .pagination svg {
+            display: inline !important;
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            vertical-align: -0.125em;
+        }
+
+        /* File upload drag-drop area responsive */
+        @media (max-width: 576px) {
+            #refundUploadArea {
+                padding: 1.5rem !important;
+            }
+
+            #refundUploadArea .fa-2x {
+                font-size: 1.5rem !important;
+            }
+
+            #refundUploadArea p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* ===== ADMIN PAGES RESPONSIVE STYLES ===== */
+        @media (max-width: 768px) {
+            /* Button groups wrap on mobile */
+            .btn-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .btn-group .btn {
+                flex: 1 1 auto;
+                min-width: 100px;
+            }
+
+            /* Stat cards better on tablet */
+            .row.g-3 .col-md-3 {
+                margin-bottom: 0.5rem;
+            }
+
+            /* Admin table more readable */
+            .table {
+                font-size: 0.9rem;
+            }
+
+            .table-responsive {
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Admin page heading */
+            .h3 {
+                font-size: 1.5rem;
+            }
+
+            /* Badge sizing in tables */
+            .badge {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            /* Action buttons more accessible */
+            .d-flex.gap-2 .btn-sm {
+                padding: 0.4rem 0.6rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            /* Extra small screens - admin optimization */
+            .btn-group {
+                width: 100%;
+            }
+
+            .btn-group .btn {
+                flex: 1 1 100%;
+                margin-bottom: 0.25rem;
+            }
+
+            /* Stats display better */
+            .row.g-3 > [class*='col-'] {
+                margin-bottom: 0.5rem;
+            }
+
+            /* Table font sizing */
+            .table th {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+
+            .table td {
+                font-size: 0.85rem;
+                padding: 0.5rem;
+            }
+
+            /* Compact action buttons */
+            .btn-sm {
+                padding: 0.35rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            /* Icon sizing in tables */
+            .fa {
+                font-size: 0.9rem;
+            }
+
+            /* Hide non-essential info on small screens */
+            .d-none-sm {
+                display: none !important;
+            }
+
+            /* Text truncation for emails */
+            .text-truncate {
+                max-width: 150px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            /* Better modal positioning on admin pages */
+            .modal-dialog {
+                margin: 0.5rem auto;
+            }
+        }
+
+        /* Tablet responsiveness for admin */
+        @media (max-width: 768px) and (min-width: 577px) {
+            .btn-group .btn {
+                padding: 0.5rem 0.75rem;
             }
         }
     </style>

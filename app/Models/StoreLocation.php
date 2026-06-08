@@ -10,7 +10,10 @@ class StoreLocation extends Model
     protected $fillable = [
         'name',
         'address',
+        'province',
         'city',
+        'district',
+        'postal_code',
         'country',
         'latitude',
         'longitude',

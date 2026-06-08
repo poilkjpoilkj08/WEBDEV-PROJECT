@@ -119,4 +119,164 @@ function openSubscribeModal(plan) {
     new bootstrap.Modal(document.getElementById('subscribeModal')).show();
 }
 </script>
+
+<style>
+/* ===== RESPONSIVE STYLES FOR SUBSCRIPTION PLANS ===== */
+@media (max-width: 768px) {
+    /* Heading adjustments */
+    .display-5 {
+        font-size: 2rem;
+    }
+
+    .lead {
+        font-size: 1rem;
+    }
+
+    /* Plan cards better spacing */
+    .row.g-4 {
+        gap: 1.5rem !important;
+    }
+
+    /* Card sizing */
+    .card {
+        border-radius: 12px;
+    }
+
+    /* Button sizing */
+    .btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    /* Price display */
+    .display-6 {
+        font-size: 2rem;
+    }
+
+    /* List items */
+    .list-unstyled li {
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem !important;
+    }
+
+    /* Icon sizing */
+    .fa-2x {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra small screens */
+    .container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    /* Heading sizing */
+    .display-5 {
+        font-size: 1.5rem;
+    }
+
+    h1, .h1 {
+        font-size: 1.5rem;
+    }
+
+    .lead {
+        font-size: 0.95rem;
+    }
+
+    /* Cards full width with margins */
+    .row.g-4 > [class*='col-'] {
+        margin-bottom: 0.5rem;
+    }
+
+    .card {
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+    }
+
+    .card-body {
+        padding: 1.5rem 1rem !important;
+    }
+
+    /* Price display */
+    .display-6 {
+        font-size: 1.75rem;
+    }
+
+    .fs-6 {
+        font-size: 0.8rem !important;
+    }
+
+    /* List items mobile friendly */
+    .list-unstyled li {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .list-unstyled .fa-check,
+    .list-unstyled .fa-times {
+        font-size: 0.85rem;
+    }
+
+    /* Button sizing */
+    .btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        width: 100%;
+    }
+
+    /* Badge sizing */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+    }
+
+    /* Card header */
+    .card-header {
+        padding: 0.75rem !important;
+        font-size: 0.9rem;
+    }
+
+    /* Icon sizing */
+    .fa-2x {
+        font-size: 1.25rem;
+    }
+
+    /* Alert sizing */
+    .alert {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    /* Modal sizing */
+    .modal-dialog {
+        max-width: 95% !important;
+    }
+
+    .modal-body {
+        font-size: 0.95rem;
+    }
+
+    /* Prevent horizontal overflow */
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Text truncation for long content */
+    .text-truncate {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Form controls */
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: 0.75rem;
+    }
+}
+</style>
 @endsection

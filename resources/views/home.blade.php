@@ -142,6 +142,226 @@
         background-color: #a64f1e !important;
         border-color: #a64f1e !important;
     }
+
+    /* ===== RESPONSIVE STYLES FOR HOME PAGE ===== */
+    @media (max-width: 768px) {
+        /* Hero section adjustments */
+        .hero-bg-wrapper {
+            padding-top: 120px;
+            padding-bottom: 40px;
+            margin-top: -80px;
+        }
+
+        /* Hero content better sizing */
+        .hero-content h1 {
+            font-size: 2rem;
+        }
+
+        .hero-content p {
+            font-size: 1rem;
+        }
+
+        /* Search bar adjustments */
+        .search-bar {
+            max-width: 100%;
+            padding: 0.75rem;
+        }
+
+        .search-bar input {
+            font-size: 16px; /* Prevent iOS zoom */
+        }
+
+        /* Button sizing */
+        .btn {
+            padding: 0.65rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        /* Counter/stats cards better on tablet */
+        .counter-card {
+            padding: 1.5rem 1rem;
+        }
+
+        .counter-card h3 {
+            font-size: 1.75rem;
+        }
+
+        .counter-card p {
+            font-size: 0.9rem;
+        }
+
+        /* Feature grid adjustments */
+        .feature-grid {
+            gap: 1.5rem;
+        }
+
+        /* Featured books carousel adjustments */
+        .carousel-item img {
+            max-height: 300px;
+            object-fit: cover;
+        }
+
+        /* Testimonials better on tablet */
+        .testimonial-card {
+            padding: 1.5rem;
+        }
+
+        .testimonial-card p {
+            font-size: 0.95rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Extra small screens */
+        .hero-bg-wrapper {
+            padding-top: 100px;
+            padding-bottom: 30px;
+            margin-top: -70px;
+        }
+
+        /* Hero heading sizing */
+        .hero-content h1 {
+            font-size: 1.5rem;
+        }
+
+        .hero-content p {
+            font-size: 0.95rem;
+        }
+
+        /* Container better spacing */
+        .container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+
+        /* Search bar full width */
+        .search-bar {
+            width: 100%;
+            padding: 0.5rem;
+        }
+
+        .search-bar input {
+            font-size: 16px;
+            padding: 0.75rem;
+        }
+
+        .search-bar button {
+            padding: 0.75rem 1rem;
+        }
+
+        /* Button sizing */
+        .btn-lg {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Counter cards stack and resize */
+        .row.g-3 > [class*='col-'] {
+            margin-bottom: 0.5rem;
+        }
+
+        .counter-card {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .counter-card h3 {
+            font-size: 1.5rem;
+        }
+
+        .counter-card p {
+            font-size: 0.85rem;
+        }
+
+        /* Section headings */
+        h2, .h2 {
+            font-size: 1.5rem !important;
+        }
+
+        h3, .h3 {
+            font-size: 1.25rem !important;
+        }
+
+        /* Carousel sizing */
+        .carousel-inner {
+            max-height: 250px;
+        }
+
+        .carousel-item img {
+            max-height: 250px;
+            object-fit: cover;
+        }
+
+        /* Featured books fit better */
+        .book-preview {
+            max-width: 100%;
+        }
+
+        .book-preview img {
+            max-height: 200px;
+        }
+
+        /* Testimonials mobile friendly */
+        .testimonial-card {
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-card p {
+            font-size: 0.9rem;
+        }
+
+        .testimonial-card .rating {
+            font-size: 1rem;
+        }
+
+        /* CTA buttons stack vertically */
+        .cta-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .cta-buttons .btn {
+            width: 100%;
+        }
+
+        /* Icon sizing */
+        .fa-3x {
+            font-size: 2rem !important;
+        }
+
+        .fa-2x {
+            font-size: 1.5rem !important;
+        }
+
+        /* Text alignment and wrapping */
+        .text-center {
+            word-break: break-word;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Alert and info boxes */
+        .alert {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        /* Badge sizing */
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.6rem;
+        }
+
+        /* List items better spacing */
+        .list-unstyled li {
+            margin-bottom: 0.5rem;
+        }
+    }
 </style>
 
 <div class="hero-bg-wrapper">
@@ -251,14 +471,18 @@
                         <div class="book-ui-card">
                             <div class="book-ui-img-frame">
                                 @if($book->cover_image_url)
-                                    <img src="{{ $book->cover_image_url }}" class="book-ui-img" alt="{{ $book->title }}">
+                                    <img src="{{ $book->cover_image_src }}" class="book-ui-img" alt="{{ $book->title }}">
                                 @else
                                     <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
                                         <i class="fas fa-book fa-2x opacity-20"></i>
                                     </div>
                                 @endif
-                                <div class="position-absolute top-0 end-0 m-2">
-                                    <span class="badge bg-warning text-dark px-2 py-1 small shadow-sm" style="font-size: 0.65rem;">Featured</span>
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    @if($book->status === 'out_of_stock')
+                                        <span class="badge bg-danger text-white px-2 py-1 small shadow-sm" style="font-size: 0.65rem;">Out of Stock</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark px-2 py-1 small shadow-sm" style="font-size: 0.65rem;">Featured</span>
+                                    @endif
                                 </div>
                             </div>
                             
@@ -267,7 +491,11 @@
                                 <p class="text-muted mb-2 text-truncate" style="font-size: 0.75rem;">By {{ $book->author ? $book->author->name : 'Unknown Author' }}</p>
                                 
                                 <div class="d-flex justify-content-between align-items-center pt-1">
-                                    <span class="fw-bold text-dark" style="font-size: 0.85rem;">Rp {{ number_format($book->price, 0, ',', '.') }}</span>
+                                    @if($book->status === 'out_of_stock')
+                                        <span class="fw-bold text-danger" style="font-size: 0.85rem;">Out of Stock</span>
+                                    @else
+                                        <span class="fw-bold text-dark" style="font-size: 0.85rem;">Rp {{ number_format($book->price, 0, ',', '.') }}</span>
+                                    @endif
                                     <a href="{{ route('books.show', $book->id) }}" class="btn btn-sm px-2 py-1 btn-soft-orange fw-bold" style="font-size: 0.7rem; border-radius: 6px;">
                                         Review
                                     </a>
@@ -307,11 +535,16 @@
                         <div class="book-ui-card">
                             <div class="book-ui-img-frame">
                                 @if($cBook->cover_image_url)
-                                    <img src="{{ $cBook->cover_image_url }}" class="book-ui-img" alt="{{ $cBook->title }}">
+                                    <img src="{{ $cBook->cover_image_src }}" class="book-ui-img" alt="{{ $cBook->title }}">
                                 @else
                                     <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
                                         <i class="fas fa-book fa-2x opacity-20"></i>
                                     </div>
+                                @endif
+                                @if($cBook->status === 'out_of_stock')
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    <span class="badge bg-danger text-white px-2 py-1 small shadow-sm" style="font-size: 0.65rem;">Out of Stock</span>
+                                </div>
                                 @endif
                             </div>
                             
@@ -320,7 +553,11 @@
                                 <p class="text-muted mb-2 text-truncate" style="font-size: 0.75rem;">By {{ $cBook->author ? $cBook->author->name : 'Unknown Author' }}</p>
                                 
                                 <div class="d-flex justify-content-between align-items-center pt-1">
-                                    <span class="fw-bold text-dark" style="font-size: 0.85rem;">Rp {{ number_format($cBook->price, 0, ',', '.') }}</span>
+                                    @if($cBook->status === 'out_of_stock')
+                                        <span class="fw-bold text-danger" style="font-size: 0.85rem;">Out of Stock</span>
+                                    @else
+                                        <span class="fw-bold text-dark" style="font-size: 0.85rem;">Rp {{ number_format($cBook->price, 0, ',', '.') }}</span>
+                                    @endif
                                     <a href="{{ route('books.show', $cBook->id) }}" class="btn btn-sm px-2 py-1 btn-soft-orange fw-bold" style="font-size: 0.7rem; border-radius: 6px;">
                                         Review
                                     </a>

@@ -46,6 +46,10 @@ class BookCategorySeeder extends Seeder
                 'name' => 'Self-Help',
                 'description' => 'Personal development and motivational books'
             ],
+            [
+                'name' => 'Fantasy',
+                'description' => 'Fantasy novels and magical adventures'
+            ],
         ];
 
         foreach ($bookCategories as $category) {

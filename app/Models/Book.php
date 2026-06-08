@@ -21,7 +21,6 @@ class Book extends Model
         'pages',
         'language',
         'publication_year',
-        'publisher',
         'cover_type',
         'status',
         'author_id',
@@ -50,11 +49,26 @@ class Book extends Model
     {
         return $this->belongsTo(Author::class, 'author_id');
     }
+
+    public function publishers(): BelongsToMany
+    {
+        return $this->belongsToMany(Publisher::class, 'book_publisher')
+                    ->withTimestamps();
+    }
+
     public function storeLocations(): BelongsToMany
     {
         return $this->belongsToMany(StoreLocation::class, 'book_store_locations')
                     ->withPivot('stock')
                     ->withTimestamps();
+    }
+
+    /**
+     * Get all order details for this book
+     */
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class, 'book_id');
     }
 
     /**

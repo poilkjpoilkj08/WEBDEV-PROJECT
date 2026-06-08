@@ -15,8 +15,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $abilities = [
+            'view-admin',
             'insert-author', 'update-author', 'delete-author',
             'insert-book',   'update-book',   'delete-book',
+            'create-publisher', 'edit-publisher', 'delete-publisher',
             'manage-stores',
         ];
         foreach ($abilities as $ability) {

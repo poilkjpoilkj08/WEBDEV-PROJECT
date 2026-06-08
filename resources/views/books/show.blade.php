@@ -140,24 +140,209 @@
     .max-width-md-600 {
         max-width: 600px;
     }
+
+    /* ==========================================================================
+       UNIFIED CORE ACTION STRUCTURE: Mobile-First Core Specs
+       ========================================================================== */
+    .bh-strict-2x2-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+        margin-bottom: 24px !important;
+    }
+
+    .bh-strict-action-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    .bh-strict-action-form {
+        margin: 0 !important;
+        padding: 0 !important;
+        flex: 0 1 auto !important;
+        width: calc(50% - 4px) !important; /* Sits perfectly side-by-side on mobile without bloating */
+    }
+
+    .bh-strict-action-btn {
+        width: 100% !important;
+        white-space: nowrap !important;
+        padding: 10px 4px !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* ==========================================================================
+       DESKTOP VIEWPORT SCALE-UPS (577px and Above)
+       ========================================================================== */
+    @media (min-width: 577px) {
+        .bh-strict-action-row {
+            gap: 12px !important;
+        }
+        .bh-strict-action-form {
+            flex: 1 1 50% !important; /* Seamlessly transitions to full box distribution on desktop grids */
+            width: 50% !important;
+        }
+        .bh-strict-action-btn {
+            padding: 12px 16px !important;
+            font-size: 0.85rem !important;
+        }
+    }
+
+    /* ===== RESPONSIVE STYLES FOR BOOK SHOW PAGE ===== */
+    @media (max-width: 768px) {
+        /* Hero section adjustments */
+        .hero-bg-wrapper {
+            padding-top: 150px;
+            padding-bottom: 60px;
+            margin-top: -80px;
+        }
+
+        /* Book title sizing */
+        .display-4 {
+            font-size: 2rem;
+        }
+
+        .h2 {
+            font-size: 1.5rem;
+        }
+
+        /* Image container */
+        .book-image-container {
+            max-width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .book-image-container img {
+            border-radius: 12px;
+        }
+
+        /* Rating and badges */
+        .badge {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        /* Price display */
+        .display-5 {
+            font-size: 2rem;
+        }
+
+        /* Summary card */
+        .card {
+            border-radius: 12px;
+        }
+
+        /* Reviews section */
+        .review-item {
+            padding: 1.5rem 1rem;
+        }
+
+        .review-item h6 {
+            font-size: 0.95rem;
+        }
+
+        .review-item p {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        body {
+            padding-top: 0;
+        }
+
+        .container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+
+        /* Hero adjustments */
+        .hero-bg-wrapper {
+            padding-top: 120px;
+            padding-bottom: 50px;
+            margin-top: -70px;
+        }
+
+        /* Heading sizing */
+        .display-4 { font-size: 1.5rem; }
+        .h1, h1 { font-size: 1.5rem; }
+        .h2, h2 { font-size: 1.25rem; }
+        .h3, h3 { font-size: 1.1rem; }
+
+        /* Book image full width */
+        .book-image-container {
+            max-width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .book-image-container img {
+            border-radius: 10px;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .display-5 { font-size: 1.75rem; }
+        .display-6 { font-size: 1.5rem; }
+        .rating-display { font-size: 0.9rem; }
+        .badge { font-size: 0.75rem; padding: 0.35rem 0.6rem; }
+
+        /* Summary card */
+        .card { border-radius: 10px; margin-bottom: 1.5rem; }
+        .card-body { padding: 1.25rem 1rem; }
+
+        /* Information layout */
+        .row.g-3 { gap: 1rem !important; }
+        .row.g-3 > [class*='col-'] { margin-bottom: 0.5rem; }
+
+        /* Reviews section */
+        .review-item {
+            padding: 1rem 0.75rem;
+            border-left: 3px solid #c25e25;
+            margin-bottom: 1rem;
+        }
+
+        .review-item h6 { font-size: 0.9rem; }
+        .review-item p { font-size: 0.85rem; line-height: 1.4; }
+        .review-item .small { font-size: 0.75rem; }
+        .review-count { font-size: 0.85rem; }
+
+        /* Modal sizing */
+        .modal-dialog { max-width: 95%; margin: 0.5rem auto; }
+        .modal-body { padding: 1rem; font-size: 0.9rem; }
+        .book-description { font-size: 0.95rem; line-height: 1.5; }
+        .fa-2x { font-size: 1.5rem; }
+        .fa-3x { font-size: 2rem; }
+        a { word-break: break-word; }
+        body { overflow-x: hidden; }
+        .alert { padding: 0.75rem; font-size: 0.9rem; }
+        .nav-tabs .nav-link { padding: 0.75rem 1rem; font-size: 0.9rem; }
+        .list-unstyled li { font-size: 0.9rem; margin-bottom: 0.5rem; }
+    }
 </style>
 
 <!-- Top Hero Background Breakout Context Block -->
 <div class="hero-bg-wrapper">
     <div class="container content-wrapper">
+        
         <!-- Top Action Header -->
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-5 gap-3">
-            <div>
-                <div class="glass-header-box">
-                    <h1 class="h4 mb-0 fw-bold text-white">Book Showcase</h1>
+        <div style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; width: 100% !important; margin-bottom: 3rem !important; gap: 12px !important;">
+            <div style="flex-shrink: 0 !important; max-width: 65% !important;">
+                <div class="glass-header-box" style="padding: 10px 24px !important; white-space: nowrap !important;">
+                    <h1 class="fw-bold text-white mb-0" style="font-size: clamp(1rem, 4vw, 1.5rem) !important;">Book Showcase</h1>
                 </div>
             </div>
-            <a href="{{ route('books.listing') }}" class="btn btn-light btn-sm fw-bold px-4 rounded-pill shadow-sm btn-smooth" style="color: #c25e25;">
-                <i class="fas fa-arrow-left me-2"></i>Back to Catalog
-            </a>
+            <div style="flex-shrink: 0 !important;">
+                <a href="{{ route('books.listing') }}" class="btn btn-light btn-sm fw-bold px-3 px-sm-4 rounded-pill shadow-sm btn-smooth" style="color: #c25e25; display: inline-flex !important; align-items: center !important; white-space: nowrap !important; font-size: clamp(0.75rem, 2.5vw, 0.85rem) !important;">
+                    <i class="fas fa-arrow-left me-1.5"></i>Back<span class="d-none d-sm-inline ms-1">to Catalog</span>
+                </a>
+            </div>
         </div>
 
-        <!-- Main Showcase Split Layout - Shifted inside Hero to completely float over the background art -->
+        <!-- Main Showcase Split Layout -->
         <div class="row g-5 align-items-center position-relative" style="z-index: 5;">
             <!-- Visual Column Cover Artwork -->
             <div class="col-md-5 text-center text-md-start">
@@ -196,34 +381,24 @@
                             <span class="badge bg-light text-dark border px-3 py-2 rounded-pill small" style="font-size: 0.75rem;"><i class="fas fa-bookmark me-2" style="color: #c25e25;"></i>Shelf: {{ $book->category->name }}</span>
                         </div>
 
-                        <!-- Main Core Stats Row Grid -->
-                        <div class="row g-3 mb-3">
-                            <div class="col-6 col-sm-3">
-                                <div class="bg-light rounded-3 p-3 text-center border-0">
-                                    <div class="fw-bold text-dark mb-1 small"><i class="fas fa-file-alt text-muted me-1 small"></i>{{ $book->pages ?: 'N/A' }}</div>
-                                    <small class="text-muted small" style="font-size: 0.7rem;">Pages</small>
-                                </div>
+                        <!-- ENFORCED HARDCODED CSS 2x2 GRID BOX MATRIX CONTAINER -->
+                        <div class="bh-strict-2x2-grid">
+                            <div style="background-color: #f8f9fa !important; border-radius: 8px; padding: 16px; text-align: center;">
+                                <div class="fw-bold text-dark mb-1 small"><i class="fas fa-file-alt text-muted me-1.5 small"></i>{{ $book->pages ?: 'N/A' }}</div>
+                                <small class="text-muted small" style="font-size: 0.7rem;">Pages</small>
                             </div>
-                            <div class="col-6 col-sm-3">
-                                <div class="bg-light rounded-3 p-3 text-center border-0">
-                                    <div class="fw-bold text-dark mb-1 small"><i class="fas fa-globe text-muted me-1 small"></i>{{ $book->language }}</div>
-                                    <small class="text-muted small" style="font-size: 0.7rem;">Language</small>
-                                </div>
+                            <div style="background-color: #f8f9fa !important; border-radius: 8px; padding: 16px; text-align: center;">
+                                <div class="fw-bold text-dark mb-1 small"><i class="fas fa-globe text-muted me-1.5 small"></i>{{ $book->language }}</div>
+                                <small class="text-muted small" style="font-size: 0.7rem;">Language</small>
                             </div>
-                            <div class="col-6 col-sm-3">
-                                <div class="bg-light rounded-3 p-3 text-center border-0">
-                                    <div class="fw-bold text-dark mb-1 small"><i class="fas fa-calendar-check text-muted me-1 small"></i>{{ $book->publication_year ?: 'N/A' }}</div>
-                                    <small class="text-muted small" style="font-size: 0.7rem;">Year</small>
-                                </div>
+                            <div style="background-color: #f8f9fa !important; border-radius: 8px; padding: 16px; text-align: center;">
+                                <div class="fw-bold text-dark mb-1 small"><i class="fas fa-calendar-check text-muted me-1.5 small"></i>{{ $book->publication_year ?: 'N/A' }}</div>
+                                <small class="text-muted small" style="font-size: 0.7rem;">Year</small>
                             </div>
-                            @if($book->weight_grams)
-                            <div class="col-6 col-sm-3">
-                                <div class="bg-light rounded-3 p-3 text-center border-0">
-                                    <div class="fw-bold text-dark mb-1 small"><i class="fas fa-weight text-muted me-1 small"></i>{{ number_format($book->weight_grams) }}g</div>
-                                    <small class="text-muted small" style="font-size: 0.7rem;">Weight</small>
-                                </div>
+                            <div style="background-color: #f8f9fa !important; border-radius: 8px; padding: 16px; text-align: center;">
+                                <div class="fw-bold text-dark mb-1 small"><i class="fas fa-weight text-muted me-1.5 small"></i>{{ $book->weight_grams ? number_format($book->weight_grams).'g' : 'N/A' }}</div>
+                                <small class="text-muted small" style="font-size: 0.7rem;">Weight</small>
                             </div>
-                            @endif
                         </div>
 
                         <!-- Refactored Soft-Edged Publisher Extra Info Bar -->
@@ -231,7 +406,13 @@
                             <div class="row g-2">
                                 <div class="col-sm-6 d-flex align-items-center">
                                     <span class="fw-bold text-dark me-2" style="min-width: 80px;"><i class="fas fa-building text-muted me-2"></i>Publisher</span>
-                                    <span class="text-truncate">: {{ $book->publisher ?: 'Unknown' }}</span>
+                                    <span class="text-truncate">
+                                        @if($book->publishers && $book->publishers->count() > 0)
+                                            : {{ $book->publishers->pluck('name')->join(', ') }}
+                                        @else
+                                            : Unknown
+                                        @endif
+                                    </span>
                                 </div>
                                 @if($book->cover_type)
                                 <div class="col-sm-6 d-flex align-items-center">
@@ -242,39 +423,37 @@
                             </div>
                         </div>
 
+                        <!-- ACTION BUTTON BAR HUB -->
                         @if(!auth()->check() || !auth()->user()->hasRole(['admin', 'owner']))
-                        <div class="row g-2 pt-2">
-                            <div class="col-sm-6">
-                                @auth
-                                    <form id="addToCartForm" class="add-to-cart-form">
-                                        @csrf
-                                        <input type="hidden" name="book_id" value="{{ $book->id }}">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="btn btn-soft-orange w-100 fw-bold rounded-3 py-2 text-uppercase" style="font-size: 0.85rem;">
-                                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-                                        </button>
-                                    </form>
-                                @else
-                                    <a href="{{ route('login.show') }}" class="btn btn-soft-orange w-100 fw-bold rounded-3 py-2 text-uppercase d-block text-center text-decoration-none" style="font-size: 0.85rem;">
-                                        <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-                                    </a>
-                                @endauth
-                            </div>
-                            <div class="col-sm-6">
-                                @auth
-                                    <form id="wishlistForm" class="wishlist-form">
-                                        @csrf
-                                        <input type="hidden" name="book_id" value="{{ $book->id }}">
-                                        <button type="submit" class="btn btn-outline-soft-orange w-100 fw-bold rounded-3 py-2 text-uppercase text-center" id="wishlistBtn" style="font-size: 0.85rem;">
-                                            <i class="fas fa-bookmark me-2"></i><span id="wishlistText">Add to Wishlist</span>
-                                        </button>
-                                    </form>
-                                @else
-                                    <a href="{{ route('login.show') }}" class="btn btn-outline-soft-orange w-100 fw-bold rounded-3 py-2 text-uppercase text-center text-decoration-none d-block" style="font-size: 0.85rem;">
-                                        <i class="fas fa-bookmark me-2"></i>Add to Wishlist
-                                    </a>
-                                @endauth
-                            </div>
+                        <div class="bh-strict-action-row">
+                            @auth
+                                <form id="addToCartForm" class="bh-strict-action-form">
+                                    @csrf
+                                    <input type="hidden" name="book_id" value="{{ $book->id }}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-soft-orange bh-strict-action-btn fw-bold rounded-3 text-uppercase">
+                                        <i class="fas fa-shopping-cart me-1.5"></i>Add to Cart
+                                    </button>
+                                </form>
+                            @else
+                                <a href="{{ route('login.show') }}" class="btn btn-soft-orange bh-strict-action-form bh-strict-action-btn fw-bold rounded-3 text-uppercase text-center text-decoration-none">
+                                    <i class="fas fa-shopping-cart me-1.5"></i>Add to Cart
+                                </a>
+                            @endauth
+
+                            @auth
+                                <form id="wishlistForm" class="bh-strict-action-form">
+                                    @csrf
+                                    <input type="hidden" name="book_id" value="{{ $book->id }}">
+                                    <button type="submit" class="btn btn-outline-soft-orange bh-strict-action-btn fw-bold rounded-3 text-uppercase text-center" id="wishlistBtn">
+                                        <i class="fas fa-bookmark me-1.5"></i><span id="wishlistText">Wishlist</span>
+                                    </button>
+                                </form>
+                            @else
+                                <a href="{{ route('login.show') }}" class="btn btn-outline-soft-orange bh-strict-action-form bh-strict-action-btn fw-bold rounded-3 text-uppercase text-center text-decoration-none">
+                                    <i class="fas fa-bookmark me-1.5"></i>Wishlist
+                                </a>
+                            @endauth
                         </div>
                         @endif
 
@@ -479,18 +658,31 @@
                 btn.classList.add('active');
                 btn.classList.remove('btn-outline-soft-orange');
                 btn.classList.add('btn-soft-orange');
-                if(text) text.textContent = 'Remove from Wishlist';
+                if(text) text.textContent = 'Wishlist';
             } else {
                 btn.classList.remove('active');
                 btn.classList.add('btn-outline-soft-orange');
                 btn.classList.remove('btn-soft-orange');
-                if(text) text.textContent = 'Add to Wishlist';
+                if(text) text.textContent = 'Wishlist';
             }
         }
 
         // --- Add To Cart Handler Channel Engine ---
+        let isAddingToCart = false; // Debounce flag
         document.getElementById('addToCartForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Prevent duplicate submissions
+            if (isAddingToCart) return;
+            isAddingToCart = true;
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn?.textContent;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Adding...';
+            }
+            
             try {
                 const response = await fetch('{{ route("cart.add") }}', {
                     method: 'POST',
@@ -511,6 +703,15 @@
                 showToast('✓ Added "{{ $book->title }}" to cart!', 'success', 5000);
                 this.reset();
                 setTimeout(() => location.reload(), 1500);
+            } finally {
+                // Re-enable button after 1 second
+                setTimeout(() => {
+                    isAddingToCart = false;
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                }, 1000);
             }
         });
 

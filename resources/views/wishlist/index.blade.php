@@ -58,6 +58,147 @@
         border-color: #c25e25 !important;
         color: #ffffff !important;
     }
+
+    /* ===== RESPONSIVE STYLES FOR WISHLIST PAGE ===== */
+    @media (max-width: 768px) {
+        /* Page heading adjustments */
+        .h3 {
+            font-size: 1.5rem;
+        }
+
+        /* Button sizing on mobile */
+        .btn {
+            padding: 0.65rem 1rem;
+            font-size: 0.95rem;
+            min-height: 44px;
+        }
+
+        /* Wishlist cards better spacing */
+        .wishlist-card {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Grid adjustments */
+        .row {
+            margin-left: -0.5rem;
+            margin-right: -0.5rem;
+        }
+
+        /* Card images responsive */
+        .wishlist-card img {
+            height: auto;
+            max-height: 300px;
+        }
+
+        /* Price and rating display */
+        .card-text {
+            font-size: 0.95rem;
+        }
+
+        /* Action buttons better */
+        .card-footer .btn {
+            flex: 1;
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Extra small screens */
+        .container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+
+        /* Heading sizing */
+        .h3 {
+            font-size: 1.25rem;
+        }
+
+        .h1 {
+            font-size: 1.5rem;
+        }
+
+        /* Wishlist cards stack better */
+        .wishlist-card {
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .wishlist-card img {
+            border-radius: 8px;
+            max-height: 200px;
+        }
+
+        /* Card text sizing */
+        .card-title {
+            font-size: 0.9rem;
+        }
+
+        .card-text {
+            font-size: 0.85rem;
+        }
+
+        /* Badge sizing */
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.6rem;
+        }
+
+        /* Button sizing */
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        /* Action buttons */
+        .btn {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        /* Card footer buttons stack */
+        .card-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .card-footer .btn {
+            width: 100%;
+        }
+
+        /* Empty state optimization */
+        .text-center {
+            text-align: center;
+        }
+
+        .fa-3x {
+            font-size: 2rem;
+        }
+
+        /* Text truncation for long titles */
+        .text-truncate {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Icon sizing */
+        .fa-2x {
+            font-size: 1.5rem;
+        }
+
+        /* Alert sizing */
+        .alert {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+    }
 </style>
 
 <div class="bg-white" style="position: relative; z-index: 4; padding-top: 40px;">
@@ -111,7 +252,7 @@
                                 <div class="mt-auto">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <span class="fw-bold text-dark" style="font-size: 0.95rem;">Rp {{ number_format($wishlist->book->price, 0, ',', '.') }}</span>
-                                        <span class="badge bg-light text-dark border px-2 py-1 small" style="font-size: 0.7rem;">Stock: {{ $wishlist->book->stock }}</span>
+                                        <span class="badge bg-light text-dark border px-2 py-1 small" style="font-size: 0.7rem;">Stock: {{ $wishlist->total_stock }}</span>
                                     </div>
 
                                     <div class="d-flex gap-2">

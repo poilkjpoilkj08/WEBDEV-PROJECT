@@ -178,6 +178,12 @@ class CheckoutController extends Controller
                     
                     if ($quantity < 1) continue;
                     
+                    // Validate book status is 'available'
+                    if ($book->status !== 'available') {
+                        $statusMsg = $book->status === 'out_of_stock' ? 'out of stock' : $book->status;
+                        return response()->json(['error' => sprintf('"%s" is currently %s.', $book->title, $statusMsg)], 400);
+                    }
+                    
                     // Validate store is selected for this book
                     if (!$storeId || !isset($validated['store_ids'][$book->id])) {
                         return response()->json(['error' => sprintf('Store location not selected for "%s".', $book->title)], 400);
@@ -271,6 +277,7 @@ class CheckoutController extends Controller
                         'quantity'   => $item['quantity'],
                         'price'      => $item['book']->price,
                         'subtotal'   => $item['subtotal'],
+                        'weight_grams' => $item['book']->weight_grams ?? 300,
                     ]);
                     
                     // IMPORTANT: Stock will be decremented ONLY after successful payment in markPaymentComplete()

@@ -146,6 +146,198 @@
         background-color: #f1f3f4 !important;
         border-color: #dadce0 !important;
     }
+
+    /* ===== RESPONSIVE STYLES FOR LOGIN PAGE ===== */
+    @media (max-width: 768px) {
+        /* Floating book cover - reduce on tablet */
+        .floating-stage {
+            width: 200px;
+            height: 300px;
+        }
+
+        /* Login card padding */
+        .login-box-card {
+            padding: 1.5rem !important;
+        }
+
+        /* Heading sizing */
+        .h3, h3 {
+            font-size: 1.25rem;
+        }
+
+        /* Form label sizing */
+        .form-label {
+            font-size: 0.9rem;
+        }
+
+        /* Form control sizing */
+        .form-control-lg {
+            font-size: 0.95rem;
+            padding: 0.75rem 0.75rem;
+        }
+
+        /* Button sizing */
+        .btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Small text sizing */
+        .small {
+            font-size: 0.85rem;
+        }
+
+        /* Text utilities */
+        .text-muted {
+            font-size: 0.9rem;
+        }
+
+        /* Row gap adjustment */
+        .gap-5 {
+            gap: 2rem !important;
+        }
+
+        .gap-md-0 {
+            gap: 0 !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Extra small screens */
+        /* Hide floating book cover on mobile */
+        .scenic-artwork-column {
+            display: none !important;
+        }
+
+        /* Background padding adjustment */
+        body {
+            padding-top: 70px;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Container adjustments */
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        /* Login card sizing */
+        .login-box-card {
+            padding: 1rem !important;
+            border-radius: 16px;
+        }
+
+        .card-body {
+            padding: 0 !important;
+        }
+
+        /* Heading sizing */
+        .h3, h3 {
+            font-size: 1.1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.5rem !important;
+        }
+
+        /* Form styling */
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .form-control-lg {
+            font-size: 16px; /* Prevent iOS zoom */
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+        }
+
+        .form-control:focus {
+            border-color: #c25e25 !important;
+            box-shadow: 0 0 0 0.15rem rgba(194, 94, 37, 0.15) !important;
+        }
+
+        /* Button sizing */
+        .btn {
+            padding: 0.65rem 1rem;
+            font-size: 0.9rem;
+            min-height: 44px;
+            border-radius: 0.5rem;
+        }
+
+        .btn-soft-orange {
+            width: 100%;
+        }
+
+        /* Google button */
+        .google-signin-btn {
+            width: 100%;
+            padding: 0.65rem 1rem !important;
+            font-size: 0.9rem;
+        }
+
+        /* Alert sizing */
+        .alert {
+            font-size: 0.8rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+        }
+
+        /* Text utilities */
+        .text-muted {
+            font-size: 0.8rem;
+        }
+
+        .small {
+            font-size: 0.75rem;
+        }
+
+        /* Icon sizing */
+        .fa-2x {
+            font-size: 1.2rem;
+        }
+
+        .fa-lg {
+            font-size: 1rem;
+        }
+
+        /* Row and column adjustments */
+        .row {
+            gap: 0.75rem !important;
+        }
+
+        .gap-5 {
+            gap: 0.75rem !important;
+        }
+
+        .col-md-6, .col-xl-5 {
+            flex-basis: 100%;
+        }
+
+        /* Link styling */
+        a {
+            word-break: break-word;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Modal and dropdown adjustments */
+        .dropdown-menu {
+            max-width: 95vw;
+        }
+    }
 </style>
 
 <div class="container my-auto content-wrapper">

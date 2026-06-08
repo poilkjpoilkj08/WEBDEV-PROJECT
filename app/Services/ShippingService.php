@@ -442,5 +442,41 @@ class ShippingService
     {
         return self::ZONE_PRICING;
     }
+
+    /**
+     * Filter shipping methods based on zone
+     * Instant/SameDay shipping only available for zones A, B, C
+     * 
+     * @param string $zone Zone letter (A-E)
+     * @return array Filtered list of available methods
+     */
+    public function getAvailableShippingMethods($zone = 'C')
+    {
+        $zone = strtoupper($zone ?? 'C');
+        
+        // Methods available for all zones
+        $allZoneMethods = [
+            'jne_reg' => true,
+            'jnt_reg' => true,
+            'sicepat' => true,
+            'pos_biasa' => true,
+            'jne_yes' => true, // Next day available for all zones
+        ];
+        
+        // Instant/SameDay only for zones A, B, C
+        $instantMethods = [
+            'gosend' => true,
+            'grab_instant' => true,
+        ];
+        
+        // Combine based on zone
+        $available = $allZoneMethods;
+        
+        if (in_array($zone, ['A', 'B', 'C'])) {
+            $available = array_merge($available, $instantMethods);
+        }
+        
+        return array_keys($available);
+    }
 }
 

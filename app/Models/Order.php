@@ -14,6 +14,7 @@ class Order extends Model
         'status',
         'payment_url',
         'payment_method',
+        'payment_status',
         'paid_at',
         'payment_processed',
         // Shipping fields
@@ -85,6 +86,24 @@ class Order extends Model
     public function getGrandTotalAttribute()
     {
         return $this->total_price + ($this->shipping_cost ?? 0);
+    }
+
+    /**
+     * Calculate total weight of all items in order (in grams)
+     */
+    public function getTotalWeightAttribute()
+    {
+        return $this->order_details()->sum(function ($detail) {
+            return ($detail->weight_grams ?? 300) * $detail->quantity;
+        });
+    }
+
+    /**
+     * Calculate total weight in kg with 2 decimal places
+     */
+    public function getTotalWeightKgAttribute()
+    {
+        return round($this->total_weight / 1000, 2);
     }
 
     /**

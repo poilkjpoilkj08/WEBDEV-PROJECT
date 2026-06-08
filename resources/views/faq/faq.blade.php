@@ -143,6 +143,204 @@
         0%, 100% { opacity: 1; }
         50% { opacity: 0; }
     }
+
+    /* ===== RESPONSIVE STYLES FOR FAQ PAGE ===== */
+    @media (max-width: 768px) {
+        /* Body padding adjustment */
+        body {
+            padding-top: 80px;
+        }
+
+        /* Container padding */
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Glass header box */
+        .glass-header-box {
+            padding: 10px 20px;
+            border-radius: 30px;
+        }
+
+        /* Heading sizing */
+        .h1, h1 {
+            font-size: 1.5rem;
+        }
+
+        .h2, h2 {
+            font-size: 1.25rem;
+        }
+
+        .h5, h5 {
+            font-size: 1rem;
+        }
+
+        /* FAQ button sizing */
+        .faq-btn {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* Gap adjustments */
+        .gap-4 {
+            gap: 1.5rem !important;
+        }
+
+        /* Text utilities */
+        .text-muted {
+            font-size: 0.95rem;
+        }
+
+        .small {
+            font-size: 0.9rem;
+        }
+
+        /* Row/column spacing */
+        .row {
+            gap: 1rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Extra small screens */
+        body {
+            padding-top: 70px;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Container padding */
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        /* Glass header box */
+        .glass-header-box {
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 1.5rem !important;
+        }
+
+        /* Heading sizing */
+        .h1, h1 {
+            font-size: 1.25rem;
+        }
+
+        .h2, h2 {
+            font-size: 1.1rem;
+        }
+
+        .h5, h5 {
+            font-size: 0.95rem;
+        }
+
+        .mb-5 {
+            margin-bottom: 1.5rem !important;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+
+        /* FAQ button sizing and styling */
+        .faq-btn {
+            padding: 10px 12px;
+            font-size: 0.8rem;
+            border-radius: 12px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        .faq-btn:hover {
+            transform: translateX(4px);
+        }
+
+        /* FAQ icon sizing */
+        .faq-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* FAQ control panel */
+        .faq-control-panel {
+            gap: 8px;
+        }
+
+        /* FAQ response box */
+        .faq-response-box {
+            padding: 1rem;
+            border-radius: 12px;
+            min-height: 200px;
+        }
+
+        /* Response text sizing */
+        .faq-response-content {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Cursor sizing */
+        .cursor {
+            width: 2px;
+            margin-left: 2px;
+        }
+
+        /* Text utilities */
+        .text-muted {
+            font-size: 0.85rem;
+        }
+
+        .small {
+            font-size: 0.8rem;
+        }
+
+        /* Icon sizing */
+        .fa-4x {
+            font-size: 1.75rem;
+        }
+
+        .fa-3x {
+            font-size: 1.5rem;
+        }
+
+        .fa-2x {
+            font-size: 1.2rem;
+        }
+
+        /* Row/column spacing */
+        .row {
+            gap: 0.75rem !important;
+        }
+
+        .gap-4 {
+            gap: 1rem !important;
+        }
+
+        .gap-3 {
+            gap: 0.75rem !important;
+        }
+
+        /* Column sizing */
+        .col-xl-11 {
+            flex-basis: 100%;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Link wrapping */
+        a {
+            word-break: break-word;
+        }
+    }
 </style>
 
 <div class="container py-5 content-wrapper">

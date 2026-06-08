@@ -84,6 +84,249 @@
         padding: 16px 24px;
         display: inline-block;
     }
+
+    /* ===== RESPONSIVE STYLES FOR AUTHOR SHOW PAGE ===== */
+    @media (max-width: 768px) {
+        /* Body padding adjustment */
+        body {
+            padding-top: 80px;
+        }
+
+        /* Container padding */
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Glass header box */
+        .glass-header-box {
+            padding: 10px 20px;
+            border-radius: 30px;
+        }
+
+        /* Card sizing */
+        .card {
+            border-radius: 16px;
+            padding: 1.5rem !important;
+        }
+
+        /* Heading sizing */
+        .h1, h1 {
+            font-size: 1.5rem;
+        }
+
+        .h2, h2 {
+            font-size: 1.25rem;
+        }
+
+        .h5, h5 {
+            font-size: 1rem;
+        }
+
+        /* Book card sizing */
+        .book-ui-card {
+            border-radius: 12px;
+        }
+
+        /* Button sizing */
+        .btn {
+            padding: 0.6rem 0.9rem;
+            font-size: 0.9rem;
+        }
+
+        /* Stat badge sizing */
+        .stat-badge-box {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* Row/column spacing */
+        .row {
+            gap: 1rem !important;
+        }
+
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+
+        /* Text utilities */
+        .text-muted {
+            font-size: 0.95rem;
+        }
+
+        .small {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Extra small screens */
+        body {
+            padding-top: 70px;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Container padding */
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        /* Glass header box */
+        .glass-header-box {
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        /* Card sizing and padding */
+        .card {
+            border-radius: 14px;
+            padding: 1rem !important;
+        }
+
+        .p-md-5 {
+            padding: 1rem !important;
+        }
+
+        /* Heading sizing */
+        .h1, h1 {
+            font-size: 1.25rem;
+        }
+
+        .h2, h2 {
+            font-size: 1.1rem;
+        }
+
+        .h5, h5 {
+            font-size: 0.95rem;
+        }
+
+        .display-6 {
+            font-size: 1.25rem;
+        }
+
+        .mb-5 {
+            margin-bottom: 1.5rem !important;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+
+        /* Book card sizing */
+        .book-ui-card {
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        /* Button sizing */
+        .btn {
+            padding: 0.65rem 1rem;
+            font-size: 0.8rem;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50px;
+        }
+
+        .px-4 {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+
+        /* Stat badge sizing */
+        .stat-badge-box {
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Back link */
+        .text-decoration-none {
+            font-size: 0.8rem;
+        }
+
+        /* Row/column layout */
+        .row {
+            gap: 0.75rem !important;
+            flex-direction: column;
+        }
+
+        .col-12, .col-md-6, .col-lg-4 {
+            flex-basis: 100%;
+        }
+
+        .align-items-center {
+            align-items: flex-start !important;
+        }
+
+        .gap-2 {
+            gap: 0.25rem !important;
+        }
+
+        .gap-3 {
+            gap: 0.5rem !important;
+        }
+
+        /* Flex layout adjustments */
+        .d-inline-flex {
+            display: flex !important;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .d-flex {
+            flex-direction: column;
+        }
+
+        /* Text utilities */
+        .text-muted {
+            font-size: 0.85rem;
+        }
+
+        .small {
+            font-size: 0.8rem;
+        }
+
+        .font-monospace {
+            font-size: 0.75rem;
+        }
+
+        /* Icon sizing */
+        .fa-4x {
+            font-size: 1.75rem;
+        }
+
+        .fa-3x {
+            font-size: 1.5rem;
+        }
+
+        .fa-2x {
+            font-size: 1.2rem;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Border utilities */
+        .border-top {
+            border-top: 1px solid #eee !important;
+            padding-top: 1rem !important;
+        }
+
+        /* Links */
+        a {
+            word-break: break-word;
+        }
+    }
 </style>
 
 <div class="container py-5">

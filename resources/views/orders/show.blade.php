@@ -230,40 +230,43 @@
         </div>
     </div>
 
-    {{-- Delivery Confirmation Section --}}
-    @if($order->shipping_status === 'delivered' && !$order->delivery_confirmed_by_user)
-    <div class="row g-4 mt-4">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 border-warning">
-                <div class="card-header bg-warning bg-opacity-10 fw-bold py-3">
-                    <i class="fas fa-box-open me-2 text-warning"></i>Confirm Receipt of Delivery
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">
-                        Your package has been shipped. Please confirm once you've received it safely to complete the transaction.
-                    </p>
-                    @if($order->delivery_confirmation_deadline)
-                        @php
-                            $daysRemaining = now()->diffInDays($order->delivery_confirmation_deadline, false);
-                            $hoursRemaining = now()->diffInHours($order->delivery_confirmation_deadline, false);
-                        @endphp
-                        <div class="alert alert-info mb-3">
-                            <i class="fas fa-hourglass-end me-2"></i>
-                            <strong>Confirmation Deadline:</strong> 
-                            @if($daysRemaining >= 1)
-                                {{ abs($daysRemaining) }} day(s) remaining
-                            @else
-                                {{ abs($hoursRemaining) }} hour(s) remaining
-                            @endif
-                        </div>
-                    @endif
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmDeliveryModal">
-                        <i class="fas fa-check me-2"></i>Confirm Receipt
-                    </button>
+    {{-- Delivery Confirmation Section (users only) --}}
+    @if(!in_array('admin', $userRoles) && !in_array('owner', $userRoles))
+        @if($order->shipping_status === 'delivered' && !$order->delivery_confirmed_by_user)
+        <div class="row g-4 mt-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 border-warning">
+                    <div class="card-header bg-warning bg-opacity-10 fw-bold py-3">
+                        <i class="fas fa-box-open me-2 text-warning"></i>Confirm Receipt of Delivery
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Your package has been shipped. Please confirm once you've received it safely to complete the transaction.
+                        </p>
+                        @if($order->delivery_confirmation_deadline)
+                            @php
+                                $daysRemaining = now()->diffInDays($order->delivery_confirmation_deadline, false);
+                                $hoursRemaining = now()->diffInHours($order->delivery_confirmation_deadline, false);
+                            @endphp
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-hourglass-end me-2"></i>
+                                <strong>Confirmation Deadline:</strong> 
+                                @if($daysRemaining >= 1)
+                                    {{ abs($daysRemaining) }} day(s) remaining
+                                @else
+                                    {{ abs($hoursRemaining) }} hour(s) remaining
+                                @endif
+                            </div>
+                        @endif
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmDeliveryModal">
+                            <i class="fas fa-check me-2"></i>Confirm Receipt
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+        @endif
+    @endif
 
     <!-- Confirm Delivery Modal -->
     <div class="modal fade" id="confirmDeliveryModal" tabindex="-1">
@@ -292,7 +295,6 @@
             </div>
         </div>
     </div>
-    @endif
 
     {{-- Refund Request Section (users only) --}}
     @if(!in_array('admin', $userRoles) && !in_array('owner', $userRoles))
@@ -694,4 +696,265 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<style>
+/* ===== RESPONSIVE STYLES FOR ORDER SHOW PAGE ===== */
+@media (max-width: 768px) {
+    /* Heading sizing */
+    .display-6 {
+        font-size: 1.5rem;
+    }
+
+    .h1 {
+        font-size: 1.5rem;
+    }
+
+    .h6 {
+        font-size: 0.95rem;
+    }
+
+    /* Card layouts */
+    .card {
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Button sizing */
+    .btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    /* Row spacing */
+    .row.g-4 {
+        gap: 1.5rem !important;
+    }
+
+    /* Badge sizing */
+    .badge {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    /* Table text sizing */
+    .text-muted.small {
+        font-size: 0.85rem;
+    }
+
+    /* Price display */
+    .fw-bold.text-success {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra small screens */
+    .container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    /* Heading sizing */
+    .display-6 {
+        font-size: 1.25rem;
+    }
+
+    .h1, h1 {
+        font-size: 1.25rem;
+    }
+
+    .h6, h6 {
+        font-size: 0.9rem;
+    }
+
+    /* Page header better on mobile */
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem !important;
+    }
+
+    .text-end {
+        text-align: left !important;
+    }
+
+    /* Cards stack better */
+    .row.g-4 > [class*='col-'] {
+        margin-bottom: 0.5rem;
+    }
+
+    .card {
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        padding: 1rem !important;
+    }
+
+    .card-body {
+        padding: 1rem !important;
+    }
+
+    /* Item list styling */
+    .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .d-flex.justify-content-between {
+        flex-direction: row;
+    }
+
+    /* Information layout */
+    .row.g-3 {
+        gap: 0.75rem !important;
+    }
+
+    .row.g-3 > [class*='col-'] {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Shipping breakdown */
+    .small.bg-light {
+        padding: 1rem !important;
+        font-size: 0.85rem;
+    }
+
+    .small.bg-light .ps-3 {
+        padding-left: 0.75rem !important;
+    }
+
+    /* Price and summary text */
+    .fw-semibold {
+        font-weight: 600;
+    }
+
+    .text-primary {
+        font-size: 0.95rem;
+    }
+
+    .text-success {
+        font-size: 0.95rem;
+    }
+
+    /* Button sizing */
+    .btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-group {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btn-group .btn {
+        flex: 1;
+    }
+
+    /* Badge sizing */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+    }
+
+    /* Modal sizing */
+    .modal-dialog {
+        max-width: 95%;
+        margin: 0.5rem auto;
+    }
+
+    .modal-header {
+        padding: 1rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-footer {
+        padding: 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    /* Form controls in modals */
+    .form-label {
+        font-size: 0.95rem;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: 0.75rem;
+    }
+
+    /* File upload area */
+    #refundUploadArea {
+        padding: 1.5rem !important;
+    }
+
+    #refundUploadArea .fa-2x {
+        font-size: 1.5rem;
+    }
+
+    #refundUploadArea p {
+        font-size: 0.85rem;
+    }
+
+    /* Alert sizing */
+    .alert {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Icon sizing */
+    .fa-2x {
+        font-size: 1.5rem;
+    }
+
+    .fa-3x {
+        font-size: 2rem;
+    }
+
+    /* Text utilities */
+    .text-muted {
+        font-size: 0.85rem;
+    }
+
+    .small {
+        font-size: 0.8rem;
+    }
+
+    /* Prevent horizontal overflow */
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Monospace font sizing */
+    .font-monospace {
+        font-size: 0.85rem;
+    }
+
+    /* Border utilities */
+    .border-bottom {
+        margin-bottom: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+
+    .border-top {
+        margin-top: 0.75rem !important;
+        padding-top: 0.75rem !important;
+    }
+
+    /* Link styling */
+    a {
+        word-break: break-word;
+    }
+}
+</style>
 @endsection

@@ -392,6 +392,191 @@
         border-radius: 6px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
+
+    /* ===== RESPONSIVE STYLES FOR MOBILE & TABLET ===== */
+    @media (max-width: 768px) {
+        /* Improve form field spacing on mobile */
+        .form-control,
+        .form-select {
+            font-size: 16px !important; /* Prevent auto-zoom on iOS */
+            padding: 0.75rem !important;
+        }
+
+        /* Larger buttons on mobile for easier tapping */
+        .btn {
+            padding: 0.65rem 1rem !important;
+            font-size: 0.95rem !important;
+            min-height: 44px; /* iOS recommendation for touch targets */
+        }
+
+        /* Full-width buttons in checkout context */
+        .checkout-card .btn-block,
+        .checkout-card .btn-soft-orange,
+        .checkout-card .btn-outline-soft-orange {
+            width: 100% !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        /* Improve checkout card spacing */
+        .checkout-card {
+            margin-bottom: 1.5rem !important;
+            padding: 1rem !important;
+        }
+
+        /* Item list better spacing */
+        .d-flex {
+            flex-direction: column !important;
+        }
+
+        .d-flex.align-items-center {
+            flex-direction: row !important;
+        }
+
+        /* Form labels more readable */
+        label.form-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem !important;
+        }
+
+        /* Reduce map height on smaller screens */
+        #mapPickerModal .modal-dialog {
+            height: 70vh !important;
+            max-height: 600px !important;
+        }
+
+        /* Summary sidebar better on mobile */
+        .order-summary {
+            margin-top: 2rem !important;
+        }
+
+        /* Better spacing for list items */
+        .list-group-item {
+            padding: 1rem !important;
+        }
+
+        /* Badge sizing */
+        .badge {
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.85rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Extra small screens - aggressive optimizations */
+        .container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+
+        .checkout-card {
+            padding: 0.75rem !important;
+            margin-bottom: 1rem !important;
+            border-radius: 8px !important;
+        }
+
+        /* Stack form groups tighter */
+        .form-group,
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+
+        /* Button text on small screens */
+        .btn {
+            padding: 0.6rem 0.8rem !important;
+            font-size: 0.9rem !important;
+        }
+
+        /* Hide unnecessary text on very small screens */
+        .d-none-xs {
+            display: none !important;
+        }
+
+        /* Heading sizing on mobile */
+        h3, .h3 {
+            font-size: 1.25rem !important;
+        }
+
+        h4, .h4 {
+            font-size: 1.1rem !important;
+        }
+
+        /* Ensure inputs and selects are fully visible */
+        .form-control,
+        .form-select {
+            width: 100% !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        /* Better row/column spacing */
+        .row {
+            margin-left: -0.375rem !important;
+            margin-right: -0.375rem !important;
+        }
+
+        .row > [class*='col-'] {
+            padding-left: 0.375rem !important;
+            padding-right: 0.375rem !important;
+        }
+
+        /* Map autocomplete dropdown more readable */
+        .map-autocomplete-results {
+            width: calc(100% - 30px) !important;
+            left: 15px !important;
+            max-width: calc(100vw - 30px);
+        }
+
+        /* Shipping options easier to read */
+        .shipping-option {
+            margin-bottom: 0.75rem !important;
+            padding: 0.75rem !important;
+        }
+
+        /* Store select cards fit better */
+        .item-store-select {
+            min-width: 100% !important;
+        }
+
+        /* Payment method options */
+        .form-check {
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem !important;
+        }
+
+        .form-check-input {
+            width: 1.1rem;
+            height: 1.1rem;
+            margin-top: 0.2rem;
+        }
+
+        /* Text truncation for long titles */
+        .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Icons sizing */
+        .fa, [class*='fa-'] {
+            font-size: 1.1rem;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+
+        .container-fluid {
+            overflow-x: hidden;
+        }
+
+        /* Alert sizing */
+        .alert {
+            padding: 0.75rem !important;
+            font-size: 0.9rem !important;
+            margin-bottom: 1rem !important;
+        }
+    }
 </style>
 
 <div class="bg-white" style="position: relative; z-index: 4; padding-top: 40px;">
@@ -455,7 +640,6 @@
                                             class="form-select form-select-sm rounded-3 item-store-select fw-medium text-secondary" 
                                             data-book-id="{{ $item['book']->id }}" 
                                             @if(!$item['store_id']) required @endif>
-                                        <option value="">-- Select Store Location --</option>
                                         @foreach($stores as $store)
                                             @php
                                                 $storeBook = $item['book']->storeLocations()->where('store_location_id', $store->id)->first();
@@ -551,9 +735,9 @@
                                 <div class="row g-3 m-0 p-0" id="addressFormFields">
                                     {{-- Primary Form Fields --}}
                                     <div class="col-md-6 mt-2">
-                                        <label class="form-label fw-semibold text-dark small">Recipient Full Name *</label>
-                                        <input type="text" name="shipping_name" value="{{ old('shipping_name', auth()->user()->name) }}"
-                                               required class="form-control rounded-3 text-dark border" style="border-color: #ced4da !important; font-size: 0.85rem;" placeholder="e.g. John Doe">
+                                        <label class="form-label fw-semibold text-dark small">Recipient Full Name <small class="text-muted">(from account)</small></label>
+                                        <input type="text" name="shipping_name" value="{{ auth()->user()->name }}"
+                                               readonly class="form-control rounded-3 text-dark border bg-light" style="border-color: #ced4da !important; font-size: 0.85rem;">
                                     </div>
                                     <div class="col-md-6 mt-2">
                                         <label class="form-label fw-semibold text-dark small">Contact Phone Number *</label>
@@ -1372,7 +1556,7 @@ function displayPerStoreShippingBreakdown(shippingByStore) {
         'A': 'Same Province', 'B': 'Same Province, Different City', 'C': 'Same Island, Different Province', 'D': 'Different Main Islands', 'E': 'Remote Area'
     };
 
-    let html = '<div class="p-3 my-3 rounded-4" style="background: #fdf6f0; border: 1px solid #fbd3bc; border-left: 4px solid #c25e25 !important;"><p class="mb-2 text-dark small fw-bold text-uppercase tracking-wider" style="font-size: 0.65rem;">Courier Breakdown Logistics</p>';
+    let html = '<div class="p-3 my-3 rounded-4" style="background: #fdf6f0; border: 1px solid #fbd3bc; border-left: 4px solid #c25e25 !important;">';
     
     const storeInfo = {};
     document.querySelectorAll('.item-store-select').forEach(select => {
@@ -1390,35 +1574,38 @@ function displayPerStoreShippingBreakdown(shippingByStore) {
     for (const [storeId, data] of Object.entries(shippingByStore)) {
         const b = data.breakdown;
         const totalWeight = (b.weight_kg || 0).toFixed(2);
-        const extraWeight = (b.extra_kg || 0).toFixed(2);
         const zoneCategory = zoneLabels[b.zone] || 'Unknown Zone';
         const storeName = storeInfo[storeId]?.name || `Store #${storeId}`;
         const books = storeInfo[storeId]?.books || [];
         
-        let weightDisplay = `${totalWeight}kg`;
-        if (extraWeight > 0) weightDisplay += ` (above 1kg: ${extraWeight}kg)`;
-        let booksHtml = books.length > 0 ? books.map(b => `<div class="ps-2 small text-muted text-truncate" style="font-size: 0.75rem;">• ${b}</div>`).join('') : '';
+        let booksHtml = books.length > 0 ? books.map(b => `<div style="font-size: 0.8rem; margin-bottom: 0.25rem;">• ${b}</div>`).join('') : '';
         
         html += `
-        <div class="mb-2 p-3 bg-white border rounded-3" style="border-color: #eef0f2 !important;">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <div>
-                    <strong class="text-dark small">From: ${storeName}</strong>
-                    ${booksHtml}
-                    <small class="d-block text-muted mt-1" style="font-size: 0.7rem;">Zone <strong>${b.zone}</strong> (${zoneCategory})</small>
-                </div>
-                <strong style="color: #c25e25; font-size: 0.9rem;">${data.display}</strong>
-            </div>
-            <small class="d-block text-muted mb-2" style="font-size: 0.7rem;">Combined Weight: ${weightDisplay}</small>
-            <div class="ps-1 text-secondary" style="font-size: 0.75rem;">
-                <div class="d-flex justify-content-between mb-0.5"><span>Base Tariff:</span><span>Rp ${(b.zone_base || 0).toLocaleString('id-ID')}</span></div>
-                <div class="d-flex justify-content-between mb-0.5"><span>Weight Fee:</span><span>Rp ${(b.weight_fee || 0).toLocaleString('id-ID')}</span></div>
-                <div class="d-flex justify-content-between;"><span>Service (${b.service_level || 'N/A'}):</span><span>Rp ${(b.service_surcharge || 0).toLocaleString('id-ID')}</span></div>
+        <div style="margin-bottom: 1.5rem; line-height: 1.6;">
+            <div style="font-weight: bold; color: #333; font-size: 0.85rem;"><strong>From: ${storeName}</strong></div>
+            ${booksHtml}
+            <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">Zone <strong>${b.zone}</strong> (${zoneCategory})</div>
+            <div style="font-weight: bold; color: #c25e25; font-size: 0.9rem; margin-top: 0.5rem;"><strong>${data.display}</strong></div>
+            <div style="margin-top: 0.75rem; font-size: 0.8rem; color: #666;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;"><span>Base Tariff:</span><span>Rp ${(b.zone_base || 0).toLocaleString('id-ID')}</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Service (${b.service_level || 'reg'}):</span><span>Rp ${(b.service_surcharge || 0).toLocaleString('id-ID')}</span></div>
             </div>
         </div>`;
     }
     
-    html += '</div>';
+    // Add combined weight summary at the end
+    let totalCombinedWeight = 0;
+    let totalWeightFee = 0;
+    for (const data of Object.values(shippingByStore)) {
+        totalCombinedWeight += (data.breakdown.weight_kg || 0);
+        totalWeightFee += (data.breakdown.weight_fee || 0);
+    }
+    
+    html += `<div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #fbd3bc; font-size: 0.8rem; color: #666;">
+        <div style="margin-bottom: 0.5rem;"><span>Combined Weight: </span><strong>${totalCombinedWeight.toFixed(2)}kg</strong></div>
+        <div style="display: flex; justify-content: space-between;"><span>weight fee (combined)</span><span>Rp ${(totalWeightFee || 0).toLocaleString('id-ID')}</span></div>
+    </div></div>`;
+    
     breakdownContainer.innerHTML = html;
     breakdownContainer.style.display = 'block';
 }
@@ -1580,7 +1767,8 @@ document.getElementById('payButton').addEventListener('click', function(e) {
         const firstStoreData = window.shippingByStore[firstStoreId];
         if (firstStoreData && firstStoreData.breakdown) {
             formData.append('shipping_zone', firstStoreData.breakdown.zone || 'C');
-            formData.append('shipping_breakdown', JSON.stringify(firstStoreData.breakdown));
+            // Send ALL store breakdowns, not just the first one
+            formData.append('shipping_breakdown', JSON.stringify(window.shippingByStore));
         }
     }
 

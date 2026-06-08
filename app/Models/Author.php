@@ -16,7 +16,6 @@ class Author extends Model
         'phone',
         'bio',
         'photo_url',
-        'publisher',
         'user_id',
         'is_active'
     ];

@@ -33,4 +33,32 @@ class Refund extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Get the image URL for this refund's evidence
+     * Returns null if image doesn't exist
+     */
+    public function getImageUrl(): ?string
+    {
+        if (!$this->image_path) {
+            return null;
+        }
+
+        try {
+            // Check if file exists in public folder
+            $filePath = public_path($this->image_path);
+            if (file_exists($filePath)) {
+                // Return public URL (no symlink needed)
+                return '/' . $this->image_path;
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Refund image URL generation failed', [
+                'refund_id' => $this->id,
+                'image_path' => $this->image_path,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return null;
+    }
 }

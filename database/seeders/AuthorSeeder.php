@@ -174,6 +174,36 @@ class AuthorSeeder extends Seeder
                 'user_id' => null,
                 'is_active' => true,
             ],
+            [
+                'name' => 'J.R.R. Tolkien',
+                'email' => 'jrr.tolkien@authors.com',
+                'phone' => '555-0216',
+                'bio' => 'British writer, philologist, and university professor. Creator of Middle-earth and author of The Hobbit and The Lord of the Rings.',
+                'photo_url' => 'https://via.placeholder.com/300x300?text=J.R.R.+Tolkien',
+                'publisher' => 'Allen & Unwin',
+                'user_id' => null,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Umberto Eco',
+                'email' => 'umberto.eco@authors.com',
+                'phone' => '+39-051-293111',
+                'bio' => 'Italian semiotician, philosopher, novelist, and author known for his works blending semiotics with historical fiction.',
+                'photo_url' => 'https://via.placeholder.com/300x300?text=Umberto+Eco',
+                'publisher' => 'Bompiani',
+                'user_id' => null,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Günter Grass',
+                'email' => 'guenter.grass@authors.com',
+                'phone' => '+49-431-67017',
+                'bio' => 'German author, playwright, sculptor, and Nobel Prize winner known for exploring German history and identity.',
+                'photo_url' => 'https://via.placeholder.com/300x300?text=Gunter+Grass',
+                'publisher' => 'Klett-Cotta',
+                'user_id' => null,
+                'is_active' => true,
+            ],
         ];
 
         foreach ($authors as $author) {

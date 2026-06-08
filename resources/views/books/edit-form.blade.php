@@ -61,7 +61,6 @@
                                     <option value="Chinese" {{ old('language', $book->language) == 'Chinese' ? 'selected' : '' }}>Chinese</option>
                                     <option value="Japanese" {{ old('language', $book->language) == 'Japanese' ? 'selected' : '' }}>Japanese</option>
                                     <option value="Korean" {{ old('language', $book->language) == 'Korean' ? 'selected' : '' }}>Korean</option>
-                                    <option value="Other" {{ old('language', $book->language) == 'Other' ? 'selected' : '' }}>Other</option>
                                 </select>
                                 @error('language') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
@@ -78,17 +77,52 @@
                         </div>
 
                         <div class="row g-3 mt-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Publisher</label>
-                                <input type="text" name="publisher" value="{{ old('publisher', $book->publisher) }}" class="form-control @error('publisher') is-invalid @enderror">
-                                @error('publisher') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Publishers</label>
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        @if($book->publishers && $book->publishers->count() > 0)
+                                            <div class="mb-3">
+                                                <h6 class="text-muted mb-2">Current Publishers:</h6>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    @foreach($book->publishers as $publisher)
+                                                        <span class="badge bg-primary d-flex align-items-center gap-2">
+                                                            {{ $publisher->name }}
+                                                            <button type="button" class="btn-close btn-close-white remove-publisher" data-publisher-id="{{ $publisher->id }}" style="font-size: 0.7rem;"></button>
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                            <hr>
+                                        @else
+                                            <p class="text-muted small mb-3">No publishers assigned yet.</p>
+                                            <hr>
+                                        @endif
+                                        <div id="selectedPublishersContainer"></div>
+                                        <div class="row g-2">
+                                            <div class="col-md-10">
+                                                <select id="publisherSelect" class="form-select">
+                                                    <option value="">-- Select a publisher to add --</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" id="addPublisherBtn" class="btn btn-outline-primary w-100">
+                                                    <i class="fas fa-plus me-1"></i>Add
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="publisherIds" name="publisher_ids" value="{{ $book->publishers->pluck('id')->implode(',') }}">
                             </div>
+                        </div>
+
+                        <div class="row g-3 mt-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
                                 <select name="status" required class="form-select @error('status') is-invalid @enderror">
                                     <option value="available" {{ old('status', $book->status) == 'available' ? 'selected' : '' }}>Available</option>
                                     <option value="out_of_stock" {{ old('status', $book->status) == 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
-                                    <option value="discontinued" {{ old('status', $book->status) == 'discontinued' ? 'selected' : '' }}>Discontinued</option>
                                 </select>
                                 @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
@@ -159,4 +193,322 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load publishers and initialize
+    let allPublishers = [];
+    let selectedPublisherIds = new Set();
+    
+    // Initialize selected publishers from existing book data
+    const initialPublisherIds = document.getElementById('publisherIds').value;
+    if (initialPublisherIds) {
+        initialPublisherIds.split(',').forEach(id => {
+            if (id) selectedPublisherIds.add(parseInt(id));
+        });
+    }
+    
+    fetch('{{ route('api.publishers.get-or-create') }}')
+        .then(response => response.json())
+        .then(data => {
+            allPublishers = data;
+            updatePublisherOptions();
+        })
+        .catch(error => console.error('Error loading publishers:', error));
+    
+    function updatePublisherOptions() {
+        const select = document.getElementById('publisherSelect');
+        const currentOptions = Array.from(select.options).slice(1); // Skip first option
+        currentOptions.forEach(option => option.remove());
+        
+        allPublishers.forEach(publisher => {
+            if (!selectedPublisherIds.has(publisher.id)) {
+                const option = document.createElement('option');
+                option.value = publisher.id;
+                option.text = publisher.name;
+                select.appendChild(option);
+            }
+        });
+    }
+    
+    function renderSelectedPublishers() {
+        const container = document.getElementById('selectedPublishersContainer');
+        const publisherIds = document.getElementById('publisherIds');
+        
+        // Create display for selected publishers that were just added
+        const newlySelectedPublishers = allPublishers.filter(p => selectedPublisherIds.has(p.id));
+        
+        let html = '';
+        if (newlySelectedPublishers.length > 0) {
+            html = '<h6 class="text-muted mb-2">Selected Publishers:</h6><div class="d-flex flex-wrap gap-2">' +
+                newlySelectedPublishers.map(p => `
+                    <span class="badge bg-primary d-flex align-items-center gap-2">
+                        ${p.name}
+                        <button type="button" class="btn-close btn-close-white remove-publisher" data-publisher-id="${p.id}" style="font-size: 0.7rem;"></button>
+                    </span>
+                `).join('') + '</div>';
+        }
+        
+        // If there are no newly selected, but we still have current ones, they display in the blade template
+        if (newlySelectedPublishers.length === 0) {
+            container.innerHTML = '';
+        } else {
+            container.innerHTML = html;
+        }
+        
+        publisherIds.value = Array.from(selectedPublisherIds).join(',');
+        
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.remove-publisher').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const publisherId = parseInt(btn.getAttribute('data-publisher-id'));
+                selectedPublisherIds.delete(publisherId);
+                renderSelectedPublishers();
+                updatePublisherOptions();
+            });
+        });
+    }
+    
+    document.getElementById('addPublisherBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        const select = document.getElementById('publisherSelect');
+        const publisherId = parseInt(select.value);
+        
+        if (publisherId) {
+            selectedPublisherIds.add(publisherId);
+            select.value = '';
+            renderSelectedPublishers();
+            updatePublisherOptions();
+        }
+    });
+    
+    // Status change handler: disable stock inputs when out of stock
+    const statusSelect = document.querySelector('select[name="status"]');
+    const storeStockInputs = document.querySelectorAll('input[name^="store_stock"]');
+    
+    function updateStockFieldsState() {
+        const isOutOfStock = statusSelect.value === 'out_of_stock';
+        
+        storeStockInputs.forEach(input => {
+            input.disabled = isOutOfStock;
+            if (isOutOfStock) {
+                input.value = '0';
+                input.style.backgroundColor = '#f5f5f5';
+                input.style.cursor = 'not-allowed';
+            } else {
+                input.style.backgroundColor = '';
+                input.style.cursor = '';
+            }
+        });
+    }
+    
+    statusSelect.addEventListener('change', updateStockFieldsState);
+    
+    // Initialize on page load
+    updateStockFieldsState();
+});
+</script>
+
+<style>
+    /* ===== RESPONSIVE STYLES FOR BOOK EDIT FORM ===== */
+    @media (max-width: 768px) {
+        /* Container padding */
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Column sizing */
+        .col-xl-10 {
+            max-width: 100%;
+        }
+
+        /* Card styling */
+        .card {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Heading sizing */
+        .h3 {
+            font-size: 1.1rem;
+        }
+
+        /* Button sizing */
+        .btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Form controls */
+        .form-control, .form-select {
+            font-size: 0.95rem;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+        }
+
+        /* Row spacing */
+        .row {
+            gap: 0.75rem;
+        }
+
+        .g-3 {
+            gap: 0.75rem;
+        }
+
+        /* Margin utilities */
+        .mb-3, .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+
+        .mt-3 {
+            margin-top: 1rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Extra small screens */
+        body {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Container padding */
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .py-5 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+
+        /* Column sizing */
+        .col-xl-10 {
+            max-width: 100%;
+        }
+
+        .col-md-6, .col-md-4 {
+            max-width: 100%;
+            flex-basis: 100%;
+        }
+
+        /* Card styling */
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #dee2e6 !important;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        /* Heading sizing */
+        .h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem !important;
+        }
+
+        /* Button sizing and layout */
+        .btn {
+            padding: 0.65rem 1rem;
+            font-size: 0.8rem;
+            min-height: 44px;
+            width: auto;
+        }
+
+        .btn-outline-secondary {
+            padding: 0.6rem 0.8rem;
+        }
+
+        .btn-primary, .btn-success {
+            width: 100%;
+        }
+
+        /* Form controls */
+        .form-control, .form-select {
+            font-size: 16px;
+            padding: 0.6rem 0.75rem;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Error feedback */
+        .invalid-feedback {
+            font-size: 0.75rem;
+        }
+
+        /* Row and column layout */
+        .row {
+            gap: 0.5rem;
+            flex-direction: column;
+        }
+
+        .g-3 {
+            gap: 0.5rem;
+        }
+
+        /* Input group */
+        .input-group {
+            flex-direction: row;
+        }
+
+        .input-group .form-control {
+            min-width: 0;
+        }
+
+        /* Dropdown */
+        #publisherDropdown {
+            max-height: 150px !important;
+            max-width: 95vw !important;
+        }
+
+        /* Margin utilities */
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+
+        .mt-3 {
+            margin-top: 0.75rem !important;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem !important;
+        }
+
+        .text-danger {
+            font-size: 0.9rem;
+        }
+
+        /* Small text */
+        .small {
+            font-size: 0.75rem;
+        }
+
+        /* Icon sizing */
+        .fa {
+            font-size: 0.9rem;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+    }
+</style>
 @endsection

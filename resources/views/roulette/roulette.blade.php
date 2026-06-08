@@ -170,7 +170,7 @@
         align-items: center;
     }
 
-    /* Upscaled Book Cover Box Frames */
+    /* Book Cover Box Frames */
     .segment-image-wrap {
         width: 140px;  
         height: 200px; 
@@ -236,14 +236,125 @@
         0%, 100% { transform: translate(-50%, 0px); }
         50% { transform: translate(-50%, -8px); } 
     }
+
+    /* ==========================================================================
+       ROULETTE TARGETED RESPONSIVE LAYOUT CONSTRAINTS
+       ========================================================================== */
+    @media (max-width: 768px) {
+        .roulette-arena {
+            height: 480px; /* Scaled down frame boundaries cleanly */
+        }
+
+        /* Scaled down the entire 1400px structural element via vectors to prevent layout clipping */
+        .wheel-deck-pivot {
+            transform-origin: center center;
+            scale: 0.75;
+            bottom: -820px;
+        }
+
+        .indicator-arrow-pin {
+            bottom: 310px;
+            font-size: 2.5rem;
+        }
+
+        .btn {
+            padding: 0.65rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        .glass-header-box {
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+        }
+
+        .h2 { font-size: 1.75rem; }
+        .h3 { font-size: 1.5rem; }
+        .modal-dialog { max-width: 90%; }
+    }
+
+    @media (max-width: 576px) {
+        body {
+            padding-top: 70px;
+        }
+
+        .container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+
+        .roulette-arena {
+            height: 360px; /* Micro dimension parameter limit block */
+        }
+
+        /* Aggressive scaling optimization to keep exactly half the circle crisp and functional */
+        .wheel-deck-pivot {
+            scale: 0.52;
+            bottom: -720px;
+        }
+
+        /* Scaled the card images within segments down slightly for extreme mobile viewports */
+        .segment-image-wrap {
+            width: 105px;
+            height: 150px;
+        }
+
+        .wheel-book-segment {
+            padding-top: 90px;
+        }
+
+        .indicator-arrow-pin {
+            bottom: 215px;
+            font-size: 2.2rem;
+        }
+
+        .h2, h2 { font-size: 1.25rem; }
+        .h3, h3 { font-size: 1.1rem; }
+
+        .btn {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+            min-height: 44px;
+        }
+
+        .btn-lg {
+            padding: 0.65rem 1rem;
+        }
+
+        .glass-header-box {
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+        }
+
+        .dismiss-subtext-label { font-size: 0.65rem; }
+        .modal-body img { max-height: 220px; }
+        body { overflow-x: hidden; }
+
+        /* --- EXCLUSIVE MOBILE OVERRIDES FOR SLIM SMOOTH RESULTS POPUP --- */
+        .custom-narrow-modal {
+            max-width: 315px !important; /* Slimmer card width profile */
+        }
+        
+        .modal-cover-preview {
+            height: 210px; /* Scaled cleanly inside mobile cards */
+        }
+
+        .modal.fade .modal-dialog {
+            transform: scale(0.92) translateY(8px);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        
+        .modal.show .modal-dialog {
+            transform: scale(1) translateY(0);
+        }
+    }
 </style>
 
 @php
     if(!isset($books) || $books->isEmpty()){
         $books = \App\Models\Book::where('status', 'available')->take(12)->get();
     }
-
-    // Keep strict 12 segments on the enlarged canvas layout grid to avoid a cramped visual presentation
     $displayCollection = $books->take(12);
 @endphp
 
@@ -273,7 +384,6 @@
 
             @foreach($displayCollection as $index => $book)
                 @php
-                    // Map out precise angles for 12 clean, widespread equidistant slice segments (30 degrees each)
                     $angle = ($index * (360 / $displayCollection->count()));
                 @endphp
                 <div class="wheel-book-segment" style="transform: rotate({{ $angle }}deg);" 
@@ -299,31 +409,31 @@
 </div>
 
 <div class="modal fade" id="rouletteResultModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered custom-narrow-modal">
+    <div class="modal-dialog modal-dialog-centered custom-narrow-modal">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-white">
             <div class="modal-body text-center px-4 pb-4 pt-5">
-                <span class="badge bg-light text-dark border px-3 py-1.5 rounded-pill mb-3 font-monospace text-uppercase" style="font-size: 0.62rem; letter-spacing: 0.05em;">
+                <span class="badge bg-light text-dark border px-3 py-1.5 rounded-pill mb-3 font-monospace text-uppercase" style="font-size: 0.62rem; letter-spacing: 0.05rem;">
                     <i class="fas fa-sparkles text-warning me-1"></i>Fate Has Chosen
                 </span>
                 
                 <div class="mb-3.5">
-                    <img id="modalBookCover" src="" class="modal-cover-preview img-fluid" alt="Selected Cover Title">
+                    <img id="modalBookCover" src="" class="modal-cover-preview img-fluid" alt="Selected Cover Title" style="max-height: 200px; object-fit: cover; border-radius: 0.5rem;">
                 </div>
                 
-                <h3 class="h6 fw-bold text-dark mb-1 lh-base text-truncate px-1" id="modalBookTitle">Book Title Target</h3>
+                <h3 class="h6 fw-bold text-dark mb-1 lh-base text-truncate px-1" id="modalBookTitle">Dune</h3>
                 <p class="text-muted small mb-4">by <span class="fw-semibold text-secondary" id="modalBookAuthor">Author Frame</span></p>
                 
                 <div class="d-flex flex-column gap-2 mb-3">
-                    <a id="modalBookLink" href="#" class="btn btn-soft-orange btn-md fw-bold py-3 rounded-pill text-uppercase shadow-sm w-100" style="font-size: 0.8rem; letter-spacing: 0.02em;">
+                    <a id="modalBookLink" href="#" class="btn btn-soft-orange btn-sm fw-bold py-2 rounded-pill text-uppercase shadow-sm w-100" style="font-size: 0.75rem; letter-spacing: 0.02em;">
                         <i class="fas fa-book-open me-2"></i>View Details
                     </a>
-                    <button type="button" id="modalSpinAgainBtn" class="btn btn-light btn-md fw-bold text-secondary border rounded-pill py-3 w-100" style="font-size: 0.8rem; background-color: #fafafa;">
+                    <button type="button" id="modalSpinAgainBtn" class="btn btn-light btn-sm fw-bold text-secondary border rounded-pill py-2 w-100" style="font-size: 0.75rem; background-color: #fafafa;">
                         <i class="fas fa-redo me-1.5" style="font-size: 0.85em;"></i>Spin Again
                     </button>
                 </div>
 
                 <div class="text-center mt-3.5">
-                    <span class="dismiss-subtext-label text-muted font-monospace"><i class="fas fa-info-circle me-1"></i>Click anywhere outside to dismiss this window</span>
+                    <span class="dismiss-subtext-label text-muted font-monospace small"><i class="fas fa-info-circle me-1"></i>Click anywhere outside to dismiss</span>
                 </div>
             </div>
         </div>
@@ -337,7 +447,6 @@
         const wheel = document.getElementById('wheelDeck');
         const segments = document.querySelectorAll('.wheel-book-segment');
         
-        // Initialize explicit Bootstrap reference wrapper variable
         const resultModalEl = document.getElementById('rouletteResultModal');
         let bsResultModal = null;
         if(resultModalEl) {
@@ -347,18 +456,22 @@
         let isSpinning = false;
         let currentRotation = 0;
         
-        // Setup simple persistent rotation for immediate visual confirmation on land layout structures
         let idleAngle = 0;
         let idleTimer = setInterval(() => {
             if(!isSpinning) {
-                idleAngle += 0.15; // Smooth slow continuous rolling pace
-                wheel.style.transform = `rotate(${idleAngle}deg)`;
+                idleAngle += 0.15; 
+                // Enhanced execution to support composite inline string scale operations without wiping responsive adjustments
+                const isMobile = window.innerWidth < 768;
+                const mobileScaleFactor = window.innerWidth < 576 ? 0.52 : 0.75;
+                
+                if (isMobile) {
+                    wheel.style.transform = `rotate(${idleAngle}deg) scale(${mobileScaleFactor})`;
+                } else {
+                    wheel.style.transform = `rotate(${idleAngle}deg)`;
+                }
             }
         }, 30);
 
-        /**
-         * Core execution module driving full math calculations and transition triggers
-         */
         function executeRouletteTurn() {
             if (isSpinning || segments.length === 0) return;
             
@@ -366,28 +479,30 @@
             spinBtn.disabled = true;
             spinBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Consulting Fate...`;
             
-            // 1. Calculate a completely random winner sector element index
             const totalSegments = segments.length;
             const winnerIndex = Math.floor(Math.random() * totalSegments);
             const winnerSegment = segments[winnerIndex];
             
-            // 2. Extract intrinsic rotation values from layout definitions
             const segmentAngle = parseFloat(winnerSegment.getAttribute('data-angle'));
-            
-            // 3. Compute target parameters factoring in multiple full rotations (5-7 spins) to handle friction animations
             const fullSpinsCount = 5 + Math.floor(Math.random() * 3); 
             const targetedAdditionalDegrees = fullSpinsCount * 360;
             
-            // Align selector perfectly underneath indicator point
             const baseTargetRotation = (360 - segmentAngle) % 360;
             const finalTargetAngle = currentRotation + targetedAdditionalDegrees + (baseTargetRotation - (currentRotation % 360));
             currentRotation = finalTargetAngle;
             
-            // Force inline transition properties to process full rotation sequences instantly
             wheel.style.transition = "transform 6s cubic-bezier(0.15, 0.95, 0.3, 1)";
-            wheel.style.transform = `rotate(${finalTargetAngle}deg)`;
             
-            // 4. Await programmatic completion trigger hooks before executing overlay popup panels
+            // Re-inject dynamic scale multipliers synchronously during calculations to prevent resizing pops mid-spin
+            const isMobile = window.innerWidth < 768;
+            const mobileScaleFactor = window.innerWidth < 576 ? 0.52 : 0.75;
+            
+            if (isMobile) {
+                wheel.style.transform = `rotate(${finalTargetAngle}deg) scale(${mobileScaleFactor})`;
+            } else {
+                wheel.style.transform = `rotate(${finalTargetAngle}deg)`;
+            }
+            
             setTimeout(() => {
                 const bookId = winnerSegment.getAttribute('data-book-id');
                 const bookTitle = winnerSegment.getAttribute('data-title');
@@ -412,18 +527,14 @@
             }, 6100); 
         }
 
-        // Direct standard button click mapping
         if (spinBtn) {
             spinBtn.addEventListener('click', executeRouletteTurn);
         }
 
-        // Intercept Modal "Spin Again" actions, clean frames, dismiss overlays, and pipeline next execution
         if (modalSpinBtn) {
             modalSpinBtn.addEventListener('click', function() {
                 if (bsResultModal) {
                     bsResultModal.hide();
-                    
-                    // Allow the dismiss animation window to snap shut before firing momentum sequences
                     setTimeout(executeRouletteTurn, 400);
                 }
             });

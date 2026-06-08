@@ -1,25 +1,26 @@
 <!-- Base Navigation Wrapper Structure -->
-<nav class="navbar navbar-expand-lg navbar-dark py-3 px-md-4 shadow-sm {{ Route::is('home') ? 'navbar-home-transparent' : '' }}" 
-     style="{{ Route::is('home') ? 'background: rgba(43, 24, 12, 0.15) !important;' : 'background: linear-gradient(135deg, #c25e25, #a64f1e) !important;' }}">
-    <div class="container-fluid">
-        <!-- Brand Identity with Smooth Animated Image Configuration -->
-        <a class="navbar-brand fw-bold fs-4 tracking-tight text-white d-flex align-items-center brand-transition" 
-           href="{{ route('home') }}" 
-           style="text-decoration: none !important; box-shadow: none !important; outline: none !important;">
-            <img src="{{ asset('images/logo.png') }}" 
-                 alt="BookHive Logo" 
-                 height="45"
-                 class="me-2 d-inline-block align-top logo-smooth"
-                 style="object-fit: contain; filter: none !important;">
-            BookHive
-        </a>
+<nav class="navbar navbar-expand-lg navbar-dark py-3 px-3 px-md-4 shadow-sm {{ Route::is('home') ? 'navbar-home-transparent' : '' }}" 
+     style="{{ Route::is('home') ? 'background: rgba(43, 24, 12, 0.15) !important;' : 'background: linear-gradient(135deg, #c25e25, #a64f1e) !important;' }} z-index: 1050 !important;">
+    <div class="container-fluid bh-nav-flex-container">
         
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" style="box-shadow: none !important;">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <!-- ================= [LEFT HAND SEGMENT: TOGGLER + BRAND] ================= -->
+        <div class="bh-nav-left-cluster">
+            <!-- Mobile Hamburger Trigger (RESIZED & RESTRICTED: Hidden on desktop 'd-lg-none', visible on mobile 'd-block') -->
+            <button class="bh-hamburger-trigger d-lg-none d-block" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Brand Logo Identity -->
+            <a class="bh-brand-anchor brand-transition" href="{{ route('home') }}">
+                <img src="{{ asset('images/logo.png') }}" alt="BookHive Logo" class="logo-smooth">
+                <span class="bh-brand-label">BookHive</span>
+            </a>
+        </div>
         
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <!-- ================= [MIDDLE SEGMENT: EXPANDABLE NAVIGATION DRAWER] ================= -->
+        <div class="collapse navbar-collapse bh-navigation-drawer" id="navbarNav">
+            <!-- Tight vertical spacing utility applied to completely eliminate item gaps -->
+            <ul class="navbar-nav mt-3 mt-lg-0 py-0 vertical-gap-tight">
                 <li class="nav-item">
                     <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('home') ? 'active' : '' }}" href="{{ route('home') }}">{{ __('messages.home') }}</a>
                 </li>
@@ -29,107 +30,140 @@
                 <li class="nav-item">
                     <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('about') ? 'active' : '' }}" href="{{ route('about') }}">{{ __('messages.about') }}</a>
                 </li>
-                {{-- Roulette Text Link - Visible strictly to buyers/customers --}}
+                
+                {{-- Roulette Link --}}
                 @auth
                     @if(!auth()->user()->hasRole(['admin', 'owner']))
                     <li class="nav-item">
-                        <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('books.roulette') ? 'active' : '' }}" href="{{ route('books.roulette') }}">Confused?</a>
+                        <a class="nav-link nav-smooth nav-underline-lift {{ Route::is('books.roulette') ? 'active' : '' }}" href="{{ route('books.roulette') }}">Roulette</a>
+                    </li>
+                    
+                    <!-- UNIFIED MOBILE IN-LINE TEXT LIST: Spaced exactly like desktop links, hidden on standard viewports -->
+                    <li class="nav-item bh-mobile-drawer-only-link">
+                        <a class="nav-link {{ Route::is('orders.index') ? 'active' : '' }}" href="{{ route('orders.index') }}">
+                            My Orders
+                        </a>
+                    </li>
+                    <li class="nav-item bh-mobile-drawer-only-link">
+                        <a class="nav-link {{ Route::is('wishlist.index') ? 'active' : '' }}" href="{{ route('wishlist.index') }}">
+                            My Wishlist
+                        </a>
+                    </li>
+                    <li class="nav-item bh-mobile-drawer-only-link">
+                        @php $cartCount = collect(session('cart', []))->sum('quantity'); @endphp
+                        <a class="nav-link {{ Route::is('cart.index') ? 'active' : '' }}" href="{{ route('cart.index') }}">
+                            My Cart {!! $cartCount > 0 ? '<span class="badge bg-danger ms-1 px-1.5 rounded-pill" style="font-size:0.7em;">'.$cartCount.'</span>' : '' !!}
+                        </a>
+                    </li>
+                    <li class="nav-item bh-mobile-drawer-only-link">
+                        <a class="nav-link text-danger-hover fw-bold" href="#" id="triggerLogoutModalMobile">
+                            {{ __('messages.logout') }}
+                        </a>
                     </li>
                     @endif
                 @endauth
+
+                {{-- Admin Menu Dropdowns --}}
                 @auth
                     @if(auth()->user()->hasRole(['admin', 'owner']))
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-smooth dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {{ __('messages.admin_panel') }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark border-0 shadow-lg animate slideIn" aria-labelledby="adminDropdown" style="background-color: #a64f1e;">
-                            <li><h6 class="dropdown-header">Books</h6></li>
+                        <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg animate slideIn" aria-labelledby="adminDropdown" style="background-color: #a64f1e;">
+                            <li><h6 class="dropdown-header text-white-50">Books</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.books.index') }}"><i class="fas fa-list fa-fw me-2 text-white-50"></i>Manage Books</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">Authors</h6></li>
+                            <li><hr class="dropdown-divider border-light opacity-10"></li>
+                            <li><h6 class="dropdown-header text-white-50">Authors</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.authors.index') }}"><i class="fas fa-list fa-fw me-2 text-white-50"></i>Manage Authors</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">Stores</h6></li>
+                            <li><hr class="dropdown-divider border-light opacity-10"></li>
+                            <li><h6 class="dropdown-header text-white-50">Publishers</h6></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.publishers.index') }}"><i class="fas fa-building fa-fw me-2 text-white-50"></i>Manage Publishers</a></li>
+                            <li><hr class="dropdown-divider border-light opacity-10"></li>
+                            <li><h6 class="dropdown-header text-white-50">Stores</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.stores.index') }}"><i class="fas fa-store fa-fw me-2 text-white-50"></i>Manage Store Locations</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">Orders</h6></li>
+                            <li><hr class="dropdown-divider border-light opacity-10"></li>
+                            <li><h6 class="dropdown-header text-white-50">Orders</h6></li>
                             <li><a class="dropdown-item" href="{{ route('admin.orders.index') }}"><i class="fas fa-receipt fa-fw me-2 text-white-50"></i>All Orders</a></li>
                         </ul>
                     </li>
+                    <!-- Admin Logout option added directly inside mobile background menu drawer -->
+                    <li class="nav-item bh-mobile-drawer-only-link">
+                        <a class="nav-link text-danger-hover fw-bold" href="#" id="triggerLogoutModalAdminMobile">
+                            {{ __('messages.logout') }}
+                        </a>
+                    </li>
                     @endif
                 @endauth
+
+                {{-- Mobile Login Button (shown only when not authenticated) --}}
+                @guest
+                <li class="nav-item bh-mobile-drawer-only-link d-lg-none mt-3 pt-2 border-top">
+                    <a href="{{ route('login.show') }}" class="btn btn-light btn-sm px-4 fw-bold rounded-pill shadow-sm w-100" style="color: #c25e25;">{{ __('messages.login') }}</a>
+                </li>
+                @endguest
             </ul>
         </div>
 
-        <!-- REARRANGED ACTION HUB: Action Links (Cart, Wishlist, Orders restricted to customer role) -> User Profile -->
-        <div class="d-flex text-white align-items-center gap-2 gap-md-3 ms-auto ms-lg-0">
+        <!-- ================= [RIGHT HAND SEGMENT: DESKTOP ONLY CONSOLE HUB] ================= -->
+        <!-- Locked layout container: Disappears on mobile viewports, stays aligned on normal web views -->
+        <div class="bh-nav-right-cluster d-none d-lg-flex">
             
-            @guest
-                <a href="{{ route('login.show') }}" class="btn btn-light btn-sm px-4 fw-bold rounded-pill shadow-sm btn-smooth" style="color: #c25e25;">{{ __('messages.login') }}</a>
-            @else
-                <!-- Core Action Hub Restricted Strictly to Buyers/Customers (Hidden for admin/owners) -->
+            @auth
                 @if(!auth()->user()->hasRole(['admin', 'owner']))
-                    @php 
-                        // Dynamically tallies up the physical integers inside the quantity field instead of array row counting
-                        $cartCount = collect(session('cart', []))->sum('quantity'); 
-                    @endphp
-                    
-                    <!-- [1] Dynamic Checkout History Receipts (Orders Icon Button) -->
-                    <a href="{{ route('orders.index') }}" class="btn btn-link btn-minimal-circle text-white text-decoration-none" title="View Orders">
-                        <i class="fas fa-receipt"></i>
-                    </a>
-                    
-                    <!-- [2] Active Cart Button Context (Borderless Minimal Circle Style with Absolute Sum Count Badge) -->
-                    <a href="{{ route('cart.index') }}" class="btn btn-link btn-minimal-circle position-relative text-white text-decoration-none" title="View Cart">
+                    @php $cartCount = collect(session('cart', []))->sum('quantity'); @endphp
+                    <a href="{{ route('orders.index') }}" class="bh-desktop-link-node text-white text-decoration-none" title="View Orders"><i class="fas fa-receipt"></i></a>
+                    <a href="{{ route('wishlist.index') }}" class="bh-desktop-link-node text-white text-decoration-none" title="View Wishlist"><i class="fas fa-bookmark"></i></a>
+                    <a href="{{ route('cart.index') }}" class="bh-cart-trigger text-white text-decoration-none" title="View Cart">
                         <i class="fas fa-shopping-cart"></i>
                         @if($cartCount > 0)
-                            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill" style="font-size: 0.6rem; padding: 0.25em 0.4em;">{{ $cartCount }}</span>
+                            <span class="cart-badge-dot-indicator animate-badge">{{ $cartCount }}</span>
                         @endif
                     </a>
-
-                    <!-- [3] Standalone Curated Wishlist Button (Borderless Bookmark Aesthetic Icon) -->
-                    <a href="{{ route('wishlist.index') }}" class="btn btn-link btn-minimal-circle text-white text-decoration-none" title="View Wishlist">
-                        <i class="fas fa-bookmark"></i>
-                    </a>
                 @endif
-                
-                <!-- [4] Custom Context Profile Console Dropdown -->
+            @endauth
+
+            @auth
                 <div class="dropdown">
-                    <button class="btn btn-light btn-sm px-3 px-sm-4 fw-bold rounded-pill d-flex align-items-center shadow-sm btn-smooth" type="button" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: #c25e25;">
-                        <i class="fas fa-user-circle me-2 fs-5"></i>
-                        <span class="d-none d-lg-inline me-1">{{ auth()->user()->name }}</span>
-                        <i class="fas fa-chevron-down ms-1" style="font-size: 0.65em;"></i>
+                    <button class="btn btn-light bh-profile-trigger-pill fw-bold rounded-pill d-flex align-items-center" type="button" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: #c25e25 !important; background-color: #ffffff !important;">
+                        <i class="fas fa-user-circle fs-5"></i>
+                        <span class="ms-1.5 me-0.5 bh-profile-text-limit">{{ explode(' ', trim(auth()->user()->name))[0] }}</span>
+                        <i class="fas fa-chevron-down ms-1" style="font-size: 0.6em;"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" aria-labelledby="userProfileDropdown">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2 bh-profile-popup-card" aria-labelledby="userProfileDropdown">
                         <li>
-                            <a href="#" class="dropdown-item text-danger d-flex align-items-center py-2" id="triggerLogoutModal">
-                                <i class="fas fa-sign-out-alt me-2"></i> {{ __('messages.logout') }}
+                            <a href="#" class="dropdown-item bh-logout-action-row text-danger d-flex align-items-center" id="triggerLogoutModalDesktop">
+                                <i class="fas fa-sign-out-alt me-2 fs-6"></i> 
+                                <span class="fw-bold">{{ __('messages.logout') }}</span>
                             </a>
                         </li>
                     </ul>
                 </div>
-            @endguest
+            @else
+                <a href="{{ route('login.show') }}" class="btn btn-light btn-sm px-4 fw-bold rounded-pill shadow-sm" style="color: #c25e25;">{{ __('messages.login') }}</a>
+            @endauth
+
         </div>
+
     </div>
 </nav>
 
-<!-- Clean Intercept Confirmation Modal Logic -->
-<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- Intercept Confirmation Modal Layout -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true" style="z-index: 1150 !important;">
+    <div class="modal-dialog modal-sm modal-dialog-centered mx-auto" style="max-width: 380px;">
         <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
-                <h5 class="modal-title fw-bold text-dark d-flex align-items-center" id="logoutModalLabel">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center" id="logoutModalLabel" style="font-size: 1.15rem;">
                     <i class="fas fa-sign-out-alt text-danger me-2"></i> Confirm Logout
                 </h5>
-                <button type="button" class="btn-close closeLogoutModal" aria-label="Close"></button>
+                <button type="button" class="btn-close closeLogoutModal" aria-label="Close" style="box-shadow: none !important;"></button>
             </div>
             <div class="modal-body text-dark px-4 py-3">
-                <p class="mb-0 text-muted fs-6">Are you sure you want to log out from your account? You will need to log in again to access your session.</p>
+                <p class="mb-0 text-muted small" style="line-height: 1.5;">Are you sure you want to log out from your account? You will need to log in again to access your session.</p>
             </div>
-            <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
-                <button type="button" class="btn btn-light fw-medium rounded-pill px-4 closeLogoutModal">Cancel</button>
-                <button type="button" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm" id="confirmLogoutBtn">Logout</button>
+            <div class="modal-footer border-top-0 pt-0 pb-4 px-4 d-flex gap-2 justify-content-end">
+                <button type="button" class="btn btn-light fw-medium rounded-pill px-3.5 btn-sm closeLogoutModal">Cancel</button>
+                <button type="button" class="btn btn-danger fw-bold rounded-pill px-3.5 btn-sm shadow-sm" id="confirmLogoutBtn">Logout</button>
             </div>
         </div>
     </div>
@@ -140,144 +174,250 @@
 </form>
 
 <style>
-    /* --- STRUCTURAL NAVBAR BASE POSITIONING --- */
+    /* ==========================================================================
+       RIGID FIXED STRUCTURAL FLEX LAYOUTS
+       ========================================================================== */
+    .bh-nav-flex-container {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: nowrap !important;
+    }
+
     nav.navbar {
         position: fixed !important;
-        top: 0;
-        width: 100%;
-        z-index: 1000;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 1000 !important;
         transition: background 0.3s ease, box-shadow 0.3s ease;
     }
 
-    /* Apply transparent blurs ONLY when inside the isolated home class */
     nav.navbar.navbar-home-transparent {
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Mobile responsiveness markup logic modifications */
-    @media (max-width: 991.98px) {
-        .navbar .d-flex.text-white {
-            gap: 0.35rem !important;
-        }
-        .navbar .btn-minimal-circle {
-            width: 34px !important;
-            height: 34px !important;
-            font-size: 0.9rem !important;
-        }
-        .navbar .btn-light.btn-sm {
-            padding: 0.25rem 0.6rem !important;
-            font-size: 0.8rem !important;
-        }
-        .navbar-collapse .navbar-nav .nav-link {
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-        }
-        .navbar-collapse .navbar-nav .nav-link:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        .navbar-collapse {
-            background: rgba(166, 79, 30, 0.97);
-            border-radius: 0 0 12px 12px;
-            padding: 0.5rem 1rem 1rem;
-            margin: 0 -1.5rem;
-            padding-left: 1.5rem;
-            padding-right: 1.5rem;
-        }
-    }
-
-    /* Active Scroll Blending class style */
     nav.navbar.scrolled {
         background: rgba(148, 67, 22, 0.95) !important; 
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        border-bottom: none !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
     }
 
-    /* --- EXPANDING UNDERLINE PLATFORM HOVER DESIGN --- */
-    .nav-underline-lift {
-        position: relative;
-    }
-    
-    .nav-underline-lift::after {
-        content: '';
-        position: absolute;
-        width: 100%;
-        transform: scaleX(0);
-        height: 2px;
-        bottom: 0;
-        left: 0;
-        background-color: #ffdcb3; /* Elegant matching soft cream platform baseline color */
-        transform-origin: bottom center;
-        transition: transform 0.25s cubic-bezier(0.1, 0.8, 0.3, 1);
+    .vertical-gap-tight {
+        gap: 2px !important; /* Uniform tight metric grid list alignment */
     }
 
-    .nav-underline-lift:hover::after,
-    .nav-underline-lift.active::after {
-        transform: scaleX(1);
+    .bh-nav-left-cluster {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        flex-shrink: 0 !important;
     }
 
-    /* --- BORDERLESS MINIMAL CIRCLE GLOW INTERACTION --- */
-    .btn-minimal-circle {
+    .bh-hamburger-trigger {
+        background: transparent !important;
         border: none !important;
         outline: none !important;
         box-shadow: none !important;
-        width: 38px;
-        height: 38px;
-        display: inline-flex;
+        padding: 6px !important;
         align-items: center;
         justify-content: center;
-        border-radius: 50% !important;
-        padding: 0 !important;
-        transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease !important;
+    }
+    .bh-hamburger-trigger .navbar-toggler-icon {
+        width: 1.4rem !important;
+        height: 1.4rem !important;
     }
 
-    .btn-minimal-circle:hover {
-        background-color: rgba(255, 255, 255, 0.15) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    .bh-brand-anchor {
+        display: flex !important;
+        align-items: center !important;
+        text-decoration: none !important;
+    }
+    .bh-brand-anchor img {
+        height: 38px !important;
+        width: auto !important;
+        margin-right: 8px !important;
+    }
+    .bh-brand-label {
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
         color: #ffffff !important;
-        transform: translateY(-1px);
+        line-height: 1 !important;
     }
 
-    .btn-minimal-circle:active {
-        transform: translateY(0);
+    .bh-nav-right-cluster {
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
     }
 
-    .nav-smooth {
-        transition: color 0.25s ease, opacity 0.25s ease !important;
+    .bh-desktop-link-node {
+        width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
+        transition: background-color 0.2s ease;
     }
-    .nav-smooth:hover {
-        opacity: 1 !important;
+    .bh-desktop-link-node:hover { background-color: rgba(255,255,255,0.15) !important; }
+
+    .bh-cart-trigger {
+        width: 38px !important;
+        height: 38px !important;
+        background: transparent !important;
+        border: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        font-size: 1.05rem !important;
+        position: relative !important;
+        transition: background-color 0.2s ease !important;
     }
-    .btn-smooth {
-        transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease !important;
+    .bh-cart-trigger:hover { background-color: rgba(255, 255, 255, 0.15) !important; }
+
+    .cart-badge-dot-indicator {
+        position: absolute !important;
+        top: 2px !important;
+        right: 2px !important;
+        background-color: #dc3545 !important;
+        color: #ffffff !important;
+        font-size: 0.55rem !important;
+        font-weight: 700 !important;
+        min-width: 14px !important;
+        height: 14px !important;
+        padding: 0 2px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border: 1px solid #c25e25 !important;
     }
-    .btn-smooth:hover {
-        transform: translateY(-1px);
+
+    .bh-profile-trigger-pill {
+        padding: 0.35rem 0.85rem !important;
+        font-size: 0.9rem !important;
+        border: none !important;
+        box-shadow: none !important;
     }
-    .btn-smooth:active {
-        transform: translateY(0);
+
+    .bh-profile-text-limit {
+        max-width: 100px !important;
+        display: inline-block !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
     }
-    .brand-transition {
-        transition: transform 0.25s ease !important;
+
+    .bh-profile-popup-card {
+        min-width: 150px !important;
+        padding: 0 !important;
+        background-color: #ffffff !important;
+        border: 1px solid #eef0f2 !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12) !important;
     }
-    .brand-transition:hover {
-        transform: scale(1.02);
+
+    .bh-logout-action-row {
+        padding: 12px 18px !important; 
+        color: #dc3545 !important;
+        display: flex !important;
+        align-items: center !important;
+        background-color: #ffffff !important;
     }
-    .logo-smooth {
-        transition: transform 0.3s ease;
+
+    /* ==========================================================================
+       NAVIGATION DRAWER PORTALS 
+       ========================================================================== */
+    .bh-navigation-drawer {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 999 !important;
     }
-    .brand-transition:hover .logo-smooth {
-        transform: rotate(3deg);
+
+    .bh-navigation-drawer .navbar-nav {
+        background: rgba(166, 79, 30, 0.99) !important;
+        border-radius: 16px !important;
+        padding: 1rem 1.25rem !important;
+        margin: 0.75rem 12px 0 12px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
-    .dropdown-item.active, .dropdown-item:active {
-        background-color: #c25e25 !important;
+
+    @media (max-width: 991.98px) {
+        .bh-mobile-drawer-only-link {
+            display: block !important; 
+        }
+        .navbar-collapse .navbar-nav .nav-link {
+            padding: 0.5rem 1rem !important; 
+        }
+        .text-danger-hover:hover, .text-danger-hover {
+            color: #ff9999 !important; 
+        }
     }
+
+    @media (min-width: 992px) {
+        .bh-mobile-drawer-only-link {
+            display: none !important; 
+        }
+        .bh-navigation-drawer {
+            position: static !important;
+            width: auto !important;
+            display: flex !important;
+            flex-basis: auto !important;
+            margin-left: 24px !important;
+        }
+        .bh-navigation-drawer .navbar-nav {
+            background: transparent !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            flex-direction: row !important;
+            column-gap: 8px !important;
+        }
+        .navbar-collapse .navbar-nav .nav-link {
+            padding: 0.65rem 1rem !important;
+        }
+    }
+
+    .navbar-collapse .navbar-nav .nav-link {
+        border-radius: 8px !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    .navbar-collapse .navbar-nav .nav-link:hover,
+    .navbar-collapse .navbar-nav .nav-link.active {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+
+    .navbar-collapse .dropdown-menu {
+        background-color: #a64f1e !important;
+    }
+
+    @media (min-width: 992px) {
+        .nav-underline-lift { position: relative; }
+        .nav-underline-lift::after {
+            content: ''; position: absolute; width: 100%; transform: scaleX(0); height: 2px;
+            bottom: 0; left: 0; background-color: #ffdcb3; transform-origin: bottom center;
+            transition: transform 0.25s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+        .nav-underline-lift:hover::after, .nav-underline-lift.active::after { transform: scaleX(1); }
+    }
+
+    .nav-smooth { transition: color 0.25s ease, opacity 0.25s ease !important; }
+    .brand-transition { transition: transform 0.25s ease !important; }
+    .brand-transition:hover { transform: scale(1.01); }
+    .logo-smooth { transition: transform 0.3s ease; }
+    .brand-transition:hover .logo-smooth { transform: rotate(3deg); }
+    .dropdown-item.active, .dropdown-item:active { background-color: #c25e25 !important; }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Isolated Scroll Controller Engine ---
         const navbar = document.querySelector('nav.navbar');
         if (navbar && navbar.classList.contains('navbar-home-transparent')) {
             window.addEventListener('scroll', function() {
@@ -289,10 +429,9 @@
             });
         }
 
-        // --- Logout Handling Module ---
-        const triggerLogout = document.getElementById('triggerLogoutModal');
-        const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
+        // --- Logout Modal Multi-Trigger Routing Bridge ---
         const logoutModalEl = document.getElementById('logoutModal');
+        const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
         const closeButtons = document.querySelectorAll('.closeLogoutModal');
         
         let bsModal = null;
@@ -300,18 +439,21 @@
             bsModal = new bootstrap.Modal(logoutModalEl);
         }
 
-        if (triggerLogout) {
-            triggerLogout.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (bsModal) {
-                    bsModal.show();
-                } else if (logoutModalEl) {
-                    logoutModalEl.style.display = 'block';
-                    logoutModalEl.classList.add('show');
-                    document.body.classList.add('modal-open');
-                }
-            });
+        function displayLogoutPrompt(e) {
+            e.preventDefault();
+            if (bsModal) {
+                bsModal.show();
+            } else if (logoutModalEl) {
+                logoutModalEl.style.display = 'block';
+                logoutModalEl.classList.add('show');
+                document.body.classList.add('modal-open');
+            }
         }
+
+        ['triggerLogoutModalMobile', 'triggerLogoutModalAdminMobile', 'triggerLogoutModalDesktop'].forEach(id => {
+            const node = document.getElementById(id);
+            if (node) node.addEventListener('click', displayLogoutPrompt);
+        });
         
         function closeModal() {
             if (bsModal) {
@@ -320,7 +462,6 @@
                 logoutModalEl.style.display = 'none';
                 logoutModalEl.classList.remove('show');
                 document.body.classList.remove('modal-open');
-                
                 let backdrop = document.querySelector('.modal-backdrop');
                 if (backdrop) backdrop.remove();
             }
@@ -336,7 +477,6 @@
         if (confirmLogoutBtn) {
             confirmLogoutBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                
                 confirmLogoutBtn.disabled = true;
                 confirmLogoutBtn.textContent = 'Logging out...';
                 

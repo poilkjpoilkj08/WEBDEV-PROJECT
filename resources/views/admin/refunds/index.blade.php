@@ -45,7 +45,7 @@
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>Refund ID</th>
+                        <th>ID</th>
                         <th>Order ID</th>
                         <th>Customer</th>
                         <th>Amount</th>
@@ -59,7 +59,7 @@
                 <tbody>
                     @foreach($refunds as $refund)
                         <tr>
-                            <td><strong>#{{ $refund->id }}</strong></td>
+                            <td><strong>{{ $refund->id }}</strong></td>
                             <td>#{{ $refund->order_id }}</td>
                             <td>
                                 {{ $refund->user->name }}<br>
@@ -79,11 +79,11 @@
 
                             {{-- Evidence thumbnail --}}
                             <td>
-                                @if($refund->image_path)
-                                    <img src="{{ Storage::url($refund->image_path) }}"
+                                @if($refund->getImageUrl())
+                                    <img src="{{ $refund->getImageUrl() }}"
                                          alt="Evidence"
                                          class="refund-thumb"
-                                         data-img="{{ Storage::url($refund->image_path) }}"
+                                         data-img="{{ $refund->getImageUrl() }}"
                                          style="width:56px; height:56px; object-fit:cover; border-radius:6px; border:1px solid #dee2e6; cursor:zoom-in;"
                                          title="Click to enlarge">
                                 @else
@@ -171,11 +171,11 @@
                                                 <p class="text-muted small mb-1">Reason for Refund</p>
                                                 <div class="p-3 bg-light rounded border" style="white-space:pre-wrap; word-break:break-word; max-height:200px; overflow-y:auto;">{{ $refund->reason }}</div>
                                             </div>
-                                            @if($refund->image_path)
+                                            @if($refund->getImageUrl())
                                             <div class="col-12">
                                                 <p class="text-muted small mb-2">Evidence Image</p>
                                                 <div class="text-center border rounded p-2 bg-light">
-                                                    <img src="{{ Storage::url($refund->image_path) }}"
+                                                    <img src="{{ $refund->getImageUrl() }}"
                                                          alt="Evidence"
                                                          class="img-fluid rounded"
                                                          style="max-height:400px; object-fit:contain; cursor:zoom-in;"
@@ -224,7 +224,11 @@
                                             @if($refund->image_path)
                                             <div class="mb-3">
                                                 <p class="text-muted small mb-1">Evidence Image</p>
-                                                <img src="{{ Storage::url($refund->image_path) }}" alt="Evidence" class="img-fluid rounded border" style="max-height:250px; object-fit:contain; cursor:zoom-in;" onclick="window.open(this.src,'_blank')">
+                                                @if($refund->getImageUrl())
+                                                    <img src="{{ $refund->getImageUrl() }}" alt="Evidence" class="img-fluid rounded border" style="max-height:250px; object-fit:contain; cursor:zoom-in;" onclick="window.open(this.src,'_blank')">
+                                                @else
+                                                    <p class="text-muted fst-italic">Image not available</p>
+                                                @endif
                                             </div>
                                             @endif
                                             <div class="alert alert-info mb-0">
@@ -259,7 +263,11 @@
                                             @if($refund->image_path)
                                             <div class="mb-3">
                                                 <p class="text-muted small mb-1">Evidence Image</p>
-                                                <img src="{{ Storage::url($refund->image_path) }}" alt="Evidence" class="img-fluid rounded border" style="max-height:200px; object-fit:contain; cursor:zoom-in;" onclick="window.open(this.src,'_blank')">
+                                                @if($refund->getImageUrl())
+                                                    <img src="{{ $refund->getImageUrl() }}" alt="Evidence" class="img-fluid rounded border" style="max-height:200px; object-fit:contain; cursor:zoom-in;" onclick="window.open(this.src,'_blank')">
+                                                @else
+                                                    <p class="text-muted fst-italic">Image not available</p>
+                                                @endif
                                             </div>
                                             @endif
                                             <div class="mb-3">
@@ -280,6 +288,33 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Controls -->
+        @if($refunds->hasPages())
+        <div class="d-flex justify-content-center align-items-center gap-3 mt-5 bg-light py-2 px-4 rounded-pill shadow-sm d-inline-flex mx-auto" style="border: 1px solid #eef0f2;">
+            @if($refunds->onFirstPage())
+                <button class="btn btn-sm btn-link text-muted text-decoration-none" disabled style="font-size: 0.8rem;">
+                    <i class="fas fa-chevron-left me-2"></i>Previous
+                </button>
+            @else
+                <a href="{{ $refunds->appends(request()->query())->previousPageUrl() }}" class="btn btn-sm btn-link text-dark text-decoration-none fw-bold" style="font-size: 0.8rem;">
+                    <i class="fas fa-chevron-left me-2" style="color: #c25e25;"></i>Previous
+                </a>
+            @endif
+            <div class="text-dark fw-medium small mx-2" style="font-size: 0.8rem;">
+                Page {{ $refunds->currentPage() }} of {{ $refunds->lastPage() }}
+            </div>
+            @if($refunds->hasMorePages())
+                <a href="{{ $refunds->appends(request()->query())->nextPageUrl() }}" class="btn btn-sm btn-link text-dark text-decoration-none fw-bold" style="font-size: 0.8rem;">
+                    Next<i class="fas fa-chevron-right ms-2" style="color: #c25e25;"></i>
+                </a>
+            @else
+                <button class="btn btn-sm btn-link text-muted text-decoration-none" disabled style="font-size: 0.8rem;">
+                    Next<i class="fas fa-chevron-right ms-2"></i>
+                </button>
+            @endif
+        </div>
+        @endif
 
         {{-- ── Lightbox overlay for thumbnail clicks ─────────────────────── --}}
         <div id="imgLightbox" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; cursor:zoom-out;"
@@ -309,4 +344,361 @@ document.addEventListener('keydown', function (e) {
     }
 });
 </script>
+
+<style>
+/* ===== RESPONSIVE STYLES FOR ADMIN REFUNDS INDEX PAGE ===== */
+@media (max-width: 768px) {
+    /* Container and spacing */
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    /* Heading sizing */
+    .h3 {
+        font-size: 1.25rem;
+    }
+
+    .h4 {
+        font-size: 1.1rem;
+    }
+
+    .h5 {
+        font-size: 1rem;
+    }
+
+    /* Badge sizing */
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .fs-6 {
+        font-size: 0.95rem;
+    }
+
+    /* Button sizing */
+    .btn {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-group .btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Button group wrapping */
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    /* Table responsiveness */
+    .table {
+        font-size: 0.9rem;
+    }
+
+    .table thead {
+        font-size: 0.85rem;
+    }
+
+    .table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    /* Modal sizing */
+    .modal-dialog {
+        max-width: 95%;
+    }
+
+    .modal-header {
+        padding: 1rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    /* Form controls */
+    .form-control,
+    .form-select {
+        font-size: 0.95rem;
+        padding: 0.65rem;
+    }
+
+    /* Text utilities */
+    .text-muted {
+        font-size: 0.9rem;
+    }
+
+    /* Alert sizing */
+    .alert {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
+
+    /* Icon sizing */
+    .fa-2x {
+        font-size: 1.5rem;
+    }
+
+    .fa-3x {
+        font-size: 2rem;
+    }
+
+    /* Lightbox improvements */
+    #imgLightboxSrc {
+        max-width: 90vw !important;
+        max-height: 80vh !important;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra small screens */
+    .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Page header */
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem !important;
+    }
+
+    /* Heading sizing */
+    .h3 {
+        font-size: 1rem;
+    }
+
+    .h4 {
+        font-size: 0.95rem;
+    }
+
+    .h5 {
+        font-size: 0.9rem;
+    }
+
+    .h1, h1 {
+        font-size: 1.1rem;
+    }
+
+    /* Badge sizing */
+    .badge {
+        font-size: 0.65rem;
+        padding: 0.3rem 0.5rem;
+    }
+
+    .fs-6 {
+        font-size: 0.8rem;
+    }
+
+    /* Button sizing */
+    .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn-group .btn {
+        width: 100%;
+        font-size: 0.8rem;
+        padding: 0.5rem;
+        border-radius: 0.25rem !important;
+    }
+
+    /* Table responsiveness - horizontal scroll */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .table thead {
+        font-size: 0.7rem;
+    }
+
+    .table td,
+    .table th {
+        padding: 0.4rem 0.25rem;
+    }
+
+    /* Text truncation in table */
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Thumbnails in table */
+    .refund-thumb,
+    [style*="width:56px; height:56px"] {
+        max-width: 40px !important;
+        height: 40px !important;
+    }
+
+    /* Modal sizing */
+    .modal-dialog {
+        max-width: 95%;
+        margin: 0.5rem auto;
+    }
+
+    .modal-header {
+        padding: 0.75rem;
+    }
+
+    .modal-body {
+        padding: 0.75rem;
+    }
+
+    .modal-footer {
+        padding: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .modal-header .btn-close {
+        padding: 0.3rem;
+    }
+
+    /* Form controls */
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: 0.75rem;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+    }
+
+    /* Badge styling in modal */
+    .badge {
+        display: inline-block;
+        word-wrap: break-word;
+    }
+
+    /* Text utilities */
+    .text-muted {
+        font-size: 0.8rem;
+    }
+
+    .small {
+        font-size: 0.7rem;
+    }
+
+    /* Alert sizing */
+    .alert {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Icon sizing */
+    .fa-2x {
+        font-size: 1.2rem;
+    }
+
+    .fa-3x {
+        font-size: 1.5rem;
+    }
+
+    /* Margin/padding reductions */
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+
+    .mb-3 {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .gap-3 {
+        gap: 0.75rem !important;
+    }
+
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+
+    /* Refund reason display */
+    [style*="white-space:pre-wrap"] {
+        font-size: 0.8rem !important;
+        max-height: 120px !important;
+    }
+
+    /* Evidence image sizing in modal */
+    [style*="max-height:400px"] {
+        max-height: 250px !important;
+    }
+
+    [style*="max-height:250px"] {
+        max-height: 200px !important;
+    }
+
+    [style*="max-height:200px"] {
+        max-height: 150px !important;
+    }
+
+    /* Lightbox sizing */
+    #imgLightboxSrc {
+        max-width: 95vw !important;
+        max-height: 80vh !important;
+    }
+
+    /* Lightbox close button */
+    [style*="right:28px"] {
+        right: 15px !important;
+        top: 15px !important;
+        font-size: 24px !important;
+    }
+
+    /* Prevent horizontal overflow */
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Stat cards */
+    .card {
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .card-body {
+        padding: 0.75rem;
+    }
+
+    .card-header {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    /* Row and column spacing */
+    .row.g-3 {
+        gap: 0.75rem !important;
+    }
+
+    .row.g-4 {
+        gap: 1rem !important;
+    }
+
+    /* Links wrapping */
+    a {
+        word-break: break-word;
+    }
+}
+</style>
 @endsection

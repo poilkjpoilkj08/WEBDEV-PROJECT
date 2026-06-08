@@ -49,34 +49,35 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        max-width: 850px;
+        max-width: 1050px; /* Expanded further to accommodate the larger logo cover footprint */
         margin: 40px auto;
         position: relative;
     }
 
-    /* Central Orange Circle Cover */
+    /* Central Orange Circle Cover (Sized up significantly from 360px to 440px) */
     #logo-cover {
         position: relative;
-        width: 280px;
-        height: 280px;
+        width: 440px;
+        height: 440px;
         background-color: #ff922b; /* Vibrant Orange */
         border-radius: 50%;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
         display: flex;
         justify-content: center;
         align-items: center;
         z-index: 5;
         flex-shrink: 0;
+        transition: transform 0.3s ease;
     }
 
     /* Perfect Dead-Center Alignment for the Images */
     .logo-img {
         position: absolute;
-        width: 75%;
-        height: 75%;
+        width: 82%; /* Slightly optimized ratio for the maximized space footprint */
+        height: 82%;
         object-fit: contain;
-        top: 12.5%;
-        left: 12.5%;
+        top: 9%;
+        left: 9%;
         transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         pointer-events: none; 
     }
@@ -88,27 +89,32 @@
     .anatomy-side {
         display: flex;
         align-items: center;
-        width: 240px;
+        width: 180px; /* Brought closer to center focus */
         position: relative;
     }
     .anatomy-left { justify-content: flex-end; }
     .anatomy-right { justify-content: flex-start; }
 
-    /* Labeled Click Action Targets */
+    /* Labeled Click Action Targets (Stays slimmed down) */
     .anatomy-btn {
         background: rgba(255, 255, 255, 0.85);
         border: 2px solid #ffffff;
         color: #212529;
         font-weight: 700;
-        padding: 10px 22px;
+        padding: 10px 14px; 
+        width: 155px; 
+        text-align: center;
         border-radius: 30px;
         cursor: pointer;
         box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         transition: all 0.3s ease;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        font-size: 0.82rem;
         z-index: 10;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .anatomy-btn:hover {
         background: #ff922b;
@@ -146,7 +152,7 @@
     /* Target hover effect via the button wrapper actions */
     .hovering-hive #hive-image,
     .hovering-book #book-image {
-        transform: scale(1.06);
+        transform: scale(1.05);
         filter: blur(0) grayscale(0%) !important;
         opacity: 1 !important;
     }
@@ -270,6 +276,163 @@
         0%, 100% { opacity: 1; }
         50% { opacity: 0; }
     }
+
+    /* --- MOBILE RESPONSIVENESS OVERRIDES --- */
+    @media (max-width: 992px) {
+        .anatomy-container {
+            flex-direction: column;
+            gap: 25px;
+            margin: 30px auto;
+        }
+
+        .anatomy-side {
+            width: 100%;
+            justify-content: center !important;
+        }
+
+        .anatomy-left,
+        .anatomy-right {
+            justify-content: center !important;
+        }
+
+        .anatomy-line {
+            display: none;
+        }
+
+        #logo-cover {
+            width: 300px; /* Proportional expansion on medium mobile devices */
+            height: 300px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding-top: 80px;
+        }
+
+        .glass-header-box {
+            padding: 8px 20px;
+            border-radius: 40px;
+        }
+
+        .glass-header-box .h2 {
+            font-size: 1.5rem;
+        }
+
+        #logo-cover {
+            width: 240px;
+            height: 240px;
+        }
+
+        .anatomy-btn {
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            width: 140px;
+        }
+
+        .text-generator-container {
+            min-height: auto;
+            max-width: 100%;
+            padding: 0 15px;
+        }
+
+        .about-typed-text {
+            font-size: 1rem;
+        }
+
+        .faq-btn {
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            border-radius: 12px;
+        }
+
+        .faq-control-panel {
+            gap: 10px;
+        }
+
+        .faq-response-box {
+            min-height: 300px;
+            padding: 20px;
+        }
+
+        .monitor-screen {
+            padding: 20px;
+        }
+
+        .faq-typed-text {
+            font-size: 0.95rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        body {
+            padding-top: 70px;
+        }
+
+        .container {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        #logo-cover {
+            width: 180px;
+            height: 180px;
+        }
+
+        .anatomy-btn {
+            padding: 8px 10px;
+            font-size: 0.72rem;
+            width: 120px;
+        }
+
+        .glass-header-box .h1,
+        .glass-header-box .h2,
+        .glass-header-box .h3 {
+            font-size: 1.25rem;
+        }
+
+        .about-typed-text {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .faq-btn {
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            gap: 0.5rem;
+        }
+
+        .faq-btn span {
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .faq-btn i {
+            flex-shrink: 0;
+        }
+
+        .faq-response-box {
+            min-height: 250px;
+            padding: 15px;
+        }
+
+        .monitor-screen {
+            padding: 15px;
+        }
+
+        .faq-typed-text {
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .lead {
+            font-size: 0.95rem !important;
+        }
+
+        hr.border-white {
+            margin: 2rem 0 !important;
+        }
+    }
 </style>
 
 <div class="container py-5 content-wrapper">
@@ -297,7 +460,7 @@
                     <div class="anatomy-line"></div>
                 </div>
 
-                <!-- Central Overlap Target -->
+                <!-- Central Overlap Target (Upscaled Maximum Size Parameters) -->
                 <div id="logo-cover">
                     <img id="hive-image" src="{{ asset('images/Hive.png') }}" alt="Hive Mission" class="logo-img">
                     <img id="book-image" src="{{ asset('images/Book.png') }}" alt="Book Vision" class="logo-img">
@@ -389,7 +552,7 @@
             <!-- Dynamic Customer Service Footer Note -->
             <div class="text-center">
                 <p class="text-white bg-dark bg-opacity-25 d-inline-block px-4 py-2 rounded-pill shadow-sm backdrop-blur mb-0 small">
-                    <i class="fas fa-info-circle text-warning me-2"></i>Still looking for further information or questions? Feel free to <a href="mailto:support@bookhive.test" class="fw-bold text-white text-decoration-underline ms-1">contact administration directly</a>.
+                    <i class="fas fa-info-circle text-warning me-2"></i>Still looking for further information or questions? Feel free to contact administration directly.
                 </p>
             </div>
 

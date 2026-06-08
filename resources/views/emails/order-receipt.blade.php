@@ -67,56 +67,105 @@
         <h2>Courier Breakdown & Logistics</h2>
         <div class="courier-section">
             @php
-                $breakdown = null;
+                $breakdowns = null;
                 
-                // Get shipping breakdown
+                // Get shipping breakdown - can be either single breakdown or multiple by store ID
                 if ($order->shipping_breakdown) {
                     if (is_string($order->shipping_breakdown)) {
-                        $breakdown = json_decode($order->shipping_breakdown, true);
+                        $breakdowns = json_decode($order->shipping_breakdown, true);
                     } else {
-                        $breakdown = $order->shipping_breakdown;
+                        $breakdowns = $order->shipping_breakdown;
                     }
                 }
             @endphp
             
-            @if($breakdown && is_array($breakdown) && isset($breakdown['zone']))
-                <div class="courier-item">
-                    <div class="courier-from">Zone: {{ $breakdown['zone'] }}</div>
+            @if($breakdowns && is_array($breakdowns))
+                @php
+                    // Check if this is a multi-store breakdown (keys are numeric store IDs) or single breakdown
+                    $isMultiStore = false;
+                    $storeBreakdowns = [];
                     
-                    @if(isset($breakdown['weight_kg']))
-                    <div class="breakdown-row">
-                        <span class="breakdown-label">Weight:</span>
-                        <span class="breakdown-value">{{ $breakdown['weight_kg'] }}kg @if(isset($breakdown['extra_kg']) && $breakdown['extra_kg'] > 0) (+{{ $breakdown['extra_kg'] }}kg extra)@endif</span>
+                    // If it has 'zone' key, it's a single breakdown
+                    if (isset($breakdowns['zone'])) {
+                        $storeBreakdowns['single'] = $breakdowns;
+                    } else {
+                        // Otherwise check if keys are store IDs with 'breakdown' sub-key
+                        foreach ($breakdowns as $key => $data) {
+                            if (is_array($data) && isset($data['breakdown'])) {
+                                $isMultiStore = true;
+                                $storeBreakdowns[$key] = $data;
+                            }
+                        }
+                        // If no multi-store pattern found, treat as single
+                        if (!$isMultiStore) {
+                            $storeBreakdowns['single'] = $breakdowns;
+                        }
+                    }
+                @endphp
+                
+                @foreach($storeBreakdowns as $storeKey => $storeData)
+                    @php
+                        $breakdown = isset($storeData['breakdown']) ? $storeData['breakdown'] : $storeData;
+                    @endphp
+                    <div class="courier-item">
+                        @if(isset($storeData['display']))
+                        <div class="courier-from" style="margin-bottom: 8px;">
+                            <strong>{{ $storeData['display'] }}</strong>
+                        </div>
+                        @endif
+                        
+                        @if(isset($breakdown['zone']))
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Zone:</span>
+                            <span class="breakdown-value">{{ $breakdown['zone'] }}</span>
+                        </div>
+                        @endif
+                        
+                        @if(isset($breakdown['weight_kg']))
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Weight:</span>
+                            <span class="breakdown-value">{{ $breakdown['weight_kg'] }}kg @if(isset($breakdown['extra_kg']) && $breakdown['extra_kg'] > 0) (+{{ $breakdown['extra_kg'] }}kg extra)@endif</span>
+                        </div>
+                        @endif
+                        
+                        @if(isset($breakdown['zone_base']))
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Base Tariff:</span>
+                            <span class="breakdown-value">Rp {{ number_format($breakdown['zone_base'], 0, ',', '.') }}</span>
+                        </div>
+                        @endif
+                        
+                        @if(isset($breakdown['weight_fee']))
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Weight Fee:</span>
+                            <span class="breakdown-value">Rp {{ number_format($breakdown['weight_fee'], 0, ',', '.') }}</span>
+                        </div>
+                        @endif
+                        
+                        @if(isset($breakdown['service_surcharge']))
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Service ({{ $breakdown['service_level'] ?? 'standard' }}):</span>
+                            <span class="breakdown-value">Rp {{ number_format($breakdown['service_surcharge'], 0, ',', '.') }}</span>
+                        </div>
+                        @endif
+                        
+                        @if(isset($storeData['cost']))
+                        <div style="margin: 12px 0; padding-top: 12px; border-top: 1px solid #ddd;">
+                            <strong>Shipping Cost:</strong>
+                            <span style="float: right; color: #28a745; font-weight: bold;">Rp {{ number_format($storeData['cost'], 0, ',', '.') }}</span>
+                            <div style="clear: both;"></div>
+                        </div>
+                        @endif
                     </div>
-                    @endif
-                    
-                    @if(isset($breakdown['zone_base']))
-                    <div class="breakdown-row">
-                        <span class="breakdown-label">Base Tariff:</span>
-                        <span class="breakdown-value">Rp {{ number_format($breakdown['zone_base'], 0, ',', '.') }}</span>
-                    </div>
-                    @endif
-                    
-                    @if(isset($breakdown['weight_fee']))
-                    <div class="breakdown-row">
-                        <span class="breakdown-label">Weight Fee:</span>
-                        <span class="breakdown-value">Rp {{ number_format($breakdown['weight_fee'], 0, ',', '.') }}</span>
-                    </div>
-                    @endif
-                    
-                    @if(isset($breakdown['service_surcharge']))
-                    <div class="breakdown-row">
-                        <span class="breakdown-label">Service ({{ $breakdown['service_level'] ?? 'standard' }}):</span>
-                        <span class="breakdown-value">Rp {{ number_format($breakdown['service_surcharge'], 0, ',', '.') }}</span>
-                    </div>
-                    @endif
-                    
-                    <div style="margin: 12px 0; padding-top: 12px; border-top: 1px solid #ddd;">
-                        <strong style="color: #28a745;">Total Shipping Cost:</strong>
-                        <span style="float: right; color: #28a745; font-weight: bold;">Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
-                        <div style="clear: both;"></div>
-                    </div>
+                @endforeach
+                
+                @if(count($storeBreakdowns) > 1)
+                <div class="courier-item" style="background-color: #e8f5e9; border-left-color: #28a745;">
+                    <strong style="color: #28a745;">Total Shipping Cost (All Stores):</strong>
+                    <span style="float: right; color: #28a745; font-weight: bold; font-size: 16px;">Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
+                    <div style="clear: both;"></div>
                 </div>
+                @endif
             @else
                 <p style="color: #666; font-size: 13px; padding: 15px; background: #fafafa; border-radius: 4px;">
                     <strong>Shipping Cost:</strong> Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}<br>

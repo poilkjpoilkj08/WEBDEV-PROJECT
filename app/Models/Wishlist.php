@@ -25,4 +25,18 @@ class Wishlist extends Model
     {
         return $this->belongsTo(Book::class);
     }
+
+    /**
+     * Get total available stock from all store locations for this book
+     */
+    public function getTotalStockAttribute()
+    {
+        if (!$this->book) {
+            return 0;
+        }
+        
+        // Sum stock from all store locations via pivot table
+        return $this->book->storeLocations()
+            ->sum('book_store_locations.stock');
+    }
 }

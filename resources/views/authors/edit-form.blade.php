@@ -43,6 +43,214 @@
         border-color: #a64f1e !important;
         color: #ffffff !important;
     }
+
+    /* ===== RESPONSIVE STYLES FOR AUTHOR EDIT FORM ===== */
+    @media (max-width: 768px) {
+        /* Body padding */
+        body {
+            padding-top: 80px;
+        }
+
+        /* Container padding */
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Column sizing */
+        .col-lg-8 {
+            max-width: 100%;
+        }
+
+        /* Card styling */
+        .author-form-card {
+            border-radius: 16px;
+            padding: 1.25rem !important;
+        }
+
+        /* Heading sizing */
+        .h3 {
+            font-size: 1.1rem;
+        }
+
+        /* Button sizing */
+        .btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Form controls */
+        .form-control, .form-check-input {
+            font-size: 0.95rem;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+        }
+
+        /* Text utilities */
+        .small {
+            font-size: 0.85rem;
+        }
+
+        .text-muted {
+            font-size: 0.9rem;
+        }
+
+        /* Row spacing */
+        .row {
+            gap: 1rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+
+        /* Margin utilities */
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Extra small screens */
+        body {
+            padding-top: 70px;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Container padding */
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .py-5 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+
+        /* Column sizing */
+        .col-lg-8 {
+            max-width: 100%;
+        }
+
+        /* Card styling */
+        .author-form-card {
+            border-radius: 12px;
+            padding: 1rem !important;
+            border: 1px solid #eef0f2 !important;
+        }
+
+        .card-body {
+            padding: 0 !important;
+        }
+
+        /* Heading sizing */
+        .h3 {
+            font-size: 1rem;
+        }
+
+        .h1 {
+            font-size: 1rem;
+        }
+
+        /* Button sizing and layout */
+        .btn {
+            padding: 0.65rem 1rem;
+            font-size: 0.8rem;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .px-4 {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+
+        /* Button group */
+        .d-flex {
+            flex-direction: column;
+            gap: 0.5rem !important;
+        }
+
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+
+        /* Form controls */
+        .form-control, .form-check-input {
+            font-size: 16px;
+            padding: 0.6rem 0.75rem;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+
+        .form-check {
+            font-size: 0.85rem;
+        }
+
+        /* Text utilities */
+        .small {
+            font-size: 0.75rem;
+        }
+
+        .text-muted {
+            font-size: 0.8rem;
+        }
+
+        .text-dark {
+            font-size: 0.9rem;
+        }
+
+        /* Margin utilities */
+        .mb-4 {
+            margin-bottom: 0.75rem !important;
+        }
+
+        .mb-3 {
+            margin-bottom: 0.5rem !important;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.25rem !important;
+        }
+
+        .me-2 {
+            margin-right: 0.5rem !important;
+        }
+
+        .me-1 {
+            margin-right: 0.25rem !important;
+        }
+
+        .pt-3 {
+            padding-top: 0.75rem !important;
+        }
+
+        /* Border utilities */
+        .border-top {
+            border-top: 1px solid #eee !important;
+        }
+
+        /* Icon sizing */
+        .fa {
+            font-size: 0.9rem;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+    }
 </style>
 
 <div class="container py-5">
@@ -61,12 +269,6 @@
                             <label class="form-label fw-semibold text-dark small">Author Name *</label>
                             <input type="text" name="name" value="{{ old('name', $author->name) }}" required class="form-control rounded-3 @error('name') is-invalid @enderror" placeholder="e.g. J.K. Rowling">
                             @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark small">Publisher</label>
-                            <input type="text" name="publisher" value="{{ old('publisher', $author->publisher) }}" class="form-control rounded-3 @error('publisher') is-invalid @enderror" placeholder="e.g. Bloomsbury Publishing">
-                            @error('publisher') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="mb-3">

@@ -80,7 +80,8 @@
                 <table class="table table-hover mb-0 align-middle">
                     <thead style="background: #f8f4f0;">
                         <tr>
-                            <th class="ps-4">Invoice</th>
+                            <th class="ps-4">ID</th>
+                            <th>Invoice</th>
                             <th>Customer</th>
                             <th>Date</th>
                             <th>Subtotal</th>
@@ -119,7 +120,8 @@
                             $sc = $shippingColors[$order->shipping_status ?? 'pending'] ?? 'secondary';
                         @endphp
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4 fw-bold text-primary">{{ $order->id }}</td>
+                            <td>
                                 <span class="badge bg-primary rounded-pill">{{ $order->invoice_number }}</span>
                             </td>
                             <td>
@@ -169,27 +171,40 @@
                             </td>
                             <td class="pe-4 text-end">
                                 <div class="d-flex gap-2 justify-content-end align-items-center">
-                                    {{-- Show pending refund indicator --}}
+                                    {{-- Show pending/approved refund indicator --}}
                                     @php
                                         $pendingRefund = $order->refunds()->where('status', 'pending')->first();
+                                        $approvedRefund = $order->refunds()->where('status', 'approved')->first();
+                                        $isLocked = $order->delivery_confirmed_by_user || $pendingRefund || $approvedRefund;
                                     @endphp
                                     @if($pendingRefund)
                                     <a href="{{ route('admin.refunds.index', ['status' => 'pending']) }}" class="badge bg-danger rounded-pill" title="Click to manage pending refunds" data-bs-toggle="tooltip" style="text-decoration: none;">
                                         <i class="fas fa-exclamation-circle me-1"></i>Refund Pending
                                     </a>
                                     @endif
+                                    @if($approvedRefund)
+                                    <a href="{{ route('admin.refunds.index', ['status' => 'approved']) }}" class="badge bg-info rounded-pill" title="Click to manage approved refunds" data-bs-toggle="tooltip" style="text-decoration: none;">
+                                        <i class="fas fa-check-circle me-1"></i>Refund Approved
+                                    </a>
+                                    @endif
+                                    @if($order->delivery_confirmed_by_user)
+                                    <span class="badge bg-success rounded-pill" title="Order locked - delivery confirmed by user" data-bs-toggle="tooltip">
+                                        <i class="fas fa-lock me-1"></i>Confirmed
+                                    </span>
+                                    @endif
                                     <a href="{{ route('orders.show', $order->id) }}" class="btn btn-outline-primary btn-sm rounded-pill" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill"
-                                        title="Update Status"
+                                        title="{{ $isLocked ? 'Cannot modify - order is locked' : 'Update Status' }}"
                                         data-bs-toggle="modal"
                                         data-bs-target="#updateModal"
                                         data-order-id="{{ $order->id }}"
                                         data-invoice="{{ $order->invoice_number }}"
                                         data-status="{{ $order->status }}"
                                         data-shipping-status="{{ $order->shipping_status ?? 'pending' }}"
-                                        data-tracking="{{ $order->tracking_number ?? '' }}">
+                                        data-tracking="{{ $order->tracking_number ?? '' }}"
+                                        {{ $isLocked ? 'disabled' : '' }}>
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 </div>
@@ -199,6 +214,32 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Pagination Controls -->
+            @if($orders->hasPages())
+            <div class="d-flex justify-content-center align-items-center gap-3 mt-5 bg-light py-2 px-4 rounded-pill shadow-sm d-inline-flex mx-auto" style="border: 1px solid #eef0f2;">
+                @if($orders->onFirstPage())
+                    <button class="btn btn-sm btn-link text-muted text-decoration-none" disabled style="font-size: 0.8rem;">
+                        <i class="fas fa-chevron-left me-2"></i>Previous
+                    </button>
+                @else
+                    <a href="{{ $orders->appends(request()->query())->previousPageUrl() }}" class="btn btn-sm btn-link text-dark text-decoration-none fw-bold" style="font-size: 0.8rem;">
+                        <i class="fas fa-chevron-left me-2" style="color: #c25e25;"></i>Previous
+                    </a>
+                @endif
+                <div class="text-dark fw-medium small mx-2" style="font-size: 0.8rem;">
+                    Page {{ $orders->currentPage() }} of {{ $orders->lastPage() }}
+                </div>
+                @if($orders->hasMorePages())
+                    <a href="{{ $orders->appends(request()->query())->nextPageUrl() }}" class="btn btn-sm btn-link text-dark text-decoration-none fw-bold" style="font-size: 0.8rem;">
+                        Next<i class="fas fa-chevron-right ms-2" style="color: #c25e25;"></i>
+                    </a>
+                @else
+                    <button class="btn btn-sm btn-link text-muted text-decoration-none" disabled style="font-size: 0.8rem;">
+                        Next<i class="fas fa-chevron-right ms-2"></i>
+                    </button>
+                @endif
+            </div>
+            @endif
         </div>
     @endif
 </div>
@@ -275,4 +316,328 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+<style>
+/* ===== RESPONSIVE STYLES FOR ADMIN ORDERS INDEX PAGE ===== */
+@media (max-width: 768px) {
+    /* Container and spacing */
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    /* Heading sizing */
+    .h3 {
+        font-size: 1.25rem;
+    }
+
+    .h4 {
+        font-size: 1.1rem;
+    }
+
+    .h5 {
+        font-size: 1rem;
+    }
+
+    /* Badge and stat sizing */
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .fs-6 {
+        font-size: 0.95rem;
+    }
+
+    /* Button group wrapping */
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .btn-group .btn {
+        flex: 1;
+        min-width: 100px;
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Table responsiveness */
+    .table {
+        font-size: 0.9rem;
+    }
+
+    .table thead {
+        font-size: 0.85rem;
+    }
+
+    .table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    /* Status badge sizing */
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    /* Modal sizing */
+    .modal-dialog {
+        max-width: 95%;
+    }
+
+    .modal-header {
+        padding: 1rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-footer {
+        padding: 0.75rem;
+    }
+
+    /* Form controls */
+    .form-control,
+    .form-select {
+        font-size: 0.95rem;
+        padding: 0.65rem;
+    }
+
+    /* Text utilities */
+    .text-muted {
+        font-size: 0.9rem;
+    }
+
+    /* Alert sizing */
+    .alert {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
+
+    /* Icon sizing */
+    .fa-2x {
+        font-size: 1.5rem;
+    }
+
+    .fa-3x {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra small screens */
+    .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Page header */
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem !important;
+    }
+
+    /* Heading sizing */
+    .h3 {
+        font-size: 1rem;
+    }
+
+    .h4 {
+        font-size: 0.95rem;
+    }
+
+    .h5 {
+        font-size: 0.9rem;
+    }
+
+    .h1, h1 {
+        font-size: 1.1rem;
+    }
+
+    /* Badge and buttons */
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+    }
+
+    .fs-6 {
+        font-size: 0.85rem;
+    }
+
+    /* Button group single column */
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn-group .btn {
+        width: 100%;
+        font-size: 0.85rem;
+        padding: 0.5rem;
+        border-radius: 0.25rem !important;
+    }
+
+    /* Button sizing */
+    .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Table responsiveness - horizontal scroll */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .table thead {
+        font-size: 0.75rem;
+    }
+
+    .table td,
+    .table th {
+        padding: 0.5rem 0.25rem;
+    }
+
+    /* Status badge in table */
+    .badge {
+        display: inline-block;
+        word-wrap: break-word;
+    }
+
+    /* Text truncation */
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Links in table */
+    a {
+        word-break: break-word;
+    }
+
+    /* Modal sizing */
+    .modal-dialog {
+        max-width: 95%;
+        margin: 0.5rem auto;
+    }
+
+    .modal-header {
+        padding: 0.75rem;
+    }
+
+    .modal-body {
+        padding: 0.75rem;
+    }
+
+    .modal-footer {
+        padding: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .modal-header .btn-close {
+        padding: 0.3rem;
+    }
+
+    /* Form controls */
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: 0.75rem;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+    }
+
+    /* Text utilities */
+    .text-muted {
+        font-size: 0.8rem;
+    }
+
+    .small {
+        font-size: 0.75rem;
+    }
+
+    /* Alert sizing */
+    .alert {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Alert icon sizing */
+    .alert i {
+        font-size: 1rem;
+        margin-right: 0.5rem;
+    }
+
+    /* Icon sizing */
+    .fa-2x {
+        font-size: 1.2rem;
+    }
+
+    .fa-3x {
+        font-size: 1.5rem;
+    }
+
+    /* Margin/padding reductions */
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+
+    .mb-3 {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .gap-3 {
+        gap: 0.75rem !important;
+    }
+
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+
+    /* Row and column spacing */
+    .row.g-3 {
+        gap: 0.75rem !important;
+    }
+
+    .row.g-4 {
+        gap: 1rem !important;
+    }
+
+    /* Prevent horizontal overflow */
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Stat cards */
+    .card {
+        border-radius: 8px;
+    }
+
+    .card-body {
+        padding: 0.75rem;
+    }
+
+    /* Card header sizing */
+    .card-header {
+        padding: 0.75rem;
+        font-size: 0.95rem;
+    }
+}
+</style>
 @endsection

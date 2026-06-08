@@ -13,6 +13,6 @@ class BookCategory extends Model
 
     public function books(): HasMany
     {
-        return $this->hasMany(Book::class, 'category_id');
+        return $this->hasMany(Book::class, 'category_id')->where('status', 'available');
     }
 }

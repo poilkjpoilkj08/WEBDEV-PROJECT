@@ -72,6 +72,187 @@
     .max-width-fit {
         width: fit-content;
     }
+
+    /* ===== RESPONSIVE STYLES FOR BOOK LISTING ===== */
+    @media (max-width: 768px) {
+        body {
+            padding-top: 80px;
+        }
+
+        /* Glass header box better on tablet */
+        .glass-header-box {
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+        }
+
+        /* Book grid adjusts for tablet */
+        .row {
+            margin-left: -0.5rem;
+            margin-right: -0.5rem;
+        }
+
+        /* Book cards better spacing */
+        .book-ui-card {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Filter controls better on tablet */
+        .filter-controls {
+            flex-wrap: wrap;
+            gap: 0.75rem !important;
+        }
+
+        /* Buttons more accessible */
+        .btn {
+            padding: 0.65rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        /* Search box sizing */
+        .search-control,
+        .form-control {
+            font-size: 16px; /* Prevent iOS zoom */
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Extra small screens */
+        body {
+            padding-top: 70px;
+        }
+
+        /* Better heading sizing */
+        h1, .h1, h2, .h2 {
+            font-size: 1.5rem !important;
+        }
+
+        .h3 {
+            font-size: 1.25rem !important;
+        }
+
+        /* Glass header box mobile friendly */
+        .glass-header-box {
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+        }
+
+        /* Container better spacing */
+        .container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+
+        /* Book cards full width with padding */
+        .book-ui-card {
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        /* Image containers */
+        .book-ui-card img {
+            border-radius: 8px;
+        }
+
+        /* Text truncation for long titles */
+        .book-ui-card h6,
+        .book-ui-card .card-title {
+            font-size: 0.9rem;
+            line-height: 1.3;
+        }
+
+        /* Price and badge sizing */
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.6rem;
+        }
+
+        /* Button sizing */
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        /* Filter buttons stack */
+        .filter-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-controls .btn {
+            width: 100%;
+        }
+
+        /* Search box full width */
+        .search-control {
+            width: 100%;
+            font-size: 16px;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Icon sizing */
+        .fa-2x {
+            font-size: 1.75rem;
+        }
+
+        .fa-3x {
+            font-size: 2.25rem;
+        }
+
+        /* Rating display */
+        .rating-display {
+            font-size: 0.8rem;
+        }
+
+        /* Card footer buttons stack vertically */
+        .card-footer .btn-group,
+        .card-footer .d-flex {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .card-footer .btn {
+            width: 100%;
+        }
+
+        /* Better spacing for list items */
+        .list-group-item {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        /* Text alignment on small screens */
+        .text-truncate {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Pagination better on mobile */
+        .pagination {
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .pagination .page-link {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        /* Alert sizing */
+        .alert {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+    }
 </style>
 
 <div class="container py-5 content-wrapper">
@@ -113,6 +294,11 @@
                         <option value="Spanish" {{ request('language') == 'Spanish' ? 'selected' : '' }}>Spanish</option>
                         <option value="French" {{ request('language') == 'French' ? 'selected' : '' }}>French</option>
                         <option value="German" {{ request('language') == 'German' ? 'selected' : '' }}>German</option>
+                        <option value="Italian" {{ request('language') == 'Italian' ? 'selected' : '' }}>Italian</option>
+                        <option value="Portuguese" {{ request('language') == 'Portuguese' ? 'selected' : '' }}>Portuguese</option>
+                        <option value="Chinese" {{ request('language') == 'Chinese' ? 'selected' : '' }}>Chinese</option>
+                        <option value="Japanese" {{ request('language') == 'Japanese' ? 'selected' : '' }}>Japanese</option>
+                        <option value="Korean" {{ request('language') == 'Korean' ? 'selected' : '' }}>Korean</option>
                     </select>
                 </div>
                 <div class="col-12 col-md-6 col-lg-2">
@@ -141,11 +327,17 @@
             <div class="card h-100 border-0 overflow-hidden book-ui-card">
                 @if($book->cover_image_url)
                 <div class="position-relative" style="padding: 12px 12px 0 12px;">
-                    <img src="{{ $book->cover_image_url }}" class="card-img-top" alt="{{ $book->title }}" style="height: 240px; object-fit: cover; border-radius: 12px;" />
+                    <img src="{{ $book->cover_image_src }}" class="card-img-top" alt="{{ $book->title }}" style="height: 240px; object-fit: cover; border-radius: 12px;" />
                     <div class="position-absolute top-0 end-0 m-4">
+                        @if($book->status === 'out_of_stock')
+                        <span class="badge bg-danger fw-bold px-2 py-1 shadow-sm" style="font-size: 0.75rem;">
+                            OUT OF STOCK
+                        </span>
+                        @else
                         <span class="badge bg-light text-dark fw-bold px-2 py-1 shadow-sm" style="font-size: 0.7rem; border: 1px solid #eef0f2;">
                             {{ ucfirst($book->status) }}
                         </span>
+                        @endif
                     </div>
                 </div>
                 @else
@@ -170,7 +362,11 @@
                     
                     <div class="mt-auto pt-2">
                         <div class="d-flex justify-content-between align-items-center mb-3">
+                            @if($book->status === 'out_of_stock')
+                            <span class="fw-bold text-danger" style="font-size: 1rem;">OUT OF STOCK</span>
+                            @else
                             <span class="fw-bold text-dark" style="font-size: 1rem;">Rp {{ number_format($book->price, 0, ',', '.') }}</span>
+                            @endif
                         </div>
                         <a href="{{ route('books.show', $book->id) }}" class="btn btn-soft-orange w-100 fw-bold py-2" style="font-size: 0.85rem; border-radius: 8px;">
                             <i class="fas fa-eye me-2"></i>View Details
@@ -196,7 +392,7 @@
                 <i class="fas fa-chevron-left me-2"></i>Previous
             </button>
         @else
-            <a href="{{ $books->previousPageUrl() }}" class="btn btn-sm btn-link text-dark text-decoration-none fw-bold" style="font-size: 0.8rem;">
+            <a href="{{ $books->appends(request()->query())->previousPageUrl() }}" class="btn btn-sm btn-link text-dark text-decoration-none fw-bold" style="font-size: 0.8rem;">
                 <i class="fas fa-chevron-left me-2" style="color: #c25e25;"></i>Previous
             </a>
         @endif
@@ -206,7 +402,7 @@
         </div>
 
         @if($books->hasMorePages())
-            <a href="{{ $books->nextPageUrl() }}" class="btn btn-sm btn-link text-dark text-decoration-none fw-bold" style="font-size: 0.8rem;">
+            <a href="{{ $books->appends(request()->query())->nextPageUrl() }}" class="btn btn-sm btn-link text-dark text-decoration-none fw-bold" style="font-size: 0.8rem;">
                 Next<i class="fas fa-chevron-right ms-2" style="color: #c25e25;"></i>
             </a>
         @else

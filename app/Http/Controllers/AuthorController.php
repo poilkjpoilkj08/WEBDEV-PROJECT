@@ -45,7 +45,6 @@ class AuthorController extends Controller
             'phone'     => 'nullable|string',
             'bio'       => 'nullable|string',
             'photo_url' => 'nullable|string',
-            'publisher' => 'nullable|string',
         ]);
         Author::create($validated);
         return redirect()->route('admin.authors.index')->with('success', 'Author added successfully!');
@@ -64,7 +63,6 @@ class AuthorController extends Controller
         // Removed email, phone, and photo_url from requirements
         $validated = $request->validate([
             'name'      => 'required|string',
-            'publisher' => 'nullable|string',
             'bio'       => 'nullable|string',
         ]);
 

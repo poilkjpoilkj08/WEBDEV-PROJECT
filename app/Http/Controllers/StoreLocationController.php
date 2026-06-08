@@ -53,7 +53,8 @@ class StoreLocationController extends Controller
 
     public function create_form()
     {
-        return view('admin.store-locations.create-form');
+        $indonesianLocations = CheckoutController::indonesianLocations();
+        return view('admin.store-locations.create-form', compact('indonesianLocations'));
     }
 
     public function store(Request $request)
@@ -62,8 +63,11 @@ class StoreLocationController extends Controller
         $validated = $request->validate([
             'name'          => 'required|string|max:255',
             'address'       => 'required|string|max:500',
+            'province'      => 'required|string|max:100',
             'city'          => 'required|string|max:100',
-            'country'       => 'required|string|max:100',
+            'district'      => 'required|string|max:100',
+            'postal_code'   => 'required|string|max:20',
+            'country'       => 'required|string|in:Indonesia',
             'latitude'      => 'required|numeric|between:-90,90',
             'longitude'     => 'required|numeric|between:-180,180',
             'phone'         => 'nullable|string|max:50',
@@ -78,7 +82,8 @@ class StoreLocationController extends Controller
     public function edit_form($id)
     {
         $store = StoreLocation::findOrFail($id);
-        return view('admin.store-locations.edit-form', compact('store'));
+        $indonesianLocations = CheckoutController::indonesianLocations();
+        return view('admin.store-locations.edit-form', compact('store', 'indonesianLocations'));
     }
 
     public function update(Request $request, $id)
@@ -88,8 +93,11 @@ class StoreLocationController extends Controller
         $validated = $request->validate([
             'name'          => 'required|string|max:255',
             'address'       => 'required|string|max:500',
+            'province'      => 'required|string|max:100',
             'city'          => 'required|string|max:100',
-            'country'       => 'required|string|max:100',
+            'district'      => 'required|string|max:100',
+            'postal_code'   => 'required|string|max:20',
+            'country'       => 'required|string|in:Indonesia',
             'latitude'      => 'required|numeric|between:-90,90',
             'longitude'     => 'required|numeric|between:-180,180',
             'phone'         => 'nullable|string|max:50',

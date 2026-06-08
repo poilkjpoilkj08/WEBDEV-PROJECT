@@ -58,7 +58,7 @@ class OrderController extends Controller
             $query = $query->where('status', 'pending');
         }
         
-        $orders = $query->get();
+        $orders = $query->paginate(15);
         return view('admin.orders.index', compact('orders', 'status'));
     }
 
@@ -76,7 +76,7 @@ class OrderController extends Controller
             $query = $query->where('status', $status);
         }
         
-        $refunds = $query->get();
+        $refunds = $query->paginate(15);
         return view('admin.refunds.index', compact('refunds', 'status'));
     }
 
@@ -88,6 +88,25 @@ class OrderController extends Controller
         Gate::authorize('update-book'); // Reuse admin authorization
         
         $order = Order::findOrFail($order_id);
+        
+        // Prevent status changes if delivery has been confirmed by user
+        if ($order->delivery_confirmed_by_user) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Cannot modify order after delivery confirmation'], 400);
+            }
+            return back()->with('error', 'Cannot modify this order after delivery confirmation.');
+        }
+        
+        // Prevent status changes if there's a pending or approved refund
+        $refundWithIssue = $order->refunds()
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+        if ($refundWithIssue) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Cannot modify order with pending or approved refund'], 400);
+            }
+            return back()->with('error', 'Cannot modify order with a pending or approved refund request.');
+        }
         
         $validated = $request->validate([
             'status'          => 'nullable|in:pending,paid,cancelled',
@@ -153,6 +172,14 @@ class OrderController extends Controller
     {
         $order = Order::findOrFail($order_id);
         $user = Auth::user();
+
+        // Only users can confirm delivery, not admin/owner
+        if ($user->roles()->whereIn('role', ['admin', 'owner'])->exists()) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Admins cannot confirm delivery for customers'], 403);
+            }
+            abort(403, 'Admins cannot confirm delivery for customers');
+        }
 
         // Verify order belongs to user
         if ((int)$order->user_id !== (int)$user->id) {
@@ -301,6 +328,7 @@ class OrderController extends Controller
 
         $order->update([
             'refund_status' => 'rejected',
+            'payment_status' => 'refund_rejected',
         ]);
 
         if ($request->expectsJson()) {

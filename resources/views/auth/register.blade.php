@@ -61,27 +61,184 @@
         box-shadow: 0 0 0 0.2rem rgba(194, 94, 37, 0.15) !important;
     }
 
-    .password-strength {
-        height: 4px;
-        border-radius: 2px;
-        margin-top: 8px;
-        background-color: #e9ecef;
+
+
+    /* ===== RESPONSIVE STYLES FOR REGISTER PAGE ===== */
+    @media (max-width: 768px) {
+        /* Register card padding */
+        .register-box-card {
+            padding: 1.5rem !important;
+        }
+
+        /* Heading sizing */
+        .h3, h3 {
+            font-size: 1.25rem;
+        }
+
+        /* Form label sizing */
+        .form-label {
+            font-size: 0.9rem;
+        }
+
+        /* Form control sizing */
+        .form-control {
+            font-size: 0.95rem;
+            padding: 0.75rem 0.75rem;
+        }
+
+        /* Button sizing */
+        .btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Small text sizing */
+        .small {
+            font-size: 0.85rem;
+        }
+
+        /* Text utilities */
+        .text-muted {
+            font-size: 0.9rem;
+        }
+
+        /* Password strength indicator */
+        .password-strength {
+            height: 3px;
+        }
+
+        /* Icon sizing */
+        .fa-lg {
+            font-size: 0.95rem;
+        }
     }
 
-    .password-strength.weak {
-        background-color: #dc3545;
-    }
+    @media (max-width: 576px) {
+        /* Extra small screens */
+        /* Background padding adjustment */
+        body {
+            padding-top: 70px;
+            padding-left: 0;
+            padding-right: 0;
+        }
 
-    .password-strength.fair {
-        background-color: #ffc107;
-    }
+        /* Container adjustments */
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
 
-    .password-strength.good {
-        background-color: #17a2b8;
-    }
+        /* Register card sizing */
+        .register-box-card {
+            padding: 1rem !important;
+            border-radius: 16px;
+        }
 
-    .password-strength.strong {
-        background-color: #28a745;
+        .card-body {
+            padding: 0 !important;
+        }
+
+        /* Heading sizing */
+        .h3, h3 {
+            font-size: 1.1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.5rem !important;
+        }
+
+        /* Form styling */
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            font-size: 16px; /* Prevent iOS zoom */
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+        }
+
+        .form-control:focus {
+            border-color: #c25e25 !important;
+            box-shadow: 0 0 0 0.15rem rgba(194, 94, 37, 0.15) !important;
+        }
+
+        /* Button sizing */
+        .btn {
+            padding: 0.65rem 1rem;
+            font-size: 0.9rem;
+            min-height: 44px;
+            border-radius: 0.5rem;
+            width: 100%;
+        }
+
+        .btn-soft-orange {
+            width: 100%;
+        }
+
+        /* Alert sizing */
+        .alert {
+            font-size: 0.8rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+        }
+
+        .alert-dismissible .btn-close {
+            padding: 0.3rem;
+        }
+
+        /* Text utilities */
+        .text-muted {
+            font-size: 0.8rem;
+        }
+
+        .small {
+            font-size: 0.75rem;
+        }
+
+        /* Icon sizing */
+        .fa-2x {
+            font-size: 1.2rem;
+        }
+
+        .fa-lg {
+            font-size: 0.9rem;
+        }
+
+        /* Row and column adjustments */
+        .row {
+            gap: 0.75rem !important;
+        }
+
+        .col-md-6, .col-xl-4 {
+            flex-basis: 100%;
+        }
+
+        /* Password strength indicator */
+        .password-strength {
+            height: 3px;
+            margin-top: 6px;
+        }
+
+        /* Link styling */
+        a {
+            word-break: break-word;
+            font-size: 0.85rem;
+        }
+
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
     }
 </style>
 
@@ -163,10 +320,6 @@
                                     <div class="invalid-feedback small">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="password-strength" id="passwordStrength"></div>
-                            <small class="text-muted d-block mt-2" id="passwordHint">
-                                Password strength: <span id="strengthText">None</span>
-                            </small>
                         </div>
 
                         <!-- Password Confirmation field -->
@@ -188,9 +341,6 @@
                                     <div class="invalid-feedback small">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <small class="text-danger d-block mt-2" id="passwordMismatch" style="display: none;">
-                                Passwords do not match
-                            </small>
                         </div>
 
                         <!-- Form Submit Action Button -->
@@ -245,62 +395,6 @@
                     toggleIconConfirm.classList.toggle('fa-eye-slash');
                 }
             });
-        }
-
-        // Password strength indicator
-        const passwordStrengthBar = document.getElementById("passwordStrength");
-        const strengthText = document.getElementById("strengthText");
-
-        if (passwordInput) {
-            passwordInput.addEventListener("input", function () {
-                const password = this.value;
-                let strength = 0;
-
-                if (password.length >= 8) strength++;
-                if (password.length >= 12) strength++;
-                if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-                if (/[0-9]/.test(password)) strength++;
-                if (/[^a-zA-Z0-9]/.test(password)) strength++;
-
-                passwordStrengthBar.className = 'password-strength';
-                
-                if (strength === 0) {
-                    passwordStrengthBar.classList.add('weak');
-                    strengthText.textContent = 'Weak';
-                } else if (strength <= 2) {
-                    passwordStrengthBar.classList.add('weak');
-                    strengthText.textContent = 'Weak';
-                } else if (strength === 3) {
-                    passwordStrengthBar.classList.add('fair');
-                    strengthText.textContent = 'Fair';
-                } else if (strength === 4) {
-                    passwordStrengthBar.classList.add('good');
-                    strengthText.textContent = 'Good';
-                } else {
-                    passwordStrengthBar.classList.add('strong');
-                    strengthText.textContent = 'Strong';
-                }
-
-                // Check password match
-                checkPasswordMatch();
-            });
-        }
-
-        // Password confirmation match check
-        function checkPasswordMatch() {
-            const password = passwordInput.value;
-            const passwordConfirm = passwordConfirmInput.value;
-            const mismatchMsg = document.getElementById("passwordMismatch");
-
-            if (passwordConfirm && password !== passwordConfirm) {
-                mismatchMsg.style.display = 'block';
-            } else {
-                mismatchMsg.style.display = 'none';
-            }
-        }
-
-        if (passwordConfirmInput) {
-            passwordConfirmInput.addEventListener("input", checkPasswordMatch);
         }
     });
 </script>
