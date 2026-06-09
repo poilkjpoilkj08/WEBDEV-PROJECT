@@ -49,7 +49,7 @@ class OrderController extends Controller
         $status = $request->query('status'); // 'paid' or 'pending'
         
         // Admin sees ALL orders in management panel
-        $query = Order::with('user')->orderByDesc('created_at');
+        $query = Order::with('user')->orderBy('id');
         
         // Apply status filter
         if($status === 'paid'){

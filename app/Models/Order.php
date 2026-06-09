@@ -78,6 +78,11 @@ class Order extends Model
         return $this->hasMany(OrderDetail::class);
     }
 
+    public function orderDetails()
+    {
+        return $this->order_details();
+    }
+
     public function refunds()
     {
         return $this->hasMany(Refund::class);

@@ -109,54 +109,59 @@ class SyncController extends Controller
 
     public function orders(Request $request)
     {
-        if (!$this->validateToken()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        try {
+            if (!$this->validateToken()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            $since = $request->query('since');
+
+            $query = Order::with(['order_details', 'store']);
+            if ($since) {
+                $query->where('updated_at', '>', $since);
+            }
+
+            $orders = $query->get()->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'invoice_number' => $order->invoice_number,
+                    'user_id' => $order->user_id,
+                    'customer_name' => $order->customer_name,
+                    'total_price' => $order->total_price,
+                    'status' => $order->status,
+                    'shipping_status' => $order->shipping_status,
+                    'payment_method' => $order->payment_method,
+                    'paid_at' => $order->paid_at,
+                    'store_id' => $order->store_id,
+                    'shipping_name' => $order->shipping_name,
+                    'shipping_phone' => $order->shipping_phone,
+                    'shipping_address' => $order->shipping_address,
+                    'shipping_city' => $order->shipping_city,
+                    'shipping_province' => $order->shipping_province,
+                    'shipping_postal_code' => $order->shipping_postal_code,
+                    'shipping_country' => $order->shipping_country,
+                    'shipping_method' => $order->shipping_method,
+                    'shipping_cost' => $order->shipping_cost,
+                    'tracking_number' => $order->tracking_number,
+                    'updated_at' => $order->updated_at->toIso8601String(),
+                    'order_details' => $order->order_details->map(function ($detail) {
+                        return [
+                            'book_id' => $detail->book_id,
+                            'store_id' => $detail->store_id,
+                            'book_title' => $detail->book_title,
+                            'quantity' => $detail->quantity,
+                            'price' => $detail->price,
+                            'subtotal' => $detail->subtotal,
+                        ];
+                    })->toArray(),
+                ];
+            });
+
+            return response()->json(['data' => $orders]);
+        } catch (\Exception $e) {
+            \Log::error('Sync orders error', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => 'Server error: ' . $e->getMessage()], 500);
         }
-
-        $since = $request->query('since');
-
-        $query = Order::with(['orderDetails.book', 'orderDetails.store', 'store']);
-        if ($since) {
-            $query->where('updated_at', '>', $since);
-        }
-
-        $orders = $query->get()->map(function ($order) {
-            return [
-                'id' => $order->id,
-                'invoice_number' => $order->invoice_number,
-                'user_id' => $order->user_id,
-                'customer_name' => $order->customer_name,
-                'total_price' => $order->total_price,
-                'status' => $order->status,
-                'shipping_status' => $order->shipping_status,
-                'payment_method' => $order->payment_method,
-                'paid_at' => $order->paid_at,
-                'store_id' => $order->store_id,
-                'shipping_name' => $order->shipping_name,
-                'shipping_phone' => $order->shipping_phone,
-                'shipping_address' => $order->shipping_address,
-                'shipping_city' => $order->shipping_city,
-                'shipping_province' => $order->shipping_province,
-                'shipping_postal_code' => $order->shipping_postal_code,
-                'shipping_country' => $order->shipping_country,
-                'shipping_method' => $order->shipping_method,
-                'shipping_cost' => $order->shipping_cost,
-                'tracking_number' => $order->tracking_number,
-                'updated_at' => $order->updated_at->toIso8601String(),
-                'order_details' => $order->orderDetails->map(function ($detail) {
-                    return [
-                        'book_id' => $detail->book_id,
-                        'store_id' => $detail->store_id,
-                        'book_title' => $detail->book_title,
-                        'quantity' => $detail->quantity,
-                        'price' => $detail->price,
-                        'subtotal' => $detail->subtotal,
-                    ];
-                })->toArray(),
-            ];
-        });
-
-        return response()->json(['data' => $orders]);
     }
 
     public function store(Request $request)
