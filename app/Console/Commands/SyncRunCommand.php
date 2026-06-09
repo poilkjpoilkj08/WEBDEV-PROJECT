@@ -10,6 +10,8 @@ use App\Models\Author;
 use App\Models\Publisher;
 use App\Models\BookCategory;
 use App\Models\StoreLocation;
+use App\Models\Order;
+use App\Models\OrderDetail;
 
 class SyncRunCommand extends Command
 {
@@ -75,11 +77,12 @@ class SyncRunCommand extends Command
         $this->syncAuthors();
         $this->syncPublishers();
         $this->syncCategories();
+        $this->syncOrders();
     }
 
     protected function syncBooks(): void
     {
-        $lastSync = now()->subMinute()->toIso8601String();
+        $lastSync = now()->subHours(24)->toIso8601String();
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
@@ -183,6 +186,69 @@ class SyncRunCommand extends Command
                     ['name' => $data['name']]
                 );
             }
+        }
+    }
+
+    protected function syncOrders(): void
+    {
+        $lastSync = now()->subHours(24)->toIso8601String();
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->get($this->peerUrl . '/api/sync/orders', [
+            'since' => $lastSync,
+        ]);
+
+        if ($response->successful()) {
+            $orders = $response->json('data', []);
+            $synced = 0;
+
+            foreach ($orders as $data) {
+                $order = Order::updateOrCreate(
+                    ['invoice_number' => $data['invoice_number']],
+                    [
+                        'user_id' => $data['user_id'],
+                        'customer_name' => $data['customer_name'],
+                        'total_price' => $data['total_price'],
+                        'status' => $data['status'],
+                        'shipping_status' => $data['shipping_status'],
+                        'payment_method' => $data['payment_method'],
+                        'paid_at' => $data['paid_at'],
+                        'store_id' => $data['store_id'],
+                        'shipping_name' => $data['shipping_name'],
+                        'shipping_phone' => $data['shipping_phone'],
+                        'shipping_address' => $data['shipping_address'],
+                        'shipping_city' => $data['shipping_city'],
+                        'shipping_province' => $data['shipping_province'],
+                        'shipping_postal_code' => $data['shipping_postal_code'],
+                        'shipping_country' => $data['shipping_country'],
+                        'shipping_method' => $data['shipping_method'],
+                        'shipping_cost' => $data['shipping_cost'],
+                        'tracking_number' => $data['tracking_number'],
+                    ]
+                );
+                $synced++;
+
+                if (isset($data['order_details']) && is_array($data['order_details'])) {
+                    foreach ($data['order_details'] as $detail) {
+                        OrderDetail::updateOrCreate(
+                            [
+                                'order_id' => $order->id,
+                                'book_id' => $detail['book_id'],
+                            ],
+                            [
+                                'store_id' => $detail['store_id'],
+                                'book_title' => $detail['book_title'],
+                                'quantity' => $detail['quantity'],
+                                'price' => $detail['price'],
+                                'subtotal' => $detail['subtotal'],
+                            ]
+                        );
+                    }
+                }
+            }
+
+            $this->info("Synced {$synced} orders");
         }
     }
 }

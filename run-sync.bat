@@ -1,1 +1,2 @@
-"C:\Users\ASUS\.config\herd\bin\php.exe" "C:\Users\ASUS\Downloads\WEBDEV-PROJECT-main-5\artisan" schedule:run >> "C:\Users\ASUS\Downloads\WEBDEV-PROJECT-main-5\storage\logs\sync-schedule.log" 2>&1
+@echo off
+"C:\Users\ASUS\.config\herd\bin\php.bat" "C:\Users\ASUS\Downloads\WEBDEV-PROJECT-main-5\artisan" schedule:run >> "C:\Users\ASUS\Downloads\WEBDEV-PROJECT-main-5\storage\logs\sync-schedule.log" 2>&1

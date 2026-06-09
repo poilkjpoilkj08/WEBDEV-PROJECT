@@ -44,6 +44,7 @@ Route::get('/api/sync/books', [SyncController::class, 'books'])->name('sync.book
 Route::get('/api/sync/authors', [SyncController::class, 'authors'])->name('sync.authors');
 Route::get('/api/sync/publishers', [SyncController::class, 'publishers'])->name('sync.publishers');
 Route::get('/api/sync/categories', [SyncController::class, 'categories'])->name('sync.categories');
+Route::get('/api/sync/orders', [SyncController::class, 'orders'])->name('sync.orders');
 
 Route::post('/checkout/callback', [CheckoutController::class, 'callback'])->name('checkout.callback');
 Route::post('/checkout/calculate-shipping', [CheckoutController::class, 'calculateShipping'])->name('checkout.calculate-shipping');
