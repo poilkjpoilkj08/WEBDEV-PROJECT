@@ -12,6 +12,7 @@ use App\Models\BookCategory;
 use App\Models\StoreLocation;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\User;
 
 class SyncRunCommand extends Command
 {
@@ -205,12 +206,16 @@ class SyncRunCommand extends Command
             $synced = 0;
 
             foreach ($users as $data) {
+                $existingUser = User::where('email', $data['email'])->first();
+                $password = $existingUser ? $existingUser->password : bcrypt('sync_default_' . rand(1000, 9999));
+                
                 User::updateOrCreate(
                     ['email' => $data['email']],
                     [
                         'name' => $data['name'],
                         'email' => $data['email'],
                         'google_id' => $data['google_id'] ?? null,
+                        'password' => $password,
                     ]
                 );
                 $synced++;
