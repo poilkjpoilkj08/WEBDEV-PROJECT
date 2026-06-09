@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Models\Book;
 use App\Models\Author;
 use App\Models\Publisher;
@@ -95,8 +96,21 @@ class SyncRunCommand extends Command
         if ($response->successful()) {
             $books = $response->json('data', []);
             $synced = 0;
+            $skipped = 0;
 
             foreach ($books as $data) {
+                $existingBook = Book::where('isbn', $data['isbn'])->first();
+                
+                if ($existingBook && isset($data['updated_at'])) {
+                    $remoteUpdated = \Carbon\Carbon::parse($data['updated_at']);
+                    $localUpdated = $existingBook->updated_at;
+                    
+                    if ($remoteUpdated->lte($localUpdated)) {
+                        $skipped++;
+                        continue;
+                    }
+                }
+
                 $book = Book::updateOrCreate(
                     ['isbn' => $data['isbn']],
                     [
@@ -119,17 +133,36 @@ class SyncRunCommand extends Command
                 if (isset($data['store_stocks']) && is_array($data['store_stocks'])) {
                     foreach ($data['store_stocks'] as $storeStock) {
                         if (isset($storeStock['store_id']) && isset($storeStock['stock'])) {
-                            $book->storeLocations()->syncWithoutDetaching([
-                                $storeStock['store_id'] => [
-                                    'stock' => $storeStock['stock'],
-                                ]
-                            ]);
+                            $existingPivot = DB::table('book_store_locations')
+                                ->where('book_id', $book->id)
+                                ->where('store_location_id', $storeStock['store_id'])
+                                ->first();
+                            
+                            if (!$existingPivot || isset($storeStock['updated_at'])) {
+                                $remoteStockUpdated = \Carbon\Carbon::parse($storeStock['updated_at'] ?? $data['updated_at']);
+                                if ($existingPivot) {
+                                    $pivotUpdated = \Carbon\Carbon::parse($existingPivot->updated_at);
+                                    if ($remoteStockUpdated->gt($pivotUpdated)) {
+                                        $book->storeLocations()->syncWithoutDetaching([
+                                            $storeStock['store_id'] => [
+                                                'stock' => $storeStock['stock'],
+                                            ]
+                                        ]);
+                                    }
+                                } else {
+                                    $book->storeLocations()->syncWithoutDetaching([
+                                        $storeStock['store_id'] => [
+                                            'stock' => $storeStock['stock'],
+                                        ]
+                                    ]);
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            $this->info("Synced {$synced} books");
+            $this->info("Synced {$synced} books ({$skipped} skipped - local was newer)");
         }
     }
 
