@@ -204,10 +204,17 @@ class SyncRunCommand extends Command
             $synced = 0;
 
             foreach ($orders as $data) {
+                $userId = $data['user_id'];
+                $userExists = \App\Models\User::where('id', $userId)->exists();
+                
+                if (!$userExists) {
+                    $userId = 1; // Default to first user for synced orders
+                }
+
                 $order = Order::updateOrCreate(
                     ['invoice_number' => $data['invoice_number']],
                     [
-                        'user_id' => $data['user_id'],
+                        'user_id' => $userId,
                         'customer_name' => $data['customer_name'],
                         'total_price' => $data['total_price'],
                         'status' => $data['status'],
