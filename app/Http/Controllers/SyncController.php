@@ -69,6 +69,7 @@ class SyncController extends Controller
                     return [
                         'store_id' => $store->id,
                         'stock' => $store->pivot->stock,
+                        'updated_at' => $store->pivot->updated_at->toIso8601String(),
                     ];
                 })->toArray(),
                 'updated_at' => $book->updated_at->toIso8601String(),
