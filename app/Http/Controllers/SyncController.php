@@ -8,6 +8,7 @@ use App\Models\Publisher;
 use App\Models\BookCategory;
 use App\Models\StoreLocation;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -204,5 +205,31 @@ class SyncController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    public function users(Request $request)
+    {
+        if (!$this->validateToken()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $since = $request->query('since');
+
+        $query = User::query();
+        if ($since) {
+            $query->where('updated_at', '>', $since);
+        }
+
+        $users = $query->get()->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'google_id' => $user->google_id,
+                'updated_at' => $user->updated_at->toIso8601String(),
+            ];
+        });
+
+        return response()->json(['data' => $users]);
     }
 }

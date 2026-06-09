@@ -77,6 +77,7 @@ class SyncRunCommand extends Command
         $this->syncAuthors();
         $this->syncPublishers();
         $this->syncCategories();
+        $this->syncUsers();
         $this->syncOrders();
     }
 
@@ -186,6 +187,36 @@ class SyncRunCommand extends Command
                     ['name' => $data['name']]
                 );
             }
+        }
+    }
+
+    protected function syncUsers(): void
+    {
+        $lastSync = now()->subHours(24)->toIso8601String();
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->get($this->peerUrl . '/api/sync/users', [
+            'since' => $lastSync,
+        ]);
+
+        if ($response->successful()) {
+            $users = $response->json('data', []);
+            $synced = 0;
+
+            foreach ($users as $data) {
+                User::updateOrCreate(
+                    ['email' => $data['email']],
+                    [
+                        'name' => $data['name'],
+                        'email' => $data['email'],
+                        'google_id' => $data['google_id'] ?? null,
+                    ]
+                );
+                $synced++;
+            }
+
+            $this->info("Synced {$synced} users");
         }
     }
 
